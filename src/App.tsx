@@ -19,6 +19,7 @@ import { EmotionDetection } from "@/components/EmotionDetection";
 import { ChatSimulation } from "@/components/ChatSimulation";
 import { VTuberAvatar } from "@/components/VTuberAvatar";
 import { SystemStatusCard } from "@/components/SystemStatusCard";
+import { TwitchIntegrationGuide } from "@/components/TwitchIntegrationGuide";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -29,7 +30,7 @@ import {
   ResponseTemplate,
   ChatCommand
 } from "@/lib/types";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -550,8 +551,12 @@ Return as JSON:
         </header>
 
         <main className="container mx-auto px-6 py-8">
-          <Tabs defaultValue="monitor" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-11 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
+          <Tabs defaultValue="setup" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-12 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
+              <TabsTrigger value="setup" className="gap-2">
+                <Key size={18} weight="bold" />
+                <span className="hidden sm:inline">Setup</span>
+              </TabsTrigger>
               <TabsTrigger value="monitor" className="gap-2">
                 <Broadcast size={18} weight="bold" />
                 <span className="hidden sm:inline">Monitor</span>
@@ -597,6 +602,10 @@ Return as JSON:
                 <span className="hidden sm:inline">Personality</span>
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="setup" className="space-y-6">
+              <TwitchIntegrationGuide />
+            </TabsContent>
 
             <TabsContent value="monitor" className="space-y-6">
               <SystemStatusCard 
