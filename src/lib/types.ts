@@ -88,6 +88,31 @@ export interface SentimentData {
   messageCount: number;
 }
 
+export interface EmotionAnalysis {
+  joy: number;
+  excitement: number;
+  frustration: number;
+  confusion: number;
+  appreciation: number;
+}
+
+export interface EngagementMetrics {
+  score: number;
+  level: 'low' | 'medium' | 'high' | 'very-high';
+  messageRate: number;
+  responseRate: number;
+  sentimentTrend: 'improving' | 'stable' | 'declining';
+}
+
+export interface SentimentInsight {
+  id: string;
+  type: 'warning' | 'success' | 'info' | 'tip';
+  title: string;
+  message: string;
+  timestamp: Date;
+  actionable?: boolean;
+}
+
 export interface AnalyticsData {
   totalMessages: number;
   aiResponses: number;

@@ -27,11 +27,11 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Templates deploy in under 100ms, support dynamic variables (username, game, time), and can be organized by category
 
 ### Live Stream Monitoring
-- **Functionality**: Real-time dashboard showing connected platforms, live status, message counts, AI response metrics, and live chat feed
-- **Purpose**: Provide visibility into active streams and AI companion performance across platforms
-- **Trigger**: User navigates to Monitor tab after connecting platforms
-- **Progression**: View platform status → Start monitoring when live → Watch real-time chat feed → See engagement statistics → Stop monitoring when done
-- **Success criteria**: Display accurate live stream status, real-time message updates, and engagement analytics with platform indicators
+- **Functionality**: Real-time dashboard showing connected platforms, live status, message counts, AI response metrics, live chat feed, and integrated chat simulation for testing
+- **Purpose**: Provide visibility into active streams, AI companion performance across platforms, and testing environment for sentiment analysis validation
+- **Trigger**: User navigates to Monitor tab after connecting platforms or activates chat simulation
+- **Progression**: View platform status → Start monitoring when live or enable simulation → Watch real-time chat feed → See engagement statistics with sentiment overlay → Analyze emotion patterns → Review AI insights → Stop monitoring/simulation when done
+- **Success criteria**: Display accurate live stream status, real-time message updates with sentiment indicators, engagement analytics with platform indicators, and realistic chat simulation for testing
 
 ### Stream Behavior Settings
 - **Functionality**: Configure AI response automation including auto-respond toggle, response delays, message frequency, rate limiting, greeting automation, and poll generation intervals
@@ -114,11 +114,19 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Commands respond instantly, respect cooldowns, validate permissions, and support variables like {user}, {game}, {uptime}
 
 ### Sentiment Analysis Dashboard
-- **Functionality**: Real-time sentiment tracking of chat messages with mood visualization and alerts for negative sentiment spikes
-- **Purpose**: Help streamers gauge viewer emotions and address community concerns proactively
-- **Trigger**: Live monitoring active, automatic analysis of incoming messages
-- **Progression**: Messages analyzed for sentiment → Aggregated mood score → Visualized on gauge → Alerts on negative trends → Historical sentiment charts
-- **Success criteria**: Accurate sentiment classification (positive/neutral/negative), real-time mood indicator, and alert system for sudden mood shifts
+- **Functionality**: Advanced real-time sentiment tracking with emotion detection, engagement scoring, trend visualization, stability metrics, and AI-powered actionable insights
+- **Purpose**: Provide comprehensive emotional intelligence about chat activity, enabling streamers to gauge viewer mood, detect engagement patterns, and respond proactively to community sentiment shifts
+- **Trigger**: Live monitoring active or simulation running, automatic analysis of all incoming messages with continuous metric updates
+- **Progression**: Messages analyzed for sentiment and emotions → Aggregated mood score with stability index → Real-time trend chart visualization → Engagement score calculation → AI insights generated → Alerts on significant sentiment changes → Historical sentiment patterns tracked
+- **Success criteria**: Accurate multi-dimensional sentiment classification (positive/neutral/negative + 5 emotion categories), real-time trend visualization with velocity indicators, engagement score (0-100) with actionable recommendations, stability metrics to detect volatility, and intelligent alert system for mood shifts
+
+**Advanced Sentiment Features**:
+- **Real-time Sentiment Monitor**: Live mood gauge with score (-100 to +100), trend direction (up/down/stable), velocity indicator, and stability percentage
+- **Sentiment Trend Chart**: Rolling 30-point visualization showing sentiment evolution over time with positive/negative peak detection
+- **Engagement Score**: Composite metric (0-100) combining sentiment trend, message rate, response rate, and viewer diversity with level classification (low/medium/high/very-high)
+- **Emotion Detection**: Five-category analysis (joy, excitement, frustration, confusion, appreciation) with dominant emotion identification and keyword-based pattern matching
+- **AI Insights Panel**: Smart recommendations based on sentiment patterns including warnings for negative spikes, opportunities for polls/engagement, and actionable tips for improvement
+- **Chat Simulation**: Testing environment with auto-generation of realistic chat messages at configurable rates (slow/medium/fast) to validate sentiment analysis accuracy
 
 ### AI Response Quality Rating
 - **Functionality**: Viewers can thumbs up/down AI responses, with feedback used to improve future responses

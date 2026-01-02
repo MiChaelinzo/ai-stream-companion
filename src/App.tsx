@@ -12,6 +12,11 @@ import { ResponseTemplates } from "@/components/ResponseTemplates";
 import { ChatCommands } from "@/components/ChatCommands";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { SentimentMonitor } from "@/components/SentimentMonitor";
+import { SentimentTrendChart } from "@/components/SentimentTrendChart";
+import { EngagementScore } from "@/components/EngagementScore";
+import { SentimentInsights } from "@/components/SentimentInsights";
+import { EmotionDetection } from "@/components/EmotionDetection";
+import { ChatSimulation } from "@/components/ChatSimulation";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -22,7 +27,7 @@ import {
   ResponseTemplate,
   ChatCommand
 } from "@/lib/types";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -62,6 +67,8 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResponses, setGeneratedResponses] = useState<string[]>([]);
   const [isMonitoring, setIsMonitoring] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
@@ -352,6 +359,101 @@ Return as JSON:
     uniqueViewers: new Set((liveMessages || []).filter(m => m.username).map(m => m.username)).size,
   };
 
+  const handleSimulateMessage = async (content: string, sentiment: 'positive' | 'neutral' | 'negative') => {
+    const usernames = ['Alex', 'Jordan', 'Casey', 'Morgan', 'Taylor', 'Riley', 'Drew', 'Parker', 'Avery', 'Quinn'];
+    const username = usernames[Math.floor(Math.random() * usernames.length)];
+    
+    const newMessage: ChatMessage = {
+      id: Date.now().toString() + Math.random(),
+      content,
+      sender: 'user',
+      timestamp: new Date(),
+      username,
+      platform: 'simulator',
+      sentiment,
+    };
+
+    setLiveMessages((current) => [...(current || []), newMessage]);
+
+    if (currentStreamSettings.autoRespond && Math.random() > 0.7) {
+      setTimeout(async () => {
+        try {
+          const aiResponse = await generateAIResponse(content);
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString() + Math.random(),
+            content: aiResponse,
+            sender: 'ai',
+            timestamp: new Date(),
+            platform: 'simulator',
+          };
+          setLiveMessages((current) => [...(current || []), aiMessage]);
+        } catch (error) {
+          console.error('Failed to generate AI response', error);
+        }
+      }, currentStreamSettings.responseDelay * 1000);
+    }
+  };
+
+  const handleToggleSimulation = () => {
+    if (isSimulating) {
+      if (simulationInterval) {
+        clearInterval(simulationInterval);
+        setSimulationInterval(null);
+      }
+      setIsSimulating(false);
+      toast.info('Chat simulation stopped');
+    } else {
+      setIsSimulating(true);
+      toast.success('Chat simulation started');
+      
+      const interval = setInterval(() => {
+        const sentiments: Array<'positive' | 'neutral' | 'negative'> = ['positive', 'neutral', 'negative'];
+        const weights = [0.5, 0.3, 0.2];
+        
+        const random = Math.random();
+        let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
+        
+        if (random < weights[0]) sentiment = 'positive';
+        else if (random < weights[0] + weights[1]) sentiment = 'neutral';
+        else sentiment = 'negative';
+
+        const sampleMessages = {
+          positive: [
+            "This is so good! 🔥",
+            "Love this content!",
+            "Amazing gameplay!",
+            "You're the best!",
+            "This is so entertaining 😂",
+            "Great stream today!",
+            "Keep it up! ⚡",
+            "Awesome! 👏",
+          ],
+          neutral: [
+            "What game is this?",
+            "When did you start?",
+            "How long have you been playing?",
+            "What's next?",
+            "Interesting",
+            "Hello everyone",
+          ],
+          negative: [
+            "This is boring",
+            "Not a fan of this",
+            "Why are you doing that?",
+            "This doesn't make sense",
+            "I don't like this",
+          ],
+        };
+
+        const messages = sampleMessages[sentiment];
+        const message = messages[Math.floor(Math.random() * messages.length)];
+        handleSimulateMessage(message, sentiment);
+      }, 3000);
+      
+      setSimulationInterval(interval);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,oklch(0.65_0.25_300_/_0.1),transparent_50%)] pointer-events-none" />
@@ -379,10 +481,14 @@ Return as JSON:
 
         <main className="container mx-auto px-6 py-8">
           <Tabs defaultValue="monitor" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-10 max-w-6xl mx-auto bg-card/50 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-11 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
               <TabsTrigger value="monitor" className="gap-2">
                 <Broadcast size={18} weight="bold" />
                 <span className="hidden sm:inline">Monitor</span>
+              </TabsTrigger>
+              <TabsTrigger value="sentiment" className="gap-2">
+                <Smiley size={18} weight="fill" />
+                <span className="hidden sm:inline">Sentiment</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="gap-2">
                 <ChartLine size={18} weight="bold" />
@@ -424,7 +530,7 @@ Return as JSON:
 
             <TabsContent value="monitor" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 space-y-6">
                   <LiveMonitor
                     messages={liveMessages || []}
                     twitchConnection={twitchConnection || null}
@@ -433,14 +539,50 @@ Return as JSON:
                     onToggleMonitoring={handleToggleMonitoring}
                     stats={liveStats}
                   />
+                  <ChatSimulation
+                    onSimulateMessage={handleSimulateMessage}
+                    isRunning={isSimulating}
+                    onToggle={handleToggleSimulation}
+                  />
                 </div>
-                <div>
+                <div className="space-y-6">
                   <SentimentMonitor
                     messages={liveMessages || []}
-                    isLive={isMonitoring}
+                    isLive={isMonitoring || isSimulating}
+                  />
+                  <EngagementScore
+                    messages={liveMessages || []}
+                    isLive={isMonitoring || isSimulating}
                   />
                 </div>
               </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <SentimentTrendChart messages={liveMessages || []} />
+                <EmotionDetection messages={liveMessages || []} />
+              </div>
+
+              <SentimentInsights messages={liveMessages || []} />
+            </TabsContent>
+
+            <TabsContent value="sentiment" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <SentimentMonitor
+                  messages={[...(messages || []), ...(liveMessages || [])]}
+                  isLive={isMonitoring}
+                />
+                <EngagementScore
+                  messages={[...(messages || []), ...(liveMessages || [])]}
+                  isLive={isMonitoring}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <SentimentTrendChart messages={[...(messages || []), ...(liveMessages || [])]} />
+                <EmotionDetection messages={[...(messages || []), ...(liveMessages || [])]} />
+              </div>
+
+              <SentimentInsights messages={[...(messages || []), ...(liveMessages || [])]} />
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
