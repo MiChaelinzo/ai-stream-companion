@@ -14,9 +14,10 @@ interface ChatSimulatorProps {
   onSendMessage: (content: string) => void;
   isGenerating: boolean;
   personality: AIPersonality;
+  onVote?: (messageId: string, vote: 'up' | 'down') => void;
 }
 
-export function ChatSimulator({ messages, onSendMessage, isGenerating, personality }: ChatSimulatorProps) {
+export function ChatSimulator({ messages, onSendMessage, isGenerating, personality, onVote }: ChatSimulatorProps) {
   const [input, setInput] = useState("");
 
   const handleSend = () => {
@@ -52,7 +53,7 @@ export function ChatSimulator({ messages, onSendMessage, isGenerating, personali
         <ScrollArea className="flex-1 pr-4">
           <div className="space-y-4">
             {messages.map((message) => (
-              <ChatBubble key={message.id} message={message} />
+              <ChatBubble key={message.id} message={message} onVote={onVote} />
             ))}
             {isGenerating && <TypingIndicator />}
           </div>

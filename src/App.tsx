@@ -8,15 +8,21 @@ import { PollCreator } from "@/components/PollCreator";
 import { PlatformConnection } from "@/components/PlatformConnection";
 import { StreamSettings } from "@/components/StreamSettings";
 import { LiveMonitor } from "@/components/LiveMonitor";
+import { ResponseTemplates } from "@/components/ResponseTemplates";
+import { ChatCommands } from "@/components/ChatCommands";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
+import { SentimentMonitor } from "@/components/SentimentMonitor";
 import { 
   AIPersonality, 
   ChatMessage, 
   Poll, 
   PlatformConnection as PlatformConnectionType,
   PlatformType,
-  StreamSettings as StreamSettingsType
+  StreamSettings as StreamSettingsType,
+  ResponseTemplate,
+  ChatCommand
 } from "@/lib/types";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -50,6 +56,8 @@ function App() {
   const [youtubeConnection, setYoutubeConnection] = useKV<PlatformConnectionType | null>("youtube-connection", null);
   const [streamSettings, setStreamSettings] = useKV<StreamSettingsType>("stream-settings", defaultStreamSettings);
   const [liveMessages, setLiveMessages] = useKV<ChatMessage[]>("live-messages", []);
+  const [templates, setTemplates] = useKV<ResponseTemplate[]>("response-templates", []);
+  const [commands, setCommands] = useKV<ChatCommand[]>("chat-commands", []);
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResponses, setGeneratedResponses] = useState<string[]>([]);
@@ -81,12 +89,34 @@ Generate a ${currentPersonality.responseStyle} response that matches your person
     return response.trim();
   };
 
+  const analyzeSentiment = async (message: string): Promise<'positive' | 'neutral' | 'negative'> => {
+    try {
+      const prompt = (window.spark.llmPrompt as any)`Analyze the sentiment of this chat message: "${message}"
+
+Classify it as one of: positive, neutral, or negative.
+
+Return ONLY the classification word, nothing else.`;
+
+      const result = await window.spark.llm(prompt, "gpt-4o-mini");
+      const sentiment = result.trim().toLowerCase();
+      
+      if (sentiment.includes('positive')) return 'positive';
+      if (sentiment.includes('negative')) return 'negative';
+      return 'neutral';
+    } catch (error) {
+      return 'neutral';
+    }
+  };
+
   const handleSendMessage = async (content: string) => {
+    const sentiment = await analyzeSentiment(content);
+    
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content,
       sender: "user",
       timestamp: new Date(),
+      sentiment,
     };
 
     setMessages((current) => [...(current || []), userMessage]);
@@ -99,6 +129,7 @@ Generate a ${currentPersonality.responseStyle} response that matches your person
         content: aiResponse,
         sender: "ai",
         timestamp: new Date(),
+        votes: { up: 0, down: 0 },
       };
       setMessages((current) => [...(current || []), aiMessage]);
     } catch (error) {
@@ -253,6 +284,68 @@ Return as JSON:
     });
   };
 
+  const handleVoteOnResponse = (messageId: string, vote: 'up' | 'down') => {
+    setMessages((current) => 
+      (current || []).map(msg => {
+        if (msg.id === messageId) {
+          const votes = msg.votes || { up: 0, down: 0 };
+          return {
+            ...msg,
+            votes: {
+              up: vote === 'up' ? votes.up + 1 : votes.up,
+              down: vote === 'down' ? votes.down + 1 : votes.down,
+            }
+          };
+        }
+        return msg;
+      })
+    );
+  };
+
+  const handleCreateTemplate = (template: Omit<ResponseTemplate, "id" | "createdAt" | "usageCount">) => {
+    const newTemplate: ResponseTemplate = {
+      ...template,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      usageCount: 0,
+    };
+    setTemplates((current) => [newTemplate, ...(current || [])]);
+  };
+
+  const handleDeleteTemplate = (id: string) => {
+    setTemplates((current) => (current || []).filter(t => t.id !== id));
+  };
+
+  const handleUseTemplate = (id: string) => {
+    setTemplates((current) => 
+      (current || []).map(t => 
+        t.id === id ? { ...t, usageCount: (t.usageCount || 0) + 1 } : t
+      )
+    );
+  };
+
+  const handleCreateCommand = (command: Omit<ChatCommand, "id" | "createdAt" | "usageCount">) => {
+    const newCommand: ChatCommand = {
+      ...command,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      usageCount: 0,
+    };
+    setCommands((current) => [newCommand, ...(current || [])]);
+  };
+
+  const handleDeleteCommand = (id: string) => {
+    setCommands((current) => (current || []).filter(c => c.id !== id));
+  };
+
+  const handleToggleCommand = (id: string, enabled: boolean) => {
+    setCommands((current) => 
+      (current || []).map(c => 
+        c.id === id ? { ...c, enabled } : c
+      )
+    );
+  };
+
   const liveStats = {
     totalMessages: (liveMessages || []).length,
     aiResponses: (liveMessages || []).filter(m => m.sender === 'ai').length,
@@ -286,10 +379,14 @@ Return as JSON:
 
         <main className="container mx-auto px-6 py-8">
           <Tabs defaultValue="monitor" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-7 max-w-4xl mx-auto bg-card/50 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-10 max-w-6xl mx-auto bg-card/50 backdrop-blur-sm">
               <TabsTrigger value="monitor" className="gap-2">
                 <Broadcast size={18} weight="bold" />
                 <span className="hidden sm:inline">Monitor</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2">
+                <ChartLine size={18} weight="bold" />
+                <span className="hidden sm:inline">Analytics</span>
               </TabsTrigger>
               <TabsTrigger value="platforms" className="gap-2">
                 <LinkIcon size={18} weight="bold" />
@@ -307,6 +404,14 @@ Return as JSON:
                 <Lightning size={18} weight="fill" />
                 <span className="hidden sm:inline">Responses</span>
               </TabsTrigger>
+              <TabsTrigger value="templates" className="gap-2">
+                <ListChecks size={18} weight="bold" />
+                <span className="hidden sm:inline">Templates</span>
+              </TabsTrigger>
+              <TabsTrigger value="commands" className="gap-2">
+                <Terminal size={18} weight="bold" />
+                <span className="hidden sm:inline">Commands</span>
+              </TabsTrigger>
               <TabsTrigger value="polls" className="gap-2">
                 <Question size={18} weight="bold" />
                 <span className="hidden sm:inline">Polls</span>
@@ -318,14 +423,28 @@ Return as JSON:
             </TabsList>
 
             <TabsContent value="monitor" className="space-y-6">
-              <LiveMonitor
-                messages={liveMessages || []}
-                twitchConnection={twitchConnection || null}
-                youtubeConnection={youtubeConnection || null}
-                isMonitoring={isMonitoring}
-                onToggleMonitoring={handleToggleMonitoring}
-                stats={liveStats}
-              />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <LiveMonitor
+                    messages={liveMessages || []}
+                    twitchConnection={twitchConnection || null}
+                    youtubeConnection={youtubeConnection || null}
+                    isMonitoring={isMonitoring}
+                    onToggleMonitoring={handleToggleMonitoring}
+                    stats={liveStats}
+                  />
+                </div>
+                <div>
+                  <SentimentMonitor
+                    messages={liveMessages || []}
+                    isLive={isMonitoring}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              <AnalyticsDashboard messages={[...(messages || []), ...(liveMessages || [])]} />
             </TabsContent>
 
             <TabsContent value="platforms" className="space-y-6">
@@ -351,6 +470,7 @@ Return as JSON:
                 onSendMessage={handleSendMessage}
                 isGenerating={isGenerating}
                 personality={currentPersonality}
+                onVote={handleVoteOnResponse}
               />
             </TabsContent>
 
@@ -359,6 +479,24 @@ Return as JSON:
                 onGenerate={handleGenerateResponses}
                 isGenerating={isGenerating}
                 generatedResponses={generatedResponses}
+              />
+            </TabsContent>
+
+            <TabsContent value="templates" className="space-y-6">
+              <ResponseTemplates
+                templates={templates || []}
+                onCreateTemplate={handleCreateTemplate}
+                onDeleteTemplate={handleDeleteTemplate}
+                onUseTemplate={handleUseTemplate}
+              />
+            </TabsContent>
+
+            <TabsContent value="commands" className="space-y-6">
+              <ChatCommands
+                commands={commands || []}
+                onCreateCommand={handleCreateCommand}
+                onDeleteCommand={handleDeleteCommand}
+                onToggleCommand={handleToggleCommand}
               />
             </TabsContent>
 

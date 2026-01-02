@@ -16,6 +16,9 @@ export interface ChatMessage {
   timestamp: Date;
   username?: string;
   platform?: 'twitch' | 'youtube' | 'simulator';
+  sentiment?: 'positive' | 'neutral' | 'negative';
+  rating?: number;
+  votes?: { up: number; down: number };
 }
 
 export interface Poll {
@@ -53,4 +56,48 @@ export interface StreamSettings {
   enableGreetings: boolean;
   messageFrequency: number;
   maxMessagesPerMinute: number;
+}
+
+export interface ResponseTemplate {
+  id: string;
+  name: string;
+  content: string;
+  category: string;
+  shortcut?: string;
+  variables?: string[];
+  usageCount?: number;
+  createdAt: Date;
+}
+
+export interface ChatCommand {
+  id: string;
+  trigger: string;
+  response: string;
+  cooldown: number;
+  permissions: 'viewer' | 'subscriber' | 'moderator' | 'broadcaster';
+  enabled: boolean;
+  usageCount: number;
+  lastUsed?: Date;
+  createdAt: Date;
+}
+
+export interface SentimentData {
+  timestamp: Date;
+  score: number;
+  classification: 'positive' | 'neutral' | 'negative';
+  messageCount: number;
+}
+
+export interface AnalyticsData {
+  totalMessages: number;
+  aiResponses: number;
+  averageResponseTime: number;
+  sentimentBreakdown: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+  topKeywords: { word: string; count: number }[];
+  messagesPerHour: { hour: string; count: number }[];
+  responseRating: number;
 }

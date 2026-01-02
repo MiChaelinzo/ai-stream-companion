@@ -1,14 +1,30 @@
 import { motion } from "framer-motion";
 import { ChatMessage } from "@/lib/types";
 import { Avatar } from "@/components/ui/avatar";
-import { Robot, User } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
+import { Robot, User, ThumbsUp, ThumbsDown, Smiley, SmileyMeh, SmileyXEyes } from "@phosphor-icons/react";
 
 interface ChatBubbleProps {
   message: ChatMessage;
+  onVote?: (messageId: string, vote: 'up' | 'down') => void;
+  showVoting?: boolean;
 }
 
-export function ChatBubble({ message }: ChatBubbleProps) {
+export function ChatBubble({ message, onVote, showVoting = true }: ChatBubbleProps) {
   const isAI = message.sender === 'ai';
+  
+  const getSentimentIcon = () => {
+    if (!message.sentiment) return null;
+    
+    switch (message.sentiment) {
+      case 'positive':
+        return <Smiley size={14} weight="fill" className="text-green-500" />;
+      case 'negative':
+        return <SmileyXEyes size={14} weight="fill" className="text-red-500" />;
+      default:
+        return <SmileyMeh size={14} weight="fill" className="text-yellow-500" />;
+    }
+  };
   
   return (
     <motion.div
@@ -30,10 +46,35 @@ export function ChatBubble({ message }: ChatBubbleProps) {
           }`}
         >
           <p className="text-sm leading-relaxed">{message.content}</p>
+          {isAI && showVoting && onVote && (
+            <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/30">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 gap-1 hover:bg-green-500/20 hover:text-green-500"
+                onClick={() => onVote(message.id, 'up')}
+              >
+                <ThumbsUp size={14} weight={message.votes && message.votes.up > 0 ? 'fill' : 'regular'} />
+                {message.votes && message.votes.up > 0 && <span className="text-xs">{message.votes.up}</span>}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 gap-1 hover:bg-red-500/20 hover:text-red-500"
+                onClick={() => onVote(message.id, 'down')}
+              >
+                <ThumbsDown size={14} weight={message.votes && message.votes.down > 0 ? 'fill' : 'regular'} />
+                {message.votes && message.votes.down > 0 && <span className="text-xs">{message.votes.down}</span>}
+              </Button>
+            </div>
+          )}
         </div>
-        <span className="text-xs text-muted-foreground mt-1 px-2">
-          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
+        <div className="flex items-center gap-2 mt-1 px-2">
+          {getSentimentIcon()}
+          <span className="text-xs text-muted-foreground">
+            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
       </div>
     </motion.div>
   );

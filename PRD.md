@@ -19,6 +19,13 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Progression**: Select platform → Enter credentials (OAuth token for Twitch, API key for YouTube) → Verify connection → Monitor live status → Disconnect when needed
 - **Success criteria**: Successfully authenticate with platforms, display connection status, and enable live chat monitoring when stream is active
 
+### Response Templates & Quick Replies
+- **Functionality**: Create, save, and deploy custom response templates for common scenarios with variable placeholders and keyboard shortcuts
+- **Purpose**: Enable instant, personalized responses to frequent chat situations without waiting for AI generation
+- **Trigger**: User creates template from response history or builds from scratch, then triggers with hotkey or dropdown
+- **Progression**: Create template with variables → Assign keyboard shortcut → Use shortcut during stream → Variables auto-fill → Deploy instantly
+- **Success criteria**: Templates deploy in under 100ms, support dynamic variables (username, game, time), and can be organized by category
+
 ### Live Stream Monitoring
 - **Functionality**: Real-time dashboard showing connected platforms, live status, message counts, AI response metrics, and live chat feed
 - **Purpose**: Provide visibility into active streams and AI companion performance across platforms
@@ -93,11 +100,32 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Activities are relevant, engaging, and easy to deploy
 
 ### Response History & Analytics
-- **Functionality**: Track all AI responses, common topics, and engagement patterns
-- **Purpose**: Help streamers understand what works and refine AI behavior
-- **Trigger**: User accesses history panel
-- **Progression**: View chronological responses → Filter by type/topic → See engagement metrics → Identify patterns
-- **Success criteria**: Clear visualization of AI activity and performance trends
+- **Functionality**: Track all AI responses, common topics, and engagement patterns with visual charts and exportable reports
+- **Purpose**: Help streamers understand what works and refine AI behavior with data-driven insights
+- **Trigger**: User accesses Analytics tab
+- **Progression**: View response timeline → Filter by platform/date → See engagement charts → Export data → Identify top-performing responses
+- **Success criteria**: Clear visualization of AI activity with interactive charts showing messages per hour, response times, sentiment analysis, and top keywords
+
+### Command System & Moderation
+- **Functionality**: Custom chat commands with dynamic responses, cooldowns, and permission levels (viewer, subscriber, moderator, broadcaster)
+- **Purpose**: Automate common viewer requests and moderate chat with custom bot commands
+- **Trigger**: User creates command with trigger word and response, viewers use !command in chat
+- **Progression**: Define command trigger → Set response (static or dynamic) → Configure cooldown and permissions → Enable command → Use in chat
+- **Success criteria**: Commands respond instantly, respect cooldowns, validate permissions, and support variables like {user}, {game}, {uptime}
+
+### Sentiment Analysis Dashboard
+- **Functionality**: Real-time sentiment tracking of chat messages with mood visualization and alerts for negative sentiment spikes
+- **Purpose**: Help streamers gauge viewer emotions and address community concerns proactively
+- **Trigger**: Live monitoring active, automatic analysis of incoming messages
+- **Progression**: Messages analyzed for sentiment → Aggregated mood score → Visualized on gauge → Alerts on negative trends → Historical sentiment charts
+- **Success criteria**: Accurate sentiment classification (positive/neutral/negative), real-time mood indicator, and alert system for sudden mood shifts
+
+### AI Response Quality Rating
+- **Functionality**: Viewers can thumbs up/down AI responses, with feedback used to improve future responses
+- **Purpose**: Crowd-source quality control and continuously improve AI personality
+- **Trigger**: Each AI response displays rating buttons, streamer reviews ratings in analytics
+- **Progression**: AI responds → Rating buttons shown → Viewers vote → Aggregate score tracked → Low-rated patterns identified → Personality adjustments suggested
+- **Success criteria**: Rating system integrated in chat UI, scores persist, and analytics show response quality trends over time
 
 ## Edge Case Handling
 
