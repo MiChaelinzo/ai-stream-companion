@@ -7,6 +7,7 @@ export interface AIPersonality {
   tonePreset?: 'energetic' | 'chill' | 'sarcastic' | 'supportive' | 'chaotic' | 'wholesome' | 'custom';
   emoji?: boolean;
   slang?: boolean;
+  avatarSkin?: 'default' | 'cyberpunk' | 'pastel' | 'neon' | 'fantasy' | 'retro' | 'monochrome' | 'cosmic';
 }
 
 export interface ChatMessage {

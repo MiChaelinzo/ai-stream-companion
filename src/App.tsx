@@ -42,6 +42,7 @@ const defaultPersonality: AIPersonality = {
   tonePreset: "energetic",
   emoji: true,
   slang: true,
+  avatarSkin: "default",
 };
 
 const defaultStreamSettings: StreamSettingsType = {
@@ -620,6 +621,7 @@ Return as JSON:
                     isSpeaking={avatarSpeaking}
                     emotion={avatarEmotion}
                     speechText={currentSpeechText}
+                    skin={currentPersonality.avatarSkin || 'default'}
                   />
                   <SentimentMonitor
                     messages={liveMessages || []}

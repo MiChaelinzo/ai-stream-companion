@@ -11,6 +11,8 @@ import { AIPersonality } from "@/lib/types";
 import { Robot, X, Sparkle, Lightning, Heart, Fire, Smiley, Brain } from "@phosphor-icons/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AvatarSkinSelector } from "@/components/AvatarSkinSelector";
+import { AvatarSkin } from "@/lib/avatar-skins";
 
 interface PersonalityConfigProps {
   personality: AIPersonality;
@@ -163,6 +165,14 @@ export function PersonalityConfig({ personality, onUpdate }: PersonalityConfigPr
 
   return (
     <div className="space-y-6">
+      <AvatarSkinSelector 
+        currentSkin={personality.avatarSkin || 'default'}
+        onSkinChange={(skin: AvatarSkin) => {
+          onUpdate({ ...personality, avatarSkin: skin });
+          toast.success(`Avatar skin changed to ${skin}!`);
+        }}
+      />
+
       <Card className="border-accent/30 bg-gradient-to-br from-card to-card/50">
         <CardHeader>
           <div className="flex items-center gap-2">

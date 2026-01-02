@@ -136,11 +136,11 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Rating system integrated in chat UI, scores persist, and analytics show response quality trends over time
 
 ### VTuber Avatar Model
-- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, reactive movements synchronized to AI activity, and realistic phoneme-based lip-sync for speech animation
-- **Purpose**: Provide a visual personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations and natural speech movements
-- **Trigger**: Avatar automatically appears in the Monitor tab and animates continuously when monitoring or simulation is active
-- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Reacts to chat sentiment with emotions (happy, excited, thinking, confused) → AI speaks with realistic lip-sync → Mouth shape morphs based on phoneme analysis (A, E, I, O, U, M, B, P, F, V, TH, L, R, W) → Headphone speakers glow with speech intensity → Updates emotion based on recent chat mood → Returns to neutral when idle
-- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, realistic phoneme-accurate mouth sync during AI responses with proper mouth shapes for each sound, emotion changes based on sentiment analysis, real-time phoneme indicator display, distinctive character design with headphones and anime-inspired aesthetic
+- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, reactive movements synchronized to AI activity, realistic phoneme-based lip-sync for speech animation, and customizable visual skins for personalized appearance
+- **Purpose**: Provide a visual personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations, natural speech movements, and unique visual styles matching the streamer's brand
+- **Trigger**: Avatar automatically appears in the Monitor tab and animates continuously when monitoring or simulation is active, skin selection accessed via Personality configuration
+- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Reacts to chat sentiment with emotions (happy, excited, thinking, confused) → AI speaks with realistic lip-sync → Mouth shape morphs based on phoneme analysis (A, E, I, O, U, M, B, P, F, V, TH, L, R, W) → Headphone speakers glow with speech intensity → Updates emotion based on recent chat mood → User selects skin from gallery → Avatar instantly updates with new color palette and style → Returns to neutral when idle
+- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, realistic phoneme-accurate mouth sync during AI responses with proper mouth shapes for each sound, emotion changes based on sentiment analysis, real-time phoneme indicator display, instant skin switching without visual glitches, distinctive character design with headphones and anime-inspired aesthetic
 
 **Phoneme Lip-Sync System**:
 - **Phoneme Detection**: Analyzes AI response text and converts to phoneme sequence with timing
@@ -148,6 +148,14 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Interpolation**: Smooth transitions between phoneme shapes using eased interpolation
 - **Real-time Display**: Live phoneme indicator showing current sound being spoken
 - **Speech Synchronization**: Precise timing aligned with response delivery duration
+
+**Avatar Skin System**:
+- **Visual Styles**: 8 distinct appearance themes each with unique color palettes and material properties
+- **Style Library**: Default Kawaii (purple/pink), Cyberpunk (neon chrome), Pastel Dream (soft colors), Neon Nights (vibrant glow), Fantasy Elf (mystical green/gold), Retro Wave (80s synthwave), Monochrome (black/white), Cosmic Star (galaxy-inspired)
+- **Customization**: Each skin modifies all avatar components (skin tone, eyes, hair, body, accessories) with coordinated color schemes
+- **Material Properties**: Skins control metalness, roughness, and emissive intensity for distinct visual feels (matte, glossy, glowing)
+- **Preview System**: Visual skin selector with color swatches and descriptions
+- **Persistence**: Selected skin saves with personality configuration and loads automatically
 
 ## Edge Case Handling
 

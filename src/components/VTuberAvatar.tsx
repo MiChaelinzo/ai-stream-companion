@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Sparkle, Waveform } from "@phosphor-icons/react";
 import { PhonemeSequencer, MouthShape, Phoneme } from "@/lib/phoneme-analyzer";
+import { AvatarSkin, getSkinStyle } from "@/lib/avatar-skins";
 
 interface VTuberAvatarProps {
   personality: {
@@ -16,6 +17,7 @@ interface VTuberAvatarProps {
   isSpeaking?: boolean;
   emotion?: "neutral" | "happy" | "excited" | "thinking" | "confused";
   speechText?: string;
+  skin?: AvatarSkin;
 }
 
 export function VTuberAvatar({ 
@@ -23,7 +25,8 @@ export function VTuberAvatar({
   isLive = false, 
   isSpeaking = false,
   emotion = "neutral",
-  speechText = ""
+  speechText = "",
+  skin = "default"
 }: VTuberAvatarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
@@ -85,6 +88,8 @@ export function VTuberAvatar({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const skinStyle = getSkinStyle(skin);
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       50,
@@ -104,19 +109,19 @@ export function VTuberAvatar({
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-    const frontLight = new THREE.DirectionalLight(0xa78bfa, 0.8);
+    const frontLight = new THREE.DirectionalLight(skinStyle.colors.eyes, 0.8);
     frontLight.position.set(0, 2, 5);
     scene.add(frontLight);
 
-    const rimLight = new THREE.DirectionalLight(0xf472b6, 0.5);
+    const rimLight = new THREE.DirectionalLight(skinStyle.colors.hair, 0.5);
     rimLight.position.set(-3, 1, -2);
     scene.add(rimLight);
 
     const headGeometry = new THREE.SphereGeometry(1, 32, 32);
     const headMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0xffd4e5,
-      roughness: 0.7,
-      metalness: 0.1
+      color: skinStyle.colors.skin,
+      roughness: skinStyle.roughness,
+      metalness: skinStyle.metalness
     });
     const head = new THREE.Mesh(headGeometry, headMaterial);
     head.scale.set(1, 1.1, 0.95);
@@ -125,11 +130,11 @@ export function VTuberAvatar({
 
     const eyeGeometry = new THREE.SphereGeometry(0.15, 16, 16);
     const eyeMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0x8b5cf6,
-      emissive: 0x8b5cf6,
-      emissiveIntensity: 0.3,
-      roughness: 0.3,
-      metalness: 0.5
+      color: skinStyle.colors.eyes,
+      emissive: skinStyle.colors.eyesEmissive,
+      emissiveIntensity: skinStyle.emissiveIntensity,
+      roughness: skinStyle.roughness * 0.5,
+      metalness: skinStyle.metalness * 1.5
     });
     
     const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
@@ -142,9 +147,9 @@ export function VTuberAvatar({
 
     const pupilGeometry = new THREE.SphereGeometry(0.08, 16, 16);
     const pupilMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0x1e1b4b,
-      roughness: 0.2,
-      metalness: 0.8
+      color: skinStyle.colors.pupils,
+      roughness: skinStyle.roughness * 0.3,
+      metalness: skinStyle.metalness * 2
     });
     
     const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
@@ -157,8 +162,8 @@ export function VTuberAvatar({
 
     const mouthGeometry = new THREE.TorusGeometry(0.2, 0.05, 8, 16, Math.PI);
     const mouthMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0x1e1b4b,
-      roughness: 0.8
+      color: skinStyle.colors.mouth,
+      roughness: skinStyle.roughness * 1.1
     });
     const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
     mouth.position.set(0, 1.2, 0.85);
@@ -167,9 +172,9 @@ export function VTuberAvatar({
 
     const bodyGeometry = new THREE.CylinderGeometry(0.7, 0.9, 1.8, 32);
     const bodyMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0xa78bfa,
-      roughness: 0.6,
-      metalness: 0.2
+      color: skinStyle.colors.body,
+      roughness: skinStyle.roughness,
+      metalness: skinStyle.metalness
     });
     const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
     body.position.y = -0.2;
@@ -177,9 +182,9 @@ export function VTuberAvatar({
 
     const earGeometry = new THREE.ConeGeometry(0.25, 0.6, 8);
     const earMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0xffd4e5,
-      roughness: 0.7,
-      metalness: 0.1
+      color: skinStyle.colors.ears,
+      roughness: skinStyle.roughness,
+      metalness: skinStyle.metalness
     });
     
     const leftEar = new THREE.Mesh(earGeometry, earMaterial);
@@ -194,9 +199,9 @@ export function VTuberAvatar({
 
     const hair: THREE.Mesh[] = [];
     const hairMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0xc084fc,
-      roughness: 0.8,
-      metalness: 0.3
+      color: skinStyle.colors.hair,
+      roughness: skinStyle.roughness * 1.2,
+      metalness: skinStyle.metalness * 0.8
     });
 
     for (let i = 0; i < 8; i++) {
@@ -220,11 +225,11 @@ export function VTuberAvatar({
     
     const headphoneBandGeometry = new THREE.TorusGeometry(1.15, 0.08, 8, 32, Math.PI);
     const headphoneMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0x8b5cf6,
-      roughness: 0.4,
-      metalness: 0.6,
-      emissive: 0x8b5cf6,
-      emissiveIntensity: 0.2
+      color: skinStyle.colors.accessories,
+      roughness: skinStyle.roughness * 0.6,
+      metalness: skinStyle.metalness * 1.5,
+      emissive: skinStyle.colors.accessoriesEmissive,
+      emissiveIntensity: skinStyle.emissiveIntensity * 0.7
     });
     const headphoneBand = new THREE.Mesh(headphoneBandGeometry, headphoneMaterial);
     headphoneBand.position.set(0, 2, 0);
@@ -388,7 +393,7 @@ export function VTuberAvatar({
       }
       renderer.dispose();
     };
-  }, [emotion, isSpeaking, currentMouthShape]);
+  }, [emotion, isSpeaking, currentMouthShape, skin]);
 
   const getEmotionColor = () => {
     switch (emotion) {
