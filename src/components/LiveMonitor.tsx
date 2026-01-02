@@ -140,9 +140,12 @@ export function LiveMonitor({
                 </div>
               )}
               {!isAnyPlatformConnected && (
-                <div className="p-4 rounded-lg bg-muted/30 text-center">
+                <div className="p-4 rounded-lg bg-muted/30 text-center space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    No platforms connected. Connect to Twitch or YouTube to start monitoring.
+                    No platforms connected yet.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Note: Real-time monitoring requires backend integration. Use Chat Simulation below to test your AI now!
                   </p>
                 </div>
               )}

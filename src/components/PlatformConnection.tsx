@@ -79,12 +79,21 @@ export function PlatformConnection({
 
   return (
     <div className="space-y-6">
-      <Alert className="bg-accent/10 border-accent/30">
-        <Info size={20} className="text-accent" />
-        <AlertDescription className="text-sm">
-          Connect your streaming platforms to enable live chat integration. Your AI companion will be able to read and respond to chat messages in real-time.
-        </AlertDescription>
-      </Alert>
+      <div className="space-y-4">
+        <Alert className="bg-primary/10 border-primary/30">
+          <Info size={20} className="text-primary" />
+          <AlertDescription className="text-sm">
+            <strong className="text-primary">Status:</strong> This is a configuration interface that stores your platform credentials. Real-time chat requires a backend service to connect to Twitch IRC / YouTube Live Chat APIs.
+          </AlertDescription>
+        </Alert>
+
+        <Alert className="bg-accent/10 border-accent/30">
+          <Info size={20} className="text-accent" />
+          <AlertDescription className="text-sm">
+            <strong className="text-accent">Want to test now?</strong> Use the <strong>Chat Simulation</strong> feature in the Monitor tab to test your AI companion with realistic chat messages and sentiment analysis - no backend required!
+          </AlertDescription>
+        </Alert>
+      </div>
 
       <Card className="border-[#9146FF]/30 bg-gradient-to-br from-card to-[#9146FF]/5">
         <CardHeader>
@@ -394,10 +403,10 @@ export function PlatformConnection({
 
           <Separator />
 
-          <Alert className="bg-muted/30 border-muted-foreground/20">
-            <Info size={16} className="text-muted-foreground" />
-            <AlertDescription className="text-xs text-muted-foreground">
-              <strong>Note:</strong> This interface configures connection settings. In production, you'd need a backend service to maintain persistent connections to chat APIs and handle real-time message streaming.
+          <Alert className="bg-accent/10 border-accent/30">
+            <Info size={16} className="text-accent" />
+            <AlertDescription className="text-sm">
+              <strong className="text-accent">Important:</strong> This interface saves connection credentials for future backend integration. <strong>Real-time chat monitoring requires a backend service</strong> (Node.js/Python) to maintain persistent WebSocket/IRC connections to Twitch/YouTube APIs. Use the <strong>Chat Simulation</strong> feature in the Monitor tab to test your AI's personality and responses right now!
             </AlertDescription>
           </Alert>
         </CardContent>

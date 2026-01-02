@@ -18,6 +18,7 @@ import { SentimentInsights } from "@/components/SentimentInsights";
 import { EmotionDetection } from "@/components/EmotionDetection";
 import { ChatSimulation } from "@/components/ChatSimulation";
 import { VTuberAvatar } from "@/components/VTuberAvatar";
+import { SystemStatusCard } from "@/components/SystemStatusCard";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -598,6 +599,11 @@ Return as JSON:
             </TabsList>
 
             <TabsContent value="monitor" className="space-y-6">
+              <SystemStatusCard 
+                hasConnections={!!(twitchConnection?.isConnected || youtubeConnection?.isConnected)}
+                isSimulating={isSimulating}
+              />
+              
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
                   <LiveMonitor
