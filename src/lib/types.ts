@@ -4,6 +4,9 @@ export interface AIPersonality {
   tone: string;
   interests: string[];
   responseStyle: 'concise' | 'detailed' | 'playful' | 'professional';
+  tonePreset?: 'energetic' | 'chill' | 'sarcastic' | 'supportive' | 'chaotic' | 'wholesome' | 'custom';
+  emoji?: boolean;
+  slang?: boolean;
 }
 
 export interface ChatMessage {

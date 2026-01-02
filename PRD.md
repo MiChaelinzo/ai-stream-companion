@@ -13,11 +13,42 @@ This is a focused tool for managing AI streamer personality, simulating interact
 ## Essential Features
 
 ### AI Personality Configuration
-- **Functionality**: Define the AI streamer's name, personality traits, tone, and response style
-- **Purpose**: Create a unique, memorable AI character that aligns with the streamer's brand
-- **Trigger**: User accesses settings panel or first-time setup
-- **Progression**: View current personality → Edit traits (name, bio, tone, interests) → Preview changes → Save configuration
-- **Success criteria**: Personality saves persist and influence all AI-generated responses
+- **Functionality**: Define the AI streamer's name, personality traits, tone, response style, and behavioral preferences with preset personalities for quick setup
+- **Purpose**: Create a unique, memorable AI character that aligns with the streamer's brand using pre-configured personalities or custom settings
+- **Trigger**: User accesses personality panel or first-time setup
+- **Progression**: View current personality → Choose preset (Nova, Zen, Spark, Sage, Sunny, Glitch) or customize → Edit traits (name, bio, tone preset, interests, emoji/slang preferences) → Preview changes → Save configuration
+- **Success criteria**: Personality saves persist and influence all AI-generated responses with consistent tone, style, and behavior
+
+### Personality Presets
+- **Functionality**: Six pre-configured personality templates with distinct tones and characteristics
+- **Purpose**: Allow streamers to quickly adopt a fully-formed AI personality that matches their streaming style
+- **Trigger**: User clicks preset button in personality configuration
+- **Progression**: Browse presets → Preview personality description → Apply preset → Fine-tune if desired
+- **Success criteria**: Preset instantly applies all personality attributes (name, bio, tone, interests, style, emoji/slang preferences)
+
+**Available Presets**:
+- **Nova** (⚡ Energetic): High-energy gaming companion, enthusiastic and playful
+- **Zen** (😌 Chill): Calm and supportive, creates relaxing vibes
+- **Spark** (🔥 Chaotic): Unpredictable and wild, embraces chaos and memes
+- **Sage** (🧠 Supportive): Strategic and analytical, focuses on helpful insights
+- **Sunny** (😊 Wholesome): Kind and positive, spreads joy and encouragement
+- **Glitch** (✨ Sarcastic): Witty and sharp, masters playful roasting and banter
+
+### Tone Customization
+- **Functionality**: Select from predefined tone presets or create custom tone descriptions
+- **Purpose**: Fine-tune communication style beyond basic personality traits
+- **Trigger**: User selects tone preset dropdown or enters custom tone description
+- **Progression**: Select tone preset → Read description → Adjust custom tone text if needed → Enable/disable emoji and slang toggles
+- **Success criteria**: AI responses reflect selected tone characteristics consistently
+
+**Tone Presets**:
+- **Energetic**: High energy, enthusiastic, uses exclamation points frequently
+- **Chill**: Relaxed and calm, keeps intensity low
+- **Sarcastic**: Witty comebacks and playful roasting
+- **Supportive**: Encouraging and uplifting focus
+- **Chaotic**: Unpredictable and embraces randomness
+- **Wholesome**: Pure positivity and kindness
+- **Custom**: User-defined tone description
 
 ### Live Chat Simulation
 - **Functionality**: Simulated chat interface where users can test AI responses in real-time

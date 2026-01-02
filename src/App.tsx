@@ -17,6 +17,9 @@ const defaultPersonality: AIPersonality = {
   tone: "Friendly, enthusiastic, and supportive with a touch of playful humor.",
   interests: ["Gaming", "Technology", "Memes", "Community"],
   responseStyle: "playful",
+  tonePreset: "energetic",
+  emoji: true,
+  slang: true,
 };
 
 function App() {
@@ -30,12 +33,19 @@ function App() {
   const currentPersonality = personality || defaultPersonality;
 
   const generateAIResponse = async (userMessage: string): Promise<string> => {
+    const emojiInstruction = currentPersonality.emoji ? "Use emojis naturally in your responses." : "Do not use emojis.";
+    const slangInstruction = currentPersonality.slang ? "Use internet slang and casual language where appropriate." : "Use proper grammar and avoid slang.";
+    
     const prompt = (window.spark.llmPrompt as any)`You are ${currentPersonality.name}, an AI streamer companion with the following characteristics:
 
 Bio: ${currentPersonality.bio}
 Tone: ${currentPersonality.tone}
 Interests: ${currentPersonality.interests.join(", ")}
 Response Style: ${currentPersonality.responseStyle}
+
+Communication Guidelines:
+- ${emojiInstruction}
+- ${slangInstruction}
 
 A viewer just said: "${userMessage}"
 
@@ -86,6 +96,9 @@ Generate a ${currentPersonality.responseStyle} response that matches your person
         random: "A viewer sent a random chat message",
       };
 
+      const emojiInstruction = currentPersonality.emoji ? "Use emojis naturally in your responses." : "Do not use emojis.";
+      const slangInstruction = currentPersonality.slang ? "Use internet slang and casual language where appropriate." : "Use proper grammar and avoid slang.";
+
       const prompt = (window.spark.llmPrompt as any)`You are ${currentPersonality.name}, an AI streamer companion.
 
 Personality:
@@ -93,6 +106,10 @@ Personality:
 - Tone: ${currentPersonality.tone}
 - Interests: ${currentPersonality.interests.join(", ")}
 - Style: ${currentPersonality.responseStyle}
+
+Communication Guidelines:
+- ${emojiInstruction}
+- ${slangInstruction}
 
 Scenario: ${scenarioDescriptions[scenario]}
 ${context ? `Additional context: ${context}` : ""}
