@@ -14,6 +14,8 @@ export interface ChatMessage {
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
+  username?: string;
+  platform?: 'twitch' | 'youtube' | 'simulator';
 }
 
 export interface Poll {
@@ -28,4 +30,27 @@ export interface Activity {
   type: 'poll' | 'question' | 'game';
   content: string;
   timestamp: Date;
+}
+
+export type PlatformType = 'twitch' | 'youtube';
+
+export interface PlatformConnection {
+  platform: PlatformType;
+  isConnected: boolean;
+  username?: string;
+  channelId?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: Date;
+  isLive?: boolean;
+}
+
+export interface StreamSettings {
+  autoRespond: boolean;
+  responseDelay: number;
+  pollInterval: number;
+  enablePolls: boolean;
+  enableGreetings: boolean;
+  messageFrequency: number;
+  maxMessagesPerMinute: number;
 }

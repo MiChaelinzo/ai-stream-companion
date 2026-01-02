@@ -1,16 +1,37 @@
 # AI Streamer Companion Dashboard
 
-An intelligent AI streamer personality management and simulation platform that helps streamers maintain audience engagement while focused on gameplay.
+An intelligent AI streamer personality management and live streaming integration platform that enables streamers to maintain audience engagement across Twitch and YouTube while focused on gameplay.
 
 **Experience Qualities**:
 1. **Intelligent** - The AI should feel smart and capable, generating contextually appropriate responses that enhance the streaming experience
 2. **Engaging** - Every interaction should feel lively and entertaining, keeping chat active and viewers invested
-3. **Personalized** - The streamer should be able to customize their AI companion's personality, voice, and behavior patterns
+3. **Connected** - Seamless integration with streaming platforms creates a unified live engagement experience
 
 **Complexity Level**: Light Application (multiple features with basic state)
-This is a focused tool for managing AI streamer personality, simulating interactions, and testing responses before deployment. It provides essential features without overwhelming complexity.
+This is a comprehensive tool for managing AI streamer personality, connecting to live streaming platforms (Twitch/YouTube), and automating chat engagement. It provides essential platform integration features with intelligent response management.
 
 ## Essential Features
+
+### Platform Connection Management
+- **Functionality**: Connect to Twitch (via IRC/OAuth) and YouTube (via Live Chat API) with credential management and connection status monitoring
+- **Purpose**: Enable real-time integration with actual streaming platforms for live chat reading and AI response posting
+- **Trigger**: User navigates to Platforms tab and clicks Connect button for desired platform
+- **Progression**: Select platform → Enter credentials (OAuth token for Twitch, API key for YouTube) → Verify connection → Monitor live status → Disconnect when needed
+- **Success criteria**: Successfully authenticate with platforms, display connection status, and enable live chat monitoring when stream is active
+
+### Live Stream Monitoring
+- **Functionality**: Real-time dashboard showing connected platforms, live status, message counts, AI response metrics, and live chat feed
+- **Purpose**: Provide visibility into active streams and AI companion performance across platforms
+- **Trigger**: User navigates to Monitor tab after connecting platforms
+- **Progression**: View platform status → Start monitoring when live → Watch real-time chat feed → See engagement statistics → Stop monitoring when done
+- **Success criteria**: Display accurate live stream status, real-time message updates, and engagement analytics with platform indicators
+
+### Stream Behavior Settings
+- **Functionality**: Configure AI response automation including auto-respond toggle, response delays, message frequency, rate limiting, greeting automation, and poll generation intervals
+- **Purpose**: Control how the AI behaves during live streams to prevent spam and create natural engagement
+- **Trigger**: User accesses Settings tab while platforms are connected
+- **Progression**: Enable auto-respond → Adjust timing settings (delay, frequency, rate limits) → Configure engagement features (greetings, polls) → Save preferences
+- **Success criteria**: Settings persist and control AI behavior, preventing over-posting while maintaining engagement
 
 ### AI Personality Configuration
 - **Functionality**: Define the AI streamer's name, personality traits, tone, response style, and behavioral preferences with preset personalities for quick setup
@@ -80,12 +101,17 @@ This is a focused tool for managing AI streamer personality, simulating interact
 
 ## Edge Case Handling
 
+- **Platform Connection Failures**: Clear error messages when credentials are invalid or API limits are reached, with guidance on resolution
+- **Stream Offline**: Disable monitoring when stream ends, prevent message sending when not live
+- **Rate Limiting**: Respect platform message limits (Twitch/YouTube) with built-in throttling to prevent bot bans
+- **Token Expiration**: Detect expired OAuth tokens and prompt user to reconnect
 - **Inappropriate Content**: AI filters responses to avoid offensive, controversial, or brand-unsafe content
 - **Repetitive Questions**: System detects repeated questions and varies response phrasing
 - **Context Loss**: AI maintains conversation history to provide coherent multi-turn responses
 - **Off-Topic Messages**: AI gracefully handles random or unrelated chat messages with personality
-- **Empty State**: Helpful onboarding guides users through personality setup on first launch
+- **Empty State**: Helpful onboarding guides users through platform connection and personality setup on first launch
 - **API Failures**: Graceful fallback with cached responses when LLM unavailable
+- **Multiple Platforms Live**: Handle simultaneous monitoring of Twitch and YouTube streams with unified chat feed
 
 ## Design Direction
 
@@ -136,17 +162,20 @@ Animations should reinforce the AI-powered, real-time nature of streaming. Smoot
 ## Component Selection
 
 **Components**:
-- **Card**: Primary container for personality config, chat window, and analytics panels
-- **Tabs**: Switch between different dashboard views (Chat, Polls, History, Settings)
-- **Input/Textarea**: Personality configuration and chat message entry
-- **Button**: Primary actions (Generate, Send, Save) with variant="default" for primary, "outline" for secondary
-- **Badge**: Status indicators (Live, AI Thinking, Active) with custom colors
-- **ScrollArea**: Chat message history and response logs
+- **Card**: Primary container for platform connections, stream monitoring, settings panels, personality config, chat window, and analytics
+- **Tabs**: Switch between Monitor, Platforms, Settings, Chat Simulator, Response Generator, Polls, and Personality views
+- **Input/Textarea**: Platform credentials, personality configuration, and chat message entry
+- **Button**: Primary actions (Connect, Start Monitoring, Generate, Send, Save) with variant="default" for primary, "outline" for secondary
+- **Badge**: Status indicators (Live, Connected, Monitoring, AI Thinking, Active) with custom colors for platforms
+- **ScrollArea**: Chat message history, live feed, and response logs
 - **Dialog**: Poll creation workflow and detailed settings
 - **Avatar**: AI personality avatar with status indicator
 - **Progress**: Show AI response generation progress
 - **Separator**: Divide sections within cards
-- **Select**: Choose personality presets or response tone
+- **Select**: Choose personality presets, tone, or response style
+- **Switch**: Toggle auto-respond, greetings, polls, emoji/slang usage
+- **Slider**: Adjust response delay, poll interval, message frequency, rate limits
+- **Alert**: Important notices for platform integration instructions and connection status
 
 **Customizations**:
 - Custom chat bubble component with gradient backgrounds for AI vs user messages
@@ -164,12 +193,22 @@ Animations should reinforce the AI-powered, real-time nature of streaming. Smoot
 - ChatCircle (chat/messaging)
 - Lightning (AI generation)
 - ChartLine (analytics)
-- Gear (settings)
-- Play (live streaming)
+- GearSix (settings)
+- Broadcast (live streaming/monitoring)
 - Question (polls)
 - Sparkle (AI thinking/magic)
 - ArrowRight (send messages)
 - Plus (create new)
+- TwitchLogo (Twitch platform)
+- YoutubeLogo (YouTube platform)
+- Link (platform connections)
+- CheckCircle (connected status)
+- XCircle (disconnected status)
+- Info (help/guidance)
+- Clock (timing settings)
+- Users (viewer count)
+- Eye (monitoring)
+- Waveform (engagement)
 
 **Spacing**:
 - Card padding: p-6 (24px) for primary containers

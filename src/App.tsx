@@ -5,8 +5,18 @@ import { PersonalityConfig } from "@/components/PersonalityConfig";
 import { ChatSimulator } from "@/components/ChatSimulator";
 import { ResponseGenerator } from "@/components/ResponseGenerator";
 import { PollCreator } from "@/components/PollCreator";
-import { AIPersonality, ChatMessage, Poll } from "@/lib/types";
-import { Robot, ChatCircle, Lightning, Question } from "@phosphor-icons/react";
+import { PlatformConnection } from "@/components/PlatformConnection";
+import { StreamSettings } from "@/components/StreamSettings";
+import { LiveMonitor } from "@/components/LiveMonitor";
+import { 
+  AIPersonality, 
+  ChatMessage, 
+  Poll, 
+  PlatformConnection as PlatformConnectionType,
+  PlatformType,
+  StreamSettings as StreamSettingsType
+} from "@/lib/types";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -22,15 +32,31 @@ const defaultPersonality: AIPersonality = {
   slang: true,
 };
 
+const defaultStreamSettings: StreamSettingsType = {
+  autoRespond: true,
+  responseDelay: 3,
+  pollInterval: 15,
+  enablePolls: true,
+  enableGreetings: true,
+  messageFrequency: 3,
+  maxMessagesPerMinute: 10,
+};
+
 function App() {
   const [personality, setPersonality] = useKV<AIPersonality>("ai-personality", defaultPersonality);
   const [messages, setMessages] = useKV<ChatMessage[]>("chat-messages", []);
   const [polls, setPolls] = useKV<Poll[]>("polls", []);
+  const [twitchConnection, setTwitchConnection] = useKV<PlatformConnectionType | null>("twitch-connection", null);
+  const [youtubeConnection, setYoutubeConnection] = useKV<PlatformConnectionType | null>("youtube-connection", null);
+  const [streamSettings, setStreamSettings] = useKV<StreamSettingsType>("stream-settings", defaultStreamSettings);
+  const [liveMessages, setLiveMessages] = useKV<ChatMessage[]>("live-messages", []);
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResponses, setGeneratedResponses] = useState<string[]>([]);
+  const [isMonitoring, setIsMonitoring] = useState(false);
 
   const currentPersonality = personality || defaultPersonality;
+  const currentStreamSettings = streamSettings || defaultStreamSettings;
 
   const generateAIResponse = async (userMessage: string): Promise<string> => {
     const emojiInstruction = currentPersonality.emoji ? "Use emojis naturally in your responses." : "Do not use emojis.";
@@ -178,6 +204,61 @@ Return as JSON:
     }
   };
 
+  const handlePlatformConnect = (platform: PlatformType, credentials: any) => {
+    if (platform === 'twitch') {
+      setTwitchConnection((current) => ({
+        platform: 'twitch',
+        isConnected: true,
+        username: credentials.username,
+        channelId: credentials.channelId,
+        accessToken: credentials.accessToken,
+        isLive: false,
+      }));
+    } else {
+      setYoutubeConnection((current) => ({
+        platform: 'youtube',
+        isConnected: true,
+        channelId: credentials.liveId,
+        accessToken: credentials.apiKey,
+        isLive: false,
+      }));
+    }
+  };
+
+  const handlePlatformDisconnect = (platform: PlatformType) => {
+    if (platform === 'twitch') {
+      setTwitchConnection(() => null);
+      setIsMonitoring(false);
+    } else {
+      setYoutubeConnection(() => null);
+      setIsMonitoring(false);
+    }
+  };
+
+  const handleToggleMonitoring = () => {
+    setIsMonitoring((prev) => {
+      const newState = !prev;
+      if (newState) {
+        toast.success("Started monitoring live chat");
+        if (twitchConnection) {
+          setTwitchConnection((current) => current ? { ...current, isLive: true } : null);
+        }
+        if (youtubeConnection) {
+          setYoutubeConnection((current) => current ? { ...current, isLive: true } : null);
+        }
+      } else {
+        toast.info("Stopped monitoring live chat");
+      }
+      return newState;
+    });
+  };
+
+  const liveStats = {
+    totalMessages: (liveMessages || []).length,
+    aiResponses: (liveMessages || []).filter(m => m.sender === 'ai').length,
+    uniqueViewers: new Set((liveMessages || []).filter(m => m.username).map(m => m.username)).size,
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,oklch(0.65_0.25_300_/_0.1),transparent_50%)] pointer-events-none" />
@@ -192,7 +273,7 @@ Return as JSON:
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight">AI Streamer Companion</h1>
-                  <p className="text-sm text-muted-foreground">Intelligent streaming assistant</p>
+                  <p className="text-sm text-muted-foreground">Twitch & YouTube live chat integration</p>
                 </div>
               </div>
               <Badge className="bg-accent/20 text-accent border-accent/30 hover:bg-accent/30 px-4 py-2">
@@ -204,8 +285,20 @@ Return as JSON:
         </header>
 
         <main className="container mx-auto px-6 py-8">
-          <Tabs defaultValue="chat" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto bg-card/50 backdrop-blur-sm">
+          <Tabs defaultValue="monitor" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-7 max-w-4xl mx-auto bg-card/50 backdrop-blur-sm">
+              <TabsTrigger value="monitor" className="gap-2">
+                <Broadcast size={18} weight="bold" />
+                <span className="hidden sm:inline">Monitor</span>
+              </TabsTrigger>
+              <TabsTrigger value="platforms" className="gap-2">
+                <LinkIcon size={18} weight="bold" />
+                <span className="hidden sm:inline">Platforms</span>
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="gap-2">
+                <GearSix size={18} weight="bold" />
+                <span className="hidden sm:inline">Settings</span>
+              </TabsTrigger>
               <TabsTrigger value="chat" className="gap-2">
                 <ChatCircle size={18} weight="bold" />
                 <span className="hidden sm:inline">Chat</span>
@@ -223,6 +316,34 @@ Return as JSON:
                 <span className="hidden sm:inline">Personality</span>
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="monitor" className="space-y-6">
+              <LiveMonitor
+                messages={liveMessages || []}
+                twitchConnection={twitchConnection || null}
+                youtubeConnection={youtubeConnection || null}
+                isMonitoring={isMonitoring}
+                onToggleMonitoring={handleToggleMonitoring}
+                stats={liveStats}
+              />
+            </TabsContent>
+
+            <TabsContent value="platforms" className="space-y-6">
+              <PlatformConnection
+                twitchConnection={twitchConnection || null}
+                youtubeConnection={youtubeConnection || null}
+                onConnect={handlePlatformConnect}
+                onDisconnect={handlePlatformDisconnect}
+              />
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-6">
+              <StreamSettings
+                settings={currentStreamSettings}
+                onUpdate={setStreamSettings}
+                isConnected={twitchConnection?.isConnected || youtubeConnection?.isConnected || false}
+              />
+            </TabsContent>
 
             <TabsContent value="chat" className="space-y-6">
               <ChatSimulator
