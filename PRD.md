@@ -136,11 +136,18 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Rating system integrated in chat UI, scores persist, and analytics show response quality trends over time
 
 ### VTuber Avatar Model
-- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, and reactive movements synchronized to AI activity
-- **Purpose**: Provide a visual personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations
+- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, reactive movements synchronized to AI activity, and realistic phoneme-based lip-sync for speech animation
+- **Purpose**: Provide a visual personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations and natural speech movements
 - **Trigger**: Avatar automatically appears in the Monitor tab and animates continuously when monitoring or simulation is active
-- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Reacts to chat sentiment with emotions (happy, excited, thinking, confused) → Animates mouth and headphone glow when speaking → Updates emotion based on recent chat mood
-- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, mouth sync during AI responses, emotion changes based on sentiment analysis, distinctive character design with headphones and anime-inspired aesthetic
+- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Reacts to chat sentiment with emotions (happy, excited, thinking, confused) → AI speaks with realistic lip-sync → Mouth shape morphs based on phoneme analysis (A, E, I, O, U, M, B, P, F, V, TH, L, R, W) → Headphone speakers glow with speech intensity → Updates emotion based on recent chat mood → Returns to neutral when idle
+- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, realistic phoneme-accurate mouth sync during AI responses with proper mouth shapes for each sound, emotion changes based on sentiment analysis, real-time phoneme indicator display, distinctive character design with headphones and anime-inspired aesthetic
+
+**Phoneme Lip-Sync System**:
+- **Phoneme Detection**: Analyzes AI response text and converts to phoneme sequence with timing
+- **Mouth Shapes**: 15 distinct phoneme mouth shapes with parameters (openness, width, height, roundness, tension)
+- **Interpolation**: Smooth transitions between phoneme shapes using eased interpolation
+- **Real-time Display**: Live phoneme indicator showing current sound being spoken
+- **Speech Synchronization**: Precise timing aligned with response delivery duration
 
 ## Edge Case Handling
 

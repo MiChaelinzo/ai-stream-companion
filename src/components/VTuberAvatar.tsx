@@ -3,7 +3,8 @@ import * as THREE from "three";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Sparkle } from "@phosphor-icons/react";
+import { Eye, Sparkle, Waveform } from "@phosphor-icons/react";
+import { PhonemeSequencer, MouthShape, Phoneme } from "@/lib/phoneme-analyzer";
 
 interface VTuberAvatarProps {
   personality: {
@@ -14,13 +15,15 @@ interface VTuberAvatarProps {
   isLive?: boolean;
   isSpeaking?: boolean;
   emotion?: "neutral" | "happy" | "excited" | "thinking" | "confused";
+  speechText?: string;
 }
 
 export function VTuberAvatar({ 
   personality, 
   isLive = false, 
   isSpeaking = false,
-  emotion = "neutral" 
+  emotion = "neutral",
+  speechText = ""
 }: VTuberAvatarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
@@ -41,6 +44,43 @@ export function VTuberAvatar({
   const animationRef = useRef<number | null>(null);
   const timeRef = useRef(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [currentPhoneme, setCurrentPhoneme] = useState<Phoneme>('silence');
+  const [currentMouthShape, setCurrentMouthShape] = useState<MouthShape>({
+    openness: 0,
+    width: 1,
+    height: 0,
+    roundness: 0.3,
+    tension: 0.1
+  });
+  const phonemeSequencerRef = useRef<PhonemeSequencer | null>(null);
+
+  useEffect(() => {
+    if (isSpeaking && speechText) {
+      phonemeSequencerRef.current?.stop();
+      
+      const sequencer = new PhonemeSequencer(speechText, (shape, phoneme) => {
+        setCurrentMouthShape(shape);
+        setCurrentPhoneme(phoneme);
+      });
+      
+      phonemeSequencerRef.current = sequencer;
+      sequencer.start();
+    } else {
+      phonemeSequencerRef.current?.stop();
+      setCurrentPhoneme('silence');
+      setCurrentMouthShape({
+        openness: 0,
+        width: 1,
+        height: 0,
+        roundness: 0.3,
+        tension: 0.1
+      });
+    }
+
+    return () => {
+      phonemeSequencerRef.current?.stop();
+    };
+  }, [isSpeaking, speechText]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -253,16 +293,31 @@ export function VTuberAvatar({
       });
 
       if (isSpeaking) {
-        const talkCycle = Math.sin(time * 15) * 0.5 + 0.5;
-        mouth.scale.set(1 + talkCycle * 0.3, 1 + talkCycle * 0.5, 1);
+        const mouthScale = {
+          x: currentMouthShape.width,
+          y: currentMouthShape.height * (1 + currentMouthShape.tension * 0.3),
+          z: 1
+        };
+        
+        mouth.scale.set(mouthScale.x, mouthScale.y, mouthScale.z);
+        
+        const baseRotation = Math.PI;
+        const openRotation = currentMouthShape.openness * 0.3;
+        mouth.rotation.x = baseRotation + openRotation;
+        
+        const roundnessOffset = (1 - currentMouthShape.roundness) * 0.1;
+        mouth.position.set(0, 1.2 - currentMouthShape.openness * 0.05, 0.85 + roundnessOffset);
         
         accessories.forEach((accessory) => {
           if (accessory.geometry.type === 'CylinderGeometry') {
-            (accessory.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.4 + talkCycle * 0.3;
+            const baseIntensity = 0.2;
+            const speakingBoost = currentMouthShape.tension * 0.4;
+            (accessory.material as THREE.MeshStandardMaterial).emissiveIntensity = baseIntensity + speakingBoost;
           }
         });
       } else {
         mouth.scale.set(1, 1, 1);
+        mouth.position.set(0, 1.2, 0.85);
         
         accessories.forEach((accessory) => {
           if (accessory.geometry.type === 'CylinderGeometry') {
@@ -333,7 +388,7 @@ export function VTuberAvatar({
       }
       renderer.dispose();
     };
-  }, [emotion, isSpeaking]);
+  }, [emotion, isSpeaking, currentMouthShape]);
 
   const getEmotionColor = () => {
     switch (emotion) {
@@ -391,7 +446,7 @@ export function VTuberAvatar({
           </div>
           {isSpeaking && (
             <motion.div
-              className="flex items-center gap-1 text-accent"
+              className="flex items-center gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -413,7 +468,10 @@ export function VTuberAvatar({
                   transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }}
                 />
               </div>
-              <span>Speaking</span>
+              <div className="flex items-center gap-1 text-accent">
+                <Waveform size={14} weight="bold" />
+                <span className="uppercase tracking-wider font-medium">{currentPhoneme}</span>
+              </div>
             </motion.div>
           )}
         </div>
