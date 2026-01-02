@@ -135,6 +135,13 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Progression**: AI responds → Rating buttons shown → Viewers vote → Aggregate score tracked → Low-rated patterns identified → Personality adjustments suggested
 - **Success criteria**: Rating system integrated in chat UI, scores persist, and analytics show response quality trends over time
 
+### VTuber Avatar Model
+- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, and reactive movements synchronized to AI activity
+- **Purpose**: Provide a visual personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations
+- **Trigger**: Avatar automatically appears in the Monitor tab and animates continuously when monitoring or simulation is active
+- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Reacts to chat sentiment with emotions (happy, excited, thinking, confused) → Animates mouth and headphone glow when speaking → Updates emotion based on recent chat mood
+- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, mouth sync during AI responses, emotion changes based on sentiment analysis, distinctive character design with headphones and anime-inspired aesthetic
+
 ## Edge Case Handling
 
 - **Platform Connection Failures**: Clear error messages when credentials are invalid or API limits are reached, with guidance on resolution

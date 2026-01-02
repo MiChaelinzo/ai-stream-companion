@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useKV } from "@github/spark/hooks";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonalityConfig } from "@/components/PersonalityConfig";
@@ -17,6 +17,7 @@ import { EngagementScore } from "@/components/EngagementScore";
 import { SentimentInsights } from "@/components/SentimentInsights";
 import { EmotionDetection } from "@/components/EmotionDetection";
 import { ChatSimulation } from "@/components/ChatSimulation";
+import { VTuberAvatar } from "@/components/VTuberAvatar";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -69,9 +70,31 @@ function App() {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
+  const [avatarEmotion, setAvatarEmotion] = useState<"neutral" | "happy" | "excited" | "thinking" | "confused">("neutral");
+  const [avatarSpeaking, setAvatarSpeaking] = useState(false);
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
+
+  useEffect(() => {
+    if ((liveMessages || []).length > 0) {
+      const recentMessages = (liveMessages || []).slice(-5);
+      const sentiments = recentMessages
+        .filter(m => m.sentiment)
+        .map(m => m.sentiment);
+      
+      if (sentiments.length > 0) {
+        const positiveCount = sentiments.filter(s => s === 'positive').length;
+        const negativeCount = sentiments.filter(s => s === 'negative').length;
+        
+        if (positiveCount > negativeCount && positiveCount >= 3) {
+          setAvatarEmotion("excited");
+        } else if (negativeCount > positiveCount && negativeCount >= 2) {
+          setAvatarEmotion("confused");
+        }
+      }
+    }
+  }, [liveMessages]);
 
   const generateAIResponse = async (userMessage: string): Promise<string> => {
     const emojiInstruction = currentPersonality.emoji ? "Use emojis naturally in your responses." : "Do not use emojis.";
@@ -128,8 +151,10 @@ Return ONLY the classification word, nothing else.`;
 
     setMessages((current) => [...(current || []), userMessage]);
     setIsGenerating(true);
+    setAvatarEmotion("thinking");
 
     try {
+      setAvatarSpeaking(true);
       const aiResponse = await generateAIResponse(content);
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -139,9 +164,24 @@ Return ONLY the classification word, nothing else.`;
         votes: { up: 0, down: 0 },
       };
       setMessages((current) => [...(current || []), aiMessage]);
+      
+      if (sentiment === 'positive') {
+        setAvatarEmotion("happy");
+      } else if (sentiment === 'negative') {
+        setAvatarEmotion("confused");
+      } else {
+        setAvatarEmotion("neutral");
+      }
+      
+      setTimeout(() => {
+        setAvatarSpeaking(false);
+        setAvatarEmotion("neutral");
+      }, 3000);
     } catch (error) {
       toast.error("Failed to generate AI response");
       console.error(error);
+      setAvatarEmotion("confused");
+      setAvatarSpeaking(false);
     } finally {
       setIsGenerating(false);
     }
@@ -376,8 +416,11 @@ Return as JSON:
     setLiveMessages((current) => [...(current || []), newMessage]);
 
     if (currentStreamSettings.autoRespond && Math.random() > 0.7) {
+      setAvatarEmotion("thinking");
+      
       setTimeout(async () => {
         try {
+          setAvatarSpeaking(true);
           const aiResponse = await generateAIResponse(content);
           const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString() + Math.random(),
@@ -387,8 +430,23 @@ Return as JSON:
             platform: 'simulator',
           };
           setLiveMessages((current) => [...(current || []), aiMessage]);
+          
+          if (sentiment === 'positive') {
+            setAvatarEmotion("excited");
+          } else if (sentiment === 'negative') {
+            setAvatarEmotion("confused");
+          } else {
+            setAvatarEmotion("happy");
+          }
+          
+          setTimeout(() => {
+            setAvatarSpeaking(false);
+            setAvatarEmotion("neutral");
+          }, 2500);
         } catch (error) {
           console.error('Failed to generate AI response', error);
+          setAvatarSpeaking(false);
+          setAvatarEmotion("neutral");
         }
       }, currentStreamSettings.responseDelay * 1000);
     }
@@ -546,6 +604,12 @@ Return as JSON:
                   />
                 </div>
                 <div className="space-y-6">
+                  <VTuberAvatar
+                    personality={currentPersonality}
+                    isLive={isMonitoring || isSimulating}
+                    isSpeaking={avatarSpeaking}
+                    emotion={avatarEmotion}
+                  />
                   <SentimentMonitor
                     messages={liveMessages || []}
                     isLive={isMonitoring || isSimulating}
