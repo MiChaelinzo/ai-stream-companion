@@ -209,6 +209,20 @@ export function TwitchIntegrationGuide() {
         </TabsContent>
 
         <TabsContent value="guide" className="space-y-4">
+          <Alert className="bg-accent/10 border-accent/30">
+            <Info size={20} className="text-accent" />
+            <AlertDescription className="ml-2">
+              <div className="space-y-2">
+                <p className="font-semibold">📖 Complete Backend Deployment Guides Available!</p>
+                <div className="text-sm space-y-1">
+                  <p>• <strong>QUICK_START.md</strong> - 30-minute setup with working code</p>
+                  <p>• <strong>BACKEND_DEPLOYMENT_GUIDE.md</strong> - Complete reference with deployment options</p>
+                  <p>• Both files are in the root of this project directory</p>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+
           <Card>
             <CardHeader>
               <CardTitle>How to Actually Connect to Twitch</CardTitle>
@@ -217,7 +231,53 @@ export function TwitchIntegrationGuide() {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold mb-2">Option 1: Use OBS Plugins</h3>
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <span className="text-xl">⚡</span>
+                    Option 1: Node.js Backend (Recommended)
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Full control, AI integration, works with your stored credentials above
+                  </p>
+                  <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-xs font-mono">
+                    <div className="text-muted-foreground">// 1. Create backend folder</div>
+                    <div>mkdir ai-streamer-backend</div>
+                    <div>cd ai-streamer-backend</div>
+                    <div className="mt-2 text-muted-foreground">// 2. Install dependencies</div>
+                    <div>npm install express ws tmi.js dotenv openai</div>
+                    <div className="mt-2 text-muted-foreground">// 3. Create .env with your tokens above</div>
+                    <div>TWITCH_ACCESS_TOKEN=...</div>
+                    <div>TWITCH_CLIENT_ID=...</div>
+                    <div>TWITCH_CHANNEL=michaelinzo</div>
+                    <div className="mt-2 text-muted-foreground">// 4. Copy server.js code from guides</div>
+                    <div>node server.js</div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Button 
+                      size="sm" 
+                      onClick={() => window.open('QUICK_START.md', '_blank')}
+                      className="text-xs"
+                    >
+                      View Quick Start Guide
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => window.open('BACKEND_DEPLOYMENT_GUIDE.md', '_blank')}
+                      className="text-xs"
+                    >
+                      View Full Guide
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <span className="text-xl">🎥</span>
+                    Option 2: OBS Plugins
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    No coding required, but less flexible
+                  </p>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-2">
                     <li><strong>Streamer.bot</strong> - Free tool that connects to Twitch chat and can trigger actions</li>
                     <li><strong>Mix It Up</strong> - Chat bot with built-in AI integration options</li>
@@ -226,26 +286,13 @@ export function TwitchIntegrationGuide() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-2">Option 2: Build a Node.js Backend</h3>
-                  <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-xs font-mono">
-                    <div className="text-muted-foreground">// Install tmi.js for Twitch chat</div>
-                    <div>npm install tmi.js</div>
-                    <div className="mt-3 text-muted-foreground">// Basic bot structure</div>
-                    <div>const tmi = require('tmi.js');</div>
-                    <div>const client = new tmi.Client({"{"}</div>
-                    <div className="ml-4">options: {"{"} debug: true {"}"},</div>
-                    <div className="ml-4">identity: {"{"}</div>
-                    <div className="ml-8">username: 'your_bot_name',</div>
-                    <div className="ml-8">password: 'oauth:your_token'</div>
-                    <div className="ml-4">{"}"},</div>
-                    <div className="ml-4">channels: ['michaelinzo']</div>
-                    <div>{"}"});</div>
-                    <div className="mt-2">client.connect();</div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Option 3: Cloud Services</h3>
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <span className="text-xl">☁️</span>
+                    Option 3: Cloud Bot Services
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Hosted solutions, limited AI customization
+                  </p>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-2">
                     <li><strong>Nightbot</strong> - Hosted chat bot with commands and timers</li>
                     <li><strong>Moobot</strong> - Cloud-based moderation bot</li>
@@ -256,8 +303,8 @@ export function TwitchIntegrationGuide() {
                 <Alert className="bg-primary/10 border-primary/30">
                   <Info size={16} className="text-primary" />
                   <AlertDescription className="text-xs ml-2">
-                    <strong>Recommended approach:</strong> Deploy a Node.js server (free on Render.com or Railway.app) that handles Twitch authentication 
-                    and chat connections, then optionally connect it back to this Spark UI for visualization.
+                    <strong>Best Path:</strong> Follow the QUICK_START.md guide (30 minutes) to get a working backend with your credentials. 
+                    Deploy to Railway.app or Heroku for 24/7 availability.
                   </AlertDescription>
                 </Alert>
               </div>

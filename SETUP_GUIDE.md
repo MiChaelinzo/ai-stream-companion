@@ -76,24 +76,50 @@ This is identical to how the AI would behave with real Twitch/YouTube chat!
 
 ## 🔧 Backend Integration Guide (For Developers)
 
+> **📖 COMPLETE GUIDE AVAILABLE: [BACKEND_DEPLOYMENT_GUIDE.md](./BACKEND_DEPLOYMENT_GUIDE.md)**
+>
+> This comprehensive guide includes:
+> - ✅ Complete working backend server code
+> - ✅ Step-by-step Twitch token generation
+> - ✅ YouTube API setup instructions
+> - ✅ Deployment options (Heroku, Railway, AWS, DigitalOcean)
+> - ✅ Security best practices
+> - ✅ Troubleshooting guide
+> - ✅ Testing procedures
+
+### Quick Overview
+
 To connect to real Twitch/YouTube streams, you need a backend service:
-
-### Option 1: Node.js Backend (Recommended)
-
-```bash
-# Install dependencies
-npm install tmi.js googleapis ws express dotenv
-```
-
-**Backend Requirements:**
-- **Twitch**: Use `tmi.js` library for IRC connection
-- **YouTube**: Use Google APIs for Live Chat API polling
-- **WebSocket**: Connect frontend to backend for message streaming
-- **Auth**: Secure OAuth token storage and refresh
 
 **Architecture:**
 ```
 Frontend (This App) <--WebSocket--> Backend Server <--IRC/API--> Twitch/YouTube
+```
+
+**What the Backend Does:**
+- Maintains persistent IRC connection to Twitch
+- Polls YouTube Live Chat API
+- Forwards messages to frontend via WebSocket
+- Posts AI responses back to chat
+- Manages OAuth tokens and refresh
+- Handles rate limiting
+
+### Option 1: Node.js Backend (Recommended)
+
+See **[BACKEND_DEPLOYMENT_GUIDE.md](./BACKEND_DEPLOYMENT_GUIDE.md)** for complete implementation.
+
+**Quick Start:**
+```bash
+# Create backend directory
+mkdir ai-streamer-backend
+cd ai-streamer-backend
+
+# Install dependencies
+npm install express ws tmi.js dotenv cors axios openai googleapis
+
+# Create .env file with your tokens (see deployment guide)
+# Run the server
+node server.js
 ```
 
 ### Option 2: OBS Browser Source Integration
@@ -110,104 +136,6 @@ Integrate with existing bot platforms:
 - **Streamlabs Chatbot** - Custom scripts
 - **Nightbot** - Custom commands API
 - **StreamElements** - Custom bot integration
-
----
-
-## 📋 Backend Setup Steps (High-Level)
-
-### 1. Create Backend Server
-
-```javascript
-// backend/server.js
-const express = require('express');
-const WebSocket = require('ws');
-const tmi = require('tmi.js');
-
-const app = express();
-const wss = new WebSocket.Server({ port: 8080 });
-
-// Twitch IRC Client
-const twitchClient = new tmi.Client({
-  identity: {
-    username: process.env.TWITCH_BOT_USERNAME,
-    password: process.env.TWITCH_OAUTH_TOKEN
-  },
-  channels: [process.env.TWITCH_CHANNEL]
-});
-
-twitchClient.connect();
-
-// Forward Twitch messages to frontend via WebSocket
-twitchClient.on('message', (channel, tags, message, self) => {
-  wss.clients.forEach(client => {
-    client.send(JSON.stringify({
-      platform: 'twitch',
-      username: tags['display-name'],
-      message: message,
-      timestamp: new Date()
-    }));
-  });
-});
-
-// Receive AI responses from frontend and post to Twitch
-wss.on('connection', (ws) => {
-  ws.on('message', (data) => {
-    const { message, platform } = JSON.parse(data);
-    if (platform === 'twitch') {
-      twitchClient.say(process.env.TWITCH_CHANNEL, message);
-    }
-  });
-});
-
-app.listen(3000);
-```
-
-### 2. Update Frontend WebSocket Connection
-
-Add this to your frontend to connect to the backend:
-
-```typescript
-// In App.tsx or a custom hook
-const ws = new WebSocket('ws://localhost:8080');
-
-ws.onmessage = (event) => {
-  const chatMessage = JSON.parse(event.data);
-  // Add to liveMessages state
-  setLiveMessages(current => [...current, chatMessage]);
-  
-  // Generate AI response if auto-respond enabled
-  if (streamSettings.autoRespond) {
-    const response = await generateAIResponse(chatMessage.message);
-    ws.send(JSON.stringify({
-      message: response,
-      platform: chatMessage.platform
-    }));
-  }
-};
-```
-
-### 3. Environment Variables
-
-```bash
-# .env
-TWITCH_BOT_USERNAME=your_bot_username
-TWITCH_OAUTH_TOKEN=oauth:your_token_here
-TWITCH_CHANNEL=your_channel_name
-
-YOUTUBE_API_KEY=your_api_key
-YOUTUBE_LIVE_CHAT_ID=your_live_chat_id
-
-OPENAI_API_KEY=your_openai_key
-```
-
-### 4. Deploy Backend
-
-Options:
-- **Heroku** - Free tier available
-- **AWS Lambda** - Serverless functions
-- **DigitalOcean** - $5/month droplet
-- **Railway.app** - Simple deployment
-- **Local Machine** - If streaming from same computer
 
 ---
 
@@ -235,9 +163,10 @@ Options:
 
 ## 📚 Documentation Files
 
+- **[BACKEND_DEPLOYMENT_GUIDE.md](./BACKEND_DEPLOYMENT_GUIDE.md)** - 🆕 Complete backend deployment with code examples
 - **[PRD.md](./PRD.md)** - Complete feature specifications
 - **[PLATFORM_GUIDE.md](./PLATFORM_GUIDE.md)** - Platform integration details
-- **[README.md](./README.md)** - This file
+- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - This file
 
 ---
 

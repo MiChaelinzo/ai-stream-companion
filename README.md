@@ -46,7 +46,24 @@ An intelligent AI personality management dashboard for Twitch and YouTube stream
 
 ## 📚 Documentation
 
-- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Comprehensive setup and backend integration guide
+### 🎯 New! Backend Deployment Guides
+
+**Want to connect to real Twitch/YouTube chat?**
+
+- **[QUICK_START.md](./QUICK_START.md)** - ⚡ **30-minute setup** with working backend code
+- **[BACKEND_DEPLOYMENT_GUIDE.md](./BACKEND_DEPLOYMENT_GUIDE.md)** - 📖 Complete reference with deployment options
+
+These guides include:
+- ✅ Complete working Node.js backend server code
+- ✅ Step-by-step Twitch token generation instructions
+- ✅ YouTube API setup walkthrough
+- ✅ Deployment to Heroku, Railway, AWS, DigitalOcean
+- ✅ Security best practices
+- ✅ Troubleshooting guide
+
+### 📖 Other Documentation
+
+- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Feature overview and backend integration guide
 - **[PLATFORM_GUIDE.md](./PLATFORM_GUIDE.md)** - Platform connection details
 - **[PRD.md](./PRD.md)** - Complete feature specifications
 
