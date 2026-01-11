@@ -624,20 +624,61 @@ Return as JSON:
 
   const enhanceTextWithSSML = async (text: string, sentiment: 'positive' | 'neutral' | 'negative'): Promise<string> => {
     try {
-      const prompt = (window.spark.llmPrompt as any)`You are an SSML expert. Given a text and its sentiment, enhance it with SSML tags for more expressive speech.
+      const prompt = (window.spark.llmPrompt as any)`You are an expert SSML (Speech Synthesis Markup Language) engineer specializing in creating highly expressive and natural-sounding speech patterns.
 
-Text: "${text}"
-Sentiment: ${sentiment}
+**Text to enhance:** "${text}"
+**Detected Sentiment:** ${sentiment}
 
-Guidelines:
-- Add <break time="Xms"/> for natural pauses (use 300-500ms for dramatic pauses)
-- Add <emphasis level="strong|moderate|reduced"> for important words
-- Add <prosody pitch="high|low" rate="fast|slow"> for emotional expression
-- For positive sentiment: use higher pitch, moderate emphasis on positive words, shorter pauses
-- For negative sentiment: use lower pitch, slower rate, longer pauses
-- For neutral sentiment: use balanced prosody, natural pauses
+**SSML Enhancement Guidelines:**
 
-Return ONLY the SSML-enhanced text, no explanations.`;
+1. **Breaks and Pauses:**
+   - Use <break time="Xms"/> for natural conversation flow
+   - Short pauses (200-300ms) after commas or between clauses
+   - Medium pauses (400-600ms) for dramatic effect or emphasis
+   - Long pauses (800-1000ms) only for very dramatic moments
+   - Always place breaks naturally at punctuation or thought boundaries
+
+2. **Emphasis:**
+   - <emphasis level="strong"> for KEY words, IMPORTANT points, or EXCITEMENT
+   - <emphasis level="moderate"> for words that need mild emphasis
+   - <emphasis level="reduced"> for less important words or asides
+   - Don't over-emphasize; use sparingly for maximum impact
+
+3. **Prosody (Pitch, Rate, Volume):**
+   - <prosody pitch="+X%" rate="X%" volume="X%">text</prosody>
+   - For POSITIVE sentiment:
+     * pitch: +10% to +30% (higher, more energetic)
+     * rate: 105% to 120% (slightly faster, more excited)
+     * Use on excited words, celebrations, achievements
+   - For NEGATIVE sentiment:
+     * pitch: -10% to -20% (lower, more serious/sad)
+     * rate: 80% to 95% (slower, more thoughtful)
+     * Use on disappointed, sad, or serious phrases
+   - For NEUTRAL sentiment:
+     * pitch: -5% to +5% (natural variation)
+     * rate: 95% to 105% (near normal)
+     * Use subtle variations for natural speech
+
+4. **Emotion Mapping:**
+   - Excited/Happy: high pitch (+20%), faster rate (115%), strong emphasis
+   - Sad/Disappointed: low pitch (-15%), slower rate (85%), reduced emphasis
+   - Surprised: sudden pitch change (+25%), brief pause before
+   - Thoughtful: normal pitch, slower rate (90%), moderate pauses
+   - Welcoming: warm pitch (+10%), normal-slow rate (95%), moderate emphasis
+
+5. **Practical Examples:**
+   - "That was <emphasis level="strong">amazing</emphasis>!" → <prosody pitch="+20%" rate="115%">That was <break time="200ms"/><emphasis level="strong">amazing</emphasis>!</prosody>
+   - "Oh no..." → <prosody pitch="-15%" rate="85%">Oh <break time="300ms"/>no<break time="500ms"/></prosody>
+   - "Welcome everyone!" → <prosody pitch="+10%">Welcome <emphasis level="moderate">everyone</emphasis>!</prosody>
+
+**Critical Requirements:**
+- Return ONLY the SSML-enhanced text
+- Do NOT include explanations, markdown, or extra formatting
+- Ensure all SSML tags are properly closed
+- Make it sound natural and expressive, not robotic
+- Balance enhancement with naturalness - don't overdo it
+
+**Enhanced SSML output:**`;
 
       const enhanced = await window.spark.llm(prompt, "gpt-4o");
       return enhanced.trim();
