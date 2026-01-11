@@ -139,10 +139,12 @@ export class PhonemeSequencer {
   private isPlaying: boolean = false;
   private onUpdate?: (shape: MouthShape, phoneme: Phoneme) => void;
   private animationFrame?: number;
+  private intensityMultiplier: number = 1.0;
 
-  constructor(text: string, onUpdate?: (shape: MouthShape, phoneme: Phoneme) => void) {
+  constructor(text: string, onUpdate?: (shape: MouthShape, phoneme: Phoneme) => void, intensityMultiplier: number = 1.0) {
     this.frames = textToPhonemes(text);
     this.onUpdate = onUpdate;
+    this.intensityMultiplier = intensityMultiplier;
   }
 
   start() {
@@ -179,8 +181,11 @@ export class PhonemeSequencer {
         const frameElapsed = elapsed - (totalDuration - frameDuration);
         const progress = Math.min(frameElapsed / frameDuration, 1);
         
-        const currentShape = getMouthShapeForPhoneme(frame.phoneme, frame.intensity);
-        const nextShape = getMouthShapeForPhoneme(nextFrame.phoneme, nextFrame.intensity);
+        const adjustedIntensity = frame.intensity * this.intensityMultiplier;
+        const adjustedNextIntensity = nextFrame.intensity * this.intensityMultiplier;
+        
+        const currentShape = getMouthShapeForPhoneme(frame.phoneme, adjustedIntensity);
+        const nextShape = getMouthShapeForPhoneme(nextFrame.phoneme, adjustedNextIntensity);
         const interpolatedShape = interpolateMouthShape(currentShape, nextShape, progress);
         
         this.onUpdate?.(interpolatedShape, frame.phoneme);
@@ -203,5 +208,9 @@ export class PhonemeSequencer {
 
   getDuration(): number {
     return this.frames.reduce((sum, frame) => sum + frame.duration, 0);
+  }
+
+  setIntensityMultiplier(multiplier: number) {
+    this.intensityMultiplier = multiplier;
   }
 }

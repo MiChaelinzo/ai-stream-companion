@@ -157,18 +157,39 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Rating system integrated in chat UI, scores persist, and analytics show response quality trends over time
 
 ### VTuber Avatar Model
-- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, reactive movements synchronized to AI activity, realistic phoneme-based lip-sync for speech animation, and customizable visual skins for personalized appearance
-- **Purpose**: Provide a visual personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations, natural speech movements, and unique visual styles matching the streamer's brand
+- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, reactive movements synchronized to AI activity, realistic phoneme-based lip-sync for speech animation, advanced emotion-to-commentary synchronization, and customizable visual skins for personalized appearance
+- **Purpose**: Provide a visual personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations, natural speech movements, intelligent emotion transitions synced to commentary content, and unique visual styles matching the streamer's brand
 - **Trigger**: Avatar automatically appears in the Monitor tab and animates continuously when monitoring or simulation is active, skin selection accessed via Personality configuration
-- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Reacts to chat sentiment with emotions (happy, excited, thinking, confused) → AI speaks with realistic lip-sync → Mouth shape morphs based on phoneme analysis (A, E, I, O, U, M, B, P, F, V, TH, L, R, W) → Headphone speakers glow with speech intensity → Updates emotion based on recent chat mood → User selects skin from gallery → Avatar instantly updates with new color palette and style → Returns to neutral when idle
-- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, realistic phoneme-accurate mouth sync during AI responses with proper mouth shapes for each sound, emotion changes based on sentiment analysis, real-time phoneme indicator display, instant skin switching without visual glitches, distinctive character design with headphones and anime-inspired aesthetic
+- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Receives commentary text with sentiment → Analyzes text for emotional keywords and patterns → Generates synchronized emotion timeline → Converts text to phoneme sequence → Coordinates emotion transitions with lip movements → Reacts with intensity-based expressions (happy, excited, thinking, confused, surprised, sad) → Mouth morphs through phoneme shapes with emotion-amplified intensity → Headphone speakers pulse with speaking tension → Eyes and head movements reflect emotional state → Smooth transitions between emotional states → Returns to neutral when idle → User selects skin from gallery → Avatar instantly updates with new color palette and style
+- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, realistic phoneme-accurate mouth sync during AI responses with proper mouth shapes for each sound, emotion changes based on commentary content analysis (not just sentiment), smooth emotion transitions with intensity curves, phoneme intensity boosted by active emotion (excited = 1.4x, sad = 0.8x), real-time sync indicators showing current phoneme and emotion, instant skin switching without visual glitches, distinctive character design with headphones and anime-inspired aesthetic
 
 **Phoneme Lip-Sync System**:
 - **Phoneme Detection**: Analyzes AI response text and converts to phoneme sequence with timing
 - **Mouth Shapes**: 15 distinct phoneme mouth shapes with parameters (openness, width, height, roundness, tension)
 - **Interpolation**: Smooth transitions between phoneme shapes using eased interpolation
+- **Intensity Multipliers**: Phoneme animations amplified or subdued based on active emotion (excited = 1.4x, happy = 1.2x, sad = 0.8x, thinking = 0.9x)
 - **Real-time Display**: Live phoneme indicator showing current sound being spoken
 - **Speech Synchronization**: Precise timing aligned with response delivery duration
+
+**Emotion-to-Commentary Sync System** (NEW):
+- **Content Analysis**: Scans commentary for emotional keywords (wow, amazing, hmm, confused, etc.) and punctuation patterns (! for excitement, ? for curiosity)
+- **Emotion Timeline**: Generates sequence of emotions with intensity and duration based on sentence structure and word choice
+- **Sentiment Integration**: Combines chat sentiment (positive/neutral/negative) with text analysis for contextual emotion selection
+- **Dynamic Transitions**: Smooth emotion changes with configurable transition times (150-300ms)
+- **Intensity Curves**: Emotions have varying intensity levels (0.0-1.0) affecting expression strength
+- **Coordinated Animation**: Emotion state and phoneme system work together - emotions affect mouth movement intensity, eye size, head tilt
+- **Visual Feedback**: Real-time sync monitor displays current phoneme, active emotion, intensity percentage, and sync status
+- **Keyword Detection**: 7 emotion categories with 50+ trigger keywords
+- **Automatic Return**: Avatar returns to neutral emotion after commentary finishes with gentle transition
+- **Phoneme Boost**: Active emotions amplify lip-sync movements for more expressive speech
+
+**Commentary Sync Monitor** (NEW):
+- **Live Phoneme Display**: Real-time indicator of current phoneme being spoken with color-coded visualization
+- **Emotion Tracker**: Shows active emotion name and intensity bar (0-100%)
+- **Sync Status Grid**: Three-indicator system (Lip Sync, Emotion, Timing) showing green when active
+- **Visual Progress**: Animated bars showing phoneme activity and emotion intensity in real-time
+- **Speech Preview**: Displays current commentary text being spoken
+- **Color-Coded States**: Different colors for vowels (pink), consonants (purple), silence (gray), emotions (contextual)
 
 **Avatar Skin System**:
 - **Visual Styles**: 8 distinct appearance themes each with unique color palettes and material properties

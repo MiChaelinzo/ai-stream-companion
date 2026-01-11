@@ -24,6 +24,7 @@ import { GameplayVisionAnalyzer } from "@/components/GameplayVisionAnalyzer";
 import { VisionSettingsConfig } from "@/components/VisionSettingsConfig";
 import { VisionStatsCard } from "@/components/VisionStatsCard";
 import { CommentaryHistory } from "@/components/CommentaryHistory";
+import { CommentarySyncMonitor } from "@/components/CommentarySyncMonitor";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -94,9 +95,13 @@ function App() {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
-  const [avatarEmotion, setAvatarEmotion] = useState<"neutral" | "happy" | "excited" | "thinking" | "confused">("neutral");
+  const [avatarEmotion, setAvatarEmotion] = useState<"neutral" | "happy" | "excited" | "thinking" | "confused" | "surprised" | "sad">("neutral");
   const [avatarSpeaking, setAvatarSpeaking] = useState(false);
   const [currentSpeechText, setCurrentSpeechText] = useState("");
+  const [currentSentiment, setCurrentSentiment] = useState<'positive' | 'neutral' | 'negative'>('neutral');
+  const [avatarCurrentPhoneme, setAvatarCurrentPhoneme] = useState<string>('silence');
+  const [avatarCurrentEmotion, setAvatarCurrentEmotion] = useState<string>('neutral');
+  const [avatarEmotionIntensity, setAvatarEmotionIntensity] = useState<number>(0);
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
@@ -165,6 +170,7 @@ Return ONLY the classification word, nothing else.`;
 
   const handleSendMessage = async (content: string) => {
     const sentiment = await analyzeSentiment(content);
+    setCurrentSentiment(sentiment);
     
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -193,19 +199,12 @@ Return ONLY the classification word, nothing else.`;
       };
       setMessages((current) => [...(current || []), aiMessage]);
       
-      if (sentiment === 'positive') {
-        setAvatarEmotion("happy");
-      } else if (sentiment === 'negative') {
-        setAvatarEmotion("confused");
-      } else {
-        setAvatarEmotion("neutral");
-      }
-      
       setTimeout(() => {
         setAvatarSpeaking(false);
         setCurrentSpeechText("");
         setAvatarEmotion("neutral");
-      }, 3000);
+        setCurrentSentiment('neutral');
+      }, 5000);
     } catch (error) {
       toast.error("Failed to generate AI response");
       console.error(error);
@@ -442,6 +441,7 @@ Return as JSON:
     setAvatarSpeaking(true);
     setCurrentSpeechText(commentary);
     setAvatarEmotion("excited");
+    setCurrentSentiment('positive');
 
     const commentaryMessage: ChatMessage = {
       id: Date.now().toString() + '_vision',
@@ -456,7 +456,8 @@ Return as JSON:
       setAvatarSpeaking(false);
       setCurrentSpeechText("");
       setAvatarEmotion("neutral");
-    }, 3000);
+      setCurrentSentiment('neutral');
+    }, 4000);
   };
 
   const handleSimulateMessage = async (content: string, sentiment: 'positive' | 'neutral' | 'negative') => {
@@ -477,6 +478,7 @@ Return as JSON:
 
     if (currentStreamSettings.autoRespond && Math.random() > 0.7) {
       setAvatarEmotion("thinking");
+      setCurrentSentiment(sentiment);
       
       setTimeout(async () => {
         try {
@@ -493,19 +495,12 @@ Return as JSON:
           };
           setLiveMessages((current) => [...(current || []), aiMessage]);
           
-          if (sentiment === 'positive') {
-            setAvatarEmotion("excited");
-          } else if (sentiment === 'negative') {
-            setAvatarEmotion("confused");
-          } else {
-            setAvatarEmotion("happy");
-          }
-          
           setTimeout(() => {
             setAvatarSpeaking(false);
             setCurrentSpeechText("");
             setAvatarEmotion("neutral");
-          }, 2500);
+            setCurrentSentiment('neutral');
+          }, 4000);
         } catch (error) {
           console.error('Failed to generate AI response', error);
           setAvatarSpeaking(false);
@@ -712,6 +707,19 @@ Return as JSON:
                     emotion={avatarEmotion}
                     speechText={currentSpeechText}
                     skin={currentPersonality.avatarSkin || 'default'}
+                    sentiment={currentSentiment}
+                    onPhonemeChange={setAvatarCurrentPhoneme}
+                    onEmotionChange={(emotion, intensity) => {
+                      setAvatarCurrentEmotion(emotion);
+                      setAvatarEmotionIntensity(intensity);
+                    }}
+                  />
+                  <CommentarySyncMonitor
+                    isSpeaking={avatarSpeaking}
+                    currentPhoneme={avatarCurrentPhoneme}
+                    currentEmotion={avatarCurrentEmotion}
+                    emotionIntensity={avatarEmotionIntensity}
+                    speechText={currentSpeechText}
                   />
                   <SentimentMonitor
                     messages={liveMessages || []}

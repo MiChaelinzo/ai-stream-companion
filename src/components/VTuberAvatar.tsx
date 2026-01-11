@@ -3,9 +3,10 @@ import * as THREE from "three";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Sparkle, Waveform } from "@phosphor-icons/react";
+import { Eye, Sparkle, Waveform, Heart, Lightbulb, SmileyXEyes } from "@phosphor-icons/react";
 import { PhonemeSequencer, MouthShape, Phoneme } from "@/lib/phoneme-analyzer";
 import { AvatarSkin, getSkinStyle } from "@/lib/avatar-skins";
+import { EmotionSequencer, createSyncedCommentary, EmotionType } from "@/lib/emotion-sync";
 
 interface VTuberAvatarProps {
   personality: {
@@ -15,9 +16,12 @@ interface VTuberAvatarProps {
   };
   isLive?: boolean;
   isSpeaking?: boolean;
-  emotion?: "neutral" | "happy" | "excited" | "thinking" | "confused";
+  emotion?: EmotionType;
   speechText?: string;
   skin?: AvatarSkin;
+  sentiment?: 'positive' | 'neutral' | 'negative';
+  onPhonemeChange?: (phoneme: string) => void;
+  onEmotionChange?: (emotion: string, intensity: number) => void;
 }
 
 export function VTuberAvatar({ 
@@ -26,7 +30,10 @@ export function VTuberAvatar({
   isSpeaking = false,
   emotion = "neutral",
   speechText = "",
-  skin = "default"
+  skin = "default",
+  sentiment,
+  onPhonemeChange,
+  onEmotionChange
 }: VTuberAvatarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
@@ -55,22 +62,50 @@ export function VTuberAvatar({
     roundness: 0.3,
     tension: 0.1
   });
+  const [syncedEmotion, setSyncedEmotion] = useState<EmotionType>(emotion);
+  const [emotionIntensity, setEmotionIntensity] = useState<number>(0.5);
   const phonemeSequencerRef = useRef<PhonemeSequencer | null>(null);
+  const emotionSequencerRef = useRef<EmotionSequencer | null>(null);
 
   useEffect(() => {
     if (isSpeaking && speechText) {
       phonemeSequencerRef.current?.stop();
+      emotionSequencerRef.current?.stop();
       
-      const sequencer = new PhonemeSequencer(speechText, (shape, phoneme) => {
-        setCurrentMouthShape(shape);
-        setCurrentPhoneme(phoneme);
-      });
+      const syncedCommentary = createSyncedCommentary(speechText, sentiment);
       
-      phonemeSequencerRef.current = sequencer;
-      sequencer.start();
+      const emotionSequencer = new EmotionSequencer(
+        syncedCommentary.emotions,
+        (emotion, intensity) => {
+          setSyncedEmotion(emotion);
+          setEmotionIntensity(intensity);
+          onEmotionChange?.(emotion, intensity);
+        }
+      );
+      
+      const phonemeSequencer = new PhonemeSequencer(
+        speechText, 
+        (shape, phoneme) => {
+          setCurrentMouthShape(shape);
+          setCurrentPhoneme(phoneme);
+          onPhonemeChange?.(phoneme);
+        },
+        syncedCommentary.phonemeBoost || 1.0
+      );
+      
+      emotionSequencerRef.current = emotionSequencer;
+      phonemeSequencerRef.current = phonemeSequencer;
+      
+      emotionSequencer.start();
+      phonemeSequencer.start();
     } else {
       phonemeSequencerRef.current?.stop();
+      emotionSequencerRef.current?.stop();
       setCurrentPhoneme('silence');
+      setSyncedEmotion(emotion);
+      setEmotionIntensity(0.5);
+      onPhonemeChange?.('silence');
+      onEmotionChange?.(emotion, 0.5);
       setCurrentMouthShape({
         openness: 0,
         width: 1,
@@ -82,8 +117,9 @@ export function VTuberAvatar({
 
     return () => {
       phonemeSequencerRef.current?.stop();
+      emotionSequencerRef.current?.stop();
     };
-  }, [isSpeaking, speechText]);
+  }, [isSpeaking, speechText, sentiment, onPhonemeChange, onEmotionChange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -331,33 +367,53 @@ export function VTuberAvatar({
         });
       }
 
-      switch (emotion) {
+      const currentEmotion = isSpeaking ? syncedEmotion : emotion;
+      const intensity = isSpeaking ? emotionIntensity : 0.5;
+
+      switch (currentEmotion) {
         case "happy":
-          mouth.rotation.x = Math.PI * 1.1;
-          mouth.scale.y = 1.3;
-          leftEye.scale.set(1.2, 0.8, 1);
-          rightEye.scale.set(1.2, 0.8, 1);
+          mouth.rotation.x = Math.PI * (1.1 * intensity);
+          mouth.scale.y = 1 + (0.3 * intensity);
+          leftEye.scale.set(1 + (0.2 * intensity), 1 - (0.2 * intensity), 1);
+          rightEye.scale.set(1 + (0.2 * intensity), 1 - (0.2 * intensity), 1);
           break;
         case "excited":
-          mouth.rotation.x = Math.PI * 1.15;
-          mouth.scale.set(1.3, 1.4, 1);
-          leftEye.scale.set(1.4, 1.4, 1);
-          rightEye.scale.set(1.4, 1.4, 1);
-          (leftEye.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
-          (rightEye.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6;
+          mouth.rotation.x = Math.PI * (1.15 * intensity);
+          mouth.scale.set(1 + (0.3 * intensity), 1 + (0.4 * intensity), 1);
+          leftEye.scale.set(1 + (0.4 * intensity), 1 + (0.4 * intensity), 1);
+          rightEye.scale.set(1 + (0.4 * intensity), 1 + (0.4 * intensity), 1);
+          (leftEye.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.3 + (0.3 * intensity);
+          (rightEye.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.3 + (0.3 * intensity);
           break;
         case "thinking":
-          head.rotation.x = -0.1;
-          leftEye.position.x = -0.35;
-          rightEye.position.x = 0.25;
-          mouth.scale.set(0.8, 0.8, 1);
+          head.rotation.x = -0.1 * intensity;
+          leftEye.position.x = -0.3 - (0.05 * intensity);
+          rightEye.position.x = 0.3 - (0.05 * intensity);
+          mouth.scale.set(1 - (0.2 * intensity), 1 - (0.2 * intensity), 1);
           break;
         case "confused":
-          head.rotation.z = Math.sin(time * 2) * 0.15;
+          head.rotation.z = Math.sin(time * 2) * (0.15 * intensity);
           mouth.rotation.x = Math.PI;
-          mouth.scale.set(0.7, 0.7, 1);
-          leftEye.scale.set(0.9, 1.2, 1);
-          rightEye.scale.set(1.1, 0.9, 1);
+          mouth.scale.set(1 - (0.3 * intensity), 1 - (0.3 * intensity), 1);
+          leftEye.scale.set(1 - (0.1 * intensity), 1 + (0.2 * intensity), 1);
+          rightEye.scale.set(1 + (0.1 * intensity), 1 - (0.1 * intensity), 1);
+          break;
+        case "surprised":
+          mouth.rotation.x = Math.PI * 1.2;
+          mouth.scale.set(1 + (0.4 * intensity), 1 + (0.5 * intensity), 1);
+          leftEye.scale.set(1 + (0.5 * intensity), 1 + (0.5 * intensity), 1);
+          rightEye.scale.set(1 + (0.5 * intensity), 1 + (0.5 * intensity), 1);
+          (leftEye.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.5 + (0.3 * intensity);
+          (rightEye.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.5 + (0.3 * intensity);
+          break;
+        case "sad":
+          head.rotation.x = 0.15 * intensity;
+          mouth.rotation.x = Math.PI * 0.9;
+          mouth.scale.y = 1 - (0.3 * intensity);
+          leftEye.scale.set(1, 1 - (0.3 * intensity), 1);
+          rightEye.scale.set(1, 1 - (0.3 * intensity), 1);
+          (leftEye.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.2 * intensity;
+          (rightEye.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.2 * intensity;
           break;
         default:
           leftEye.scale.set(1, 1, 1);
@@ -393,15 +449,34 @@ export function VTuberAvatar({
       }
       renderer.dispose();
     };
-  }, [emotion, isSpeaking, currentMouthShape, skin]);
+  }, [emotion, isSpeaking, currentMouthShape, skin, syncedEmotion, emotionIntensity]);
 
   const getEmotionColor = () => {
-    switch (emotion) {
+    const currentEmotion = isSpeaking ? syncedEmotion : emotion;
+    switch (currentEmotion) {
       case "happy": return "bg-yellow-500/20 text-yellow-500 border-yellow-500/30";
       case "excited": return "bg-pink-500/20 text-pink-500 border-pink-500/30";
       case "thinking": return "bg-blue-500/20 text-blue-500 border-blue-500/30";
       case "confused": return "bg-purple-500/20 text-purple-500 border-purple-500/30";
+      case "surprised": return "bg-orange-500/20 text-orange-500 border-orange-500/30";
+      case "sad": return "bg-gray-500/20 text-gray-500 border-gray-500/30";
       default: return "bg-muted/50 text-muted-foreground border-muted";
+    }
+  };
+
+  const getEmotionIcon = () => {
+    const currentEmotion = isSpeaking ? syncedEmotion : emotion;
+    switch (currentEmotion) {
+      case "happy":
+      case "excited":
+        return <Heart size={14} weight="fill" />;
+      case "thinking":
+        return <Lightbulb size={14} weight="fill" />;
+      case "confused":
+      case "surprised":
+        return <SmileyXEyes size={14} weight="fill" />;
+      default:
+        return null;
     }
   };
 
@@ -431,8 +506,16 @@ export function VTuberAvatar({
               </Badge>
             )}
             <Badge className={getEmotionColor()}>
-              {emotion}
+              <span className="flex items-center gap-1.5">
+                {getEmotionIcon()}
+                {isSpeaking ? syncedEmotion : emotion}
+              </span>
             </Badge>
+            {isSpeaking && (
+              <Badge className="bg-primary/10 text-primary border-primary/20">
+                {Math.round(emotionIntensity * 100)}%
+              </Badge>
+            )}
           </div>
         </div>
 
