@@ -148,4 +148,8 @@ export interface VisionSettings {
   detectHighlights: boolean;
   gameContext?: string;
   confidenceThreshold: number;
+  commentaryStyle?: 'hype' | 'analytical' | 'casual' | 'educational' | 'comedic';
+  commentaryFrequency?: 'all' | 'highlights-only' | 'occasional';
+  includeGameplayTips?: boolean;
+  reactToActions?: boolean;
 }

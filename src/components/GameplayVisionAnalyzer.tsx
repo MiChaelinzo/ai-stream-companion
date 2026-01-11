@@ -24,6 +24,7 @@ export function GameplayVisionAnalyzer({
   const [currentAnalysis, setCurrentAnalysis] = useState<GameplayAnalysis | null>(null);
   const [recentAnalyses, setRecentAnalyses] = useState<GameplayAnalysis[]>([]);
   const [capturedFrame, setCapturedFrame] = useState<string | null>(null);
+  const [isGeneratingCommentary, setIsGeneratingCommentary] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -102,22 +103,32 @@ export function GameplayVisionAnalyzer({
     try {
       const base64Image = frameData.split(',')[1];
       
-      const prompt = (window.spark.llmPrompt as any)`You are an AI gameplay analyst. Analyze this gameplay screenshot and provide detailed insights.
+      const reactToActions = settings.reactToActions ?? true;
+      const includeGameplayTips = settings.includeGameplayTips ?? true;
+      
+      const prompt = (window.spark.llmPrompt as any)`You are an AI gameplay analyst powered by Gemini 3 Vision. Analyze this gameplay screenshot and provide detailed insights.
 
-Game Context: ${settings.gameContext || "Unknown game"}
+Game Context: ${settings.gameContext || "Unknown game - identify from the screenshot"}
 
-Analyze the image and provide a JSON response with:
+Analyze the image carefully and provide a JSON response with:
 {
   "game": "detected game name or genre",
-  "scene": "what's happening in this scene",
-  "objects": ["visible objects, UI elements, characters"],
-  "action": "current player action or game state",
-  "emotion": "emotional tone (exciting, tense, calm, chaotic)",
-  "suggestion": "optional gameplay tip or observation",
-  "highlights": ["notable moments worth commenting on"]
+  "scene": "detailed description of what's happening in this scene",
+  "objects": ["visible objects, UI elements, characters, weapons, items"],
+  "action": "current player action or game state - be specific",
+  "emotion": "emotional tone - choose from: exciting, tense, calm, chaotic, intense, triumphant, challenging",
+  ${includeGameplayTips ? '"suggestion": "optional gameplay tip, strategy advice, or tactical observation",' : ''}
+  ${reactToActions ? '"highlights": ["notable moments, impressive plays, or interesting events worth commenting on"]' : '"highlights": []'}
 }
 
-Be specific, concise, and focus on what would be interesting to stream viewers.`;
+Focus on:
+- What makes this moment interesting or noteworthy
+- Player performance and skill execution
+- Exciting or tense moments worth highlighting
+- Strategic decisions visible in the scene
+${includeGameplayTips ? '- Helpful tips that viewers would appreciate' : ''}
+
+Be specific, concise, and focus on what would be interesting to stream viewers. If this is a highlight-worthy moment, make it clear in the highlights array.`;
 
       const response = await window.spark.llm(prompt, "gpt-4o", true);
       const parsed = JSON.parse(response);
@@ -135,10 +146,24 @@ Be specific, concise, and focus on what would be interesting to stream viewers.`
         highlights: parsed.highlights || [],
       };
 
-      if (settings.autoCommentary && analysis.highlights && analysis.highlights.length > 0) {
+      const shouldGenerateCommentary = () => {
+        const frequency = settings.commentaryFrequency || 'highlights-only';
+        const hasHighlights = analysis.highlights && analysis.highlights.length > 0;
+        const isExciting = ['exciting', 'tense', 'chaotic', 'intense', 'triumphant'].includes(analysis.emotion.toLowerCase());
+        
+        if (frequency === 'all') return true;
+        if (frequency === 'highlights-only') return hasHighlights || isExciting;
+        if (frequency === 'occasional') return Math.random() > 0.5 || hasHighlights;
+        
+        return false;
+      };
+
+      if (settings.autoCommentary && shouldGenerateCommentary()) {
+        setIsGeneratingCommentary(true);
         const commentary = await generateCommentary(analysis);
+        setIsGeneratingCommentary(false);
         analysis.commentary = commentary;
-        if (onCommentaryGenerated) {
+        if (onCommentaryGenerated && commentary) {
           onCommentaryGenerated(commentary);
         }
       }
@@ -159,15 +184,35 @@ Be specific, concise, and focus on what would be interesting to stream viewers.`
 
   const generateCommentary = async (analysis: GameplayAnalysis): Promise<string> => {
     try {
-      const prompt = (window.spark.llmPrompt as any)`Generate a natural, enthusiastic stream commentary based on this gameplay analysis:
+      const commentaryStyle = settings.commentaryStyle || 'hype';
+      const includeGameplayTips = settings.includeGameplayTips ?? true;
+      
+      const styleDescriptions = {
+        hype: "high-energy, excited, use exclamations and dynamic language. React enthusiastically to action.",
+        analytical: "strategic, thoughtful, focus on tactics and decision-making. Explain why things work.",
+        casual: "relaxed, friendly, conversational. Like chatting with a friend watching the game.",
+        educational: "informative, teaching-focused, explain mechanics and strategies. Help viewers learn.",
+        comedic: "funny, lighthearted, find humor in moments. Make entertaining observations."
+      };
+
+      const tipsInstruction = includeGameplayTips 
+        ? "Optionally include a quick gameplay tip if relevant." 
+        : "Focus only on commentary, no tips.";
+
+      const prompt = (window.spark.llmPrompt as any)`Generate natural, engaging stream commentary based on this gameplay analysis:
 
 Game: ${analysis.game}
 Scene: ${analysis.scene}
 Action: ${analysis.action}
 Emotion: ${analysis.emotion}
-Highlights: ${analysis.highlights?.join(", ")}
+Highlights: ${analysis.highlights?.join(", ") || "None"}
+${analysis.suggestion ? `Suggestion: ${analysis.suggestion}` : ""}
 
-Create a brief (1-2 sentences) commentary that sounds natural for a live stream. Be excited, engaging, and conversational.`;
+Commentary Style: ${commentaryStyle} - Be ${styleDescriptions[commentaryStyle]}
+
+${tipsInstruction}
+
+Create a brief (1-2 sentences) commentary that sounds natural for a live stream. Match the ${commentaryStyle} style perfectly. Be engaging and authentic.`;
 
       const commentary = await window.spark.llm(prompt, "gpt-4o");
       return commentary.trim();
@@ -288,11 +333,17 @@ Create a brief (1-2 sentences) commentary that sounds natural for a live stream.
                   </div>
                 )}
                 {isAnalyzing && (
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 flex gap-2">
                     <Badge className="bg-red-500/20 text-red-500 border-red-500/30 animate-pulse">
                       <span className="w-2 h-2 rounded-full bg-red-500 mr-2" />
                       LIVE
                     </Badge>
+                    {isGeneratingCommentary && (
+                      <Badge className="bg-primary/20 text-primary border-primary/30 animate-pulse">
+                        <ChatCircle size={12} weight="fill" className="mr-1" />
+                        Generating...
+                      </Badge>
+                    )}
                   </div>
                 )}
               </div>

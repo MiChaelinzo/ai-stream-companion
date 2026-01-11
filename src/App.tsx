@@ -23,6 +23,7 @@ import { TwitchIntegrationGuide } from "@/components/TwitchIntegrationGuide";
 import { GameplayVisionAnalyzer } from "@/components/GameplayVisionAnalyzer";
 import { VisionSettingsConfig } from "@/components/VisionSettingsConfig";
 import { VisionStatsCard } from "@/components/VisionStatsCard";
+import { CommentaryHistory } from "@/components/CommentaryHistory";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -69,6 +70,10 @@ const defaultVisionSettings: VisionSettings = {
   detectHighlights: true,
   gameContext: '',
   confidenceThreshold: 0.7,
+  commentaryStyle: 'hype',
+  commentaryFrequency: 'highlights-only',
+  includeGameplayTips: true,
+  reactToActions: true,
 };
 
 function App() {
@@ -670,6 +675,10 @@ Return as JSON:
                 settings={visionSettings || defaultVisionSettings}
                 onAnalysisComplete={handleGameplayAnalysis}
                 onCommentaryGenerated={handleVisionCommentary}
+              />
+              <CommentaryHistory 
+                analyses={gameplayAnalyses || []}
+                onClear={() => setGameplayAnalyses(() => [])}
               />
             </TabsContent>
 
