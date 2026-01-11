@@ -20,6 +20,9 @@ import { ChatSimulation } from "@/components/ChatSimulation";
 import { VTuberAvatar } from "@/components/VTuberAvatar";
 import { SystemStatusCard } from "@/components/SystemStatusCard";
 import { TwitchIntegrationGuide } from "@/components/TwitchIntegrationGuide";
+import { GameplayVisionAnalyzer } from "@/components/GameplayVisionAnalyzer";
+import { VisionSettingsConfig } from "@/components/VisionSettingsConfig";
+import { VisionStatsCard } from "@/components/VisionStatsCard";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -28,9 +31,11 @@ import {
   PlatformType,
   StreamSettings as StreamSettingsType,
   ResponseTemplate,
-  ChatCommand
+  ChatCommand,
+  VisionSettings,
+  GameplayAnalysis
 } from "@/lib/types";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -57,6 +62,15 @@ const defaultStreamSettings: StreamSettingsType = {
   maxMessagesPerMinute: 10,
 };
 
+const defaultVisionSettings: VisionSettings = {
+  enabled: false,
+  analysisInterval: 15,
+  autoCommentary: true,
+  detectHighlights: true,
+  gameContext: '',
+  confidenceThreshold: 0.7,
+};
+
 function App() {
   const [personality, setPersonality] = useKV<AIPersonality>("ai-personality", defaultPersonality);
   const [messages, setMessages] = useKV<ChatMessage[]>("chat-messages", []);
@@ -67,6 +81,8 @@ function App() {
   const [liveMessages, setLiveMessages] = useKV<ChatMessage[]>("live-messages", []);
   const [templates, setTemplates] = useKV<ResponseTemplate[]>("response-templates", []);
   const [commands, setCommands] = useKV<ChatCommand[]>("chat-commands", []);
+  const [visionSettings, setVisionSettings] = useKV<VisionSettings>("vision-settings", defaultVisionSettings);
+  const [gameplayAnalyses, setGameplayAnalyses] = useKV<GameplayAnalysis[]>("gameplay-analyses", []);
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResponses, setGeneratedResponses] = useState<string[]>([]);
@@ -408,6 +424,36 @@ Return as JSON:
     uniqueViewers: new Set((liveMessages || []).filter(m => m.username).map(m => m.username)).size,
   };
 
+  const handleGameplayAnalysis = (analysis: GameplayAnalysis) => {
+    setGameplayAnalyses((current) => [analysis, ...(current || [])].slice(0, 50));
+    
+    const currentVisionSettings = visionSettings || defaultVisionSettings;
+    if (currentVisionSettings.detectHighlights && analysis.highlights && analysis.highlights.length > 0) {
+      toast.success(`🎮 Highlight detected: ${analysis.highlights[0]}`);
+    }
+  };
+
+  const handleVisionCommentary = (commentary: string) => {
+    setAvatarSpeaking(true);
+    setCurrentSpeechText(commentary);
+    setAvatarEmotion("excited");
+
+    const commentaryMessage: ChatMessage = {
+      id: Date.now().toString() + '_vision',
+      content: `🎮 ${commentary}`,
+      sender: 'ai',
+      timestamp: new Date(),
+      platform: 'simulator',
+    };
+    setLiveMessages((current) => [...(current || []), commentaryMessage]);
+
+    setTimeout(() => {
+      setAvatarSpeaking(false);
+      setCurrentSpeechText("");
+      setAvatarEmotion("neutral");
+    }, 3000);
+  };
+
   const handleSimulateMessage = async (content: string, sentiment: 'positive' | 'neutral' | 'negative') => {
     const usernames = ['Alex', 'Jordan', 'Casey', 'Morgan', 'Taylor', 'Riley', 'Drew', 'Parker', 'Avery', 'Quinn'];
     const username = usernames[Math.floor(Math.random() * usernames.length)];
@@ -552,10 +598,14 @@ Return as JSON:
 
         <main className="container mx-auto px-6 py-8">
           <Tabs defaultValue="setup" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-12 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-13 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
               <TabsTrigger value="setup" className="gap-2">
                 <Key size={18} weight="bold" />
                 <span className="hidden sm:inline">Setup</span>
+              </TabsTrigger>
+              <TabsTrigger value="vision" className="gap-2">
+                <Eye size={18} weight="bold" />
+                <span className="hidden sm:inline">Vision</span>
               </TabsTrigger>
               <TabsTrigger value="monitor" className="gap-2">
                 <Broadcast size={18} weight="bold" />
@@ -605,6 +655,22 @@ Return as JSON:
 
             <TabsContent value="setup" className="space-y-6">
               <TwitchIntegrationGuide />
+            </TabsContent>
+
+            <TabsContent value="vision" className="space-y-6">
+              <VisionStatsCard 
+                analyses={gameplayAnalyses || []}
+                isActive={visionSettings?.enabled || false}
+              />
+              <VisionSettingsConfig 
+                settings={visionSettings || defaultVisionSettings}
+                onUpdate={setVisionSettings}
+              />
+              <GameplayVisionAnalyzer 
+                settings={visionSettings || defaultVisionSettings}
+                onAnalysisComplete={handleGameplayAnalysis}
+                onCommentaryGenerated={handleVisionCommentary}
+              />
             </TabsContent>
 
             <TabsContent value="monitor" className="space-y-6">

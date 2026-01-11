@@ -127,3 +127,25 @@ export interface AnalyticsData {
   messagesPerHour: { hour: string; count: number }[];
   responseRating: number;
 }
+
+export interface GameplayAnalysis {
+  id: string;
+  timestamp: Date;
+  game: string;
+  scene: string;
+  objects: string[];
+  action: string;
+  emotion: string;
+  suggestion?: string;
+  commentary?: string;
+  highlights?: string[];
+}
+
+export interface VisionSettings {
+  enabled: boolean;
+  analysisInterval: number;
+  autoCommentary: boolean;
+  detectHighlights: boolean;
+  gameContext?: string;
+  confidenceThreshold: number;
+}

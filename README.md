@@ -11,6 +11,7 @@ An intelligent AI personality management dashboard for Twitch and YouTube stream
 This project showcases **Google Gemini 3's** capabilities in real-time streaming applications:
 - ⚡ **Low-latency responses** using Gemini 3 Flash for live chat
 - 🧠 **Advanced reasoning** with Gemini 3 Pro for sentiment analysis
+- 👁️ **Vision API integration** for real-time gameplay analysis (NEW!)
 - 🎭 **Personality-driven AI** that maintains consistent character traits
 - 📊 **Deep context understanding** for engagement analytics
 - 🎨 **Creative generation** for polls, questions, and activities
@@ -23,6 +24,7 @@ This project showcases **Google Gemini 3's** capabilities in real-time streaming
 
 ### ✅ Fully Functional (No Backend Required)
 - **AI Personality Configuration** - 6 presets + custom personalities powered by Gemini 3
+- **🎮 Gameplay Vision Analysis** - Real-time screen capture with AI commentary (NEW!)
 - **Chat Simulation** - Test with realistic generated chat messages
 - **AI Response Generation** - Powered by Gemini 3 Flash for <2s latency
 - **Sentiment Analysis** - Real-time emotion and engagement tracking via Gemini 3 Pro
@@ -46,17 +48,23 @@ This project showcases **Google Gemini 3's** capabilities in real-time streaming
    - Choose a preset or customize
    - Set tone, interests, and style
 
-2. **Test Responses**
+2. **🎮 Test Gameplay Vision (NEW!)**
+   - Go to Vision tab
+   - Enable vision analysis
+   - Click "Start Analysis" to capture screen
+   - Watch AI analyze and comment on gameplay
+
+3. **Test Chat Responses**
    - Use Chat Simulator tab
    - Try different scenarios
    - Refine personality
 
-3. **Enable Chat Simulation**
+4. **Enable Chat Simulation**
    - Go to Monitor tab
    - Toggle "Auto-generate messages"
    - Watch AI respond in real-time
 
-4. **Customize Avatar**
+5. **Customize Avatar**
    - Select skin in Personality tab
    - Watch avatar react to chat
    - See lip-sync in action

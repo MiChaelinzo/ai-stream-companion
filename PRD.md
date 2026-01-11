@@ -94,6 +94,25 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Progression**: Input message/scenario → Gemini 3 analyzes context and personality → Generate 2-3 response options → User can regenerate or approve
 - **Success criteria**: Multiple quality response options generated within 2 seconds using Gemini 3 Flash
 
+### Gemini 3 Vision Gameplay Analysis (NEW)
+- **Functionality**: Real-time screen capture and AI analysis of gameplay using Gemini 3 Vision API to understand game state, player actions, and notable moments
+- **Purpose**: Enable context-aware AI commentary by "seeing" what's happening on screen, detecting highlights, and generating engaging stream commentary
+- **Trigger**: User enables vision analysis and clicks "Start Analysis" to capture screen
+- **Progression**: Start screen capture → Capture frames at intervals → Vision API analyzes gameplay → Detect game, scene, actions, emotions → Generate commentary → Highlight detection → Display insights
+- **Success criteria**: Accurate game detection (85%+), natural commentary generation, highlight detection, minimal performance impact, 2-4s analysis latency
+
+**Vision Features**:
+- **Screen Capture**: Browser-native screen sharing API for gameplay capture
+- **Game Detection**: Identify game title, genre, and current scene
+- **Action Recognition**: Understand player actions, UI elements, game state
+- **Emotion Detection**: Determine gameplay intensity (exciting, tense, calm, chaotic)
+- **Auto Commentary**: Generate natural stream commentary based on visual analysis
+- **Highlight Detection**: Flag exciting moments worth clipping
+- **Strategic Suggestions**: Provide gameplay tips based on visual context
+- **Multi-Game Support**: Works with any game without manual configuration
+- **Configurable Analysis**: 5-60 second intervals, confidence thresholds
+- **Vision Stats**: Track analyses, highlights, commentaries, games detected
+
 ### Activity & Poll Creator
 - **Functionality**: AI suggests and generates polls, questions, and chat activities
 - **Purpose**: Keep viewers engaged during gameplay with minimal streamer effort
