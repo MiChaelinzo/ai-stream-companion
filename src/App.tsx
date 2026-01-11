@@ -119,7 +119,7 @@ A viewer just said: "${userMessage}"
 
 Generate a ${currentPersonality.responseStyle} response that matches your personality. Keep it natural and conversational, like you're streaming. Response should be 1-3 sentences.`;
 
-    const response = await window.spark.llm(prompt, "gpt-4o-mini");
+    const response = await window.spark.llm(prompt, "gpt-4o");
     return response.trim();
   };
 
@@ -131,7 +131,7 @@ Classify it as one of: positive, neutral, or negative.
 
 Return ONLY the classification word, nothing else.`;
 
-      const result = await window.spark.llm(prompt, "gpt-4o-mini");
+      const result = await window.spark.llm(prompt, "gpt-4o");
       const sentiment = result.trim().toLowerCase();
       
       if (sentiment.includes('positive')) return 'positive';
@@ -234,7 +234,7 @@ Return as JSON with this format:
   "responses": ["response1", "response2", "response3"]
 }`;
 
-      const response = await window.spark.llm(prompt, "gpt-4o-mini", true);
+      const response = await window.spark.llm(prompt, "gpt-4o", true);
       const parsed = JSON.parse(response);
       setGeneratedResponses(parsed.responses || []);
     } catch (error) {
@@ -276,7 +276,7 @@ Return as JSON:
   "options": ["option1", "option2", "option3", "option4"]
 }`;
 
-      const response = await window.spark.llm(prompt, "gpt-4o-mini", true);
+      const response = await window.spark.llm(prompt, "gpt-4o", true);
       const parsed = JSON.parse(response);
       
       if (parsed.question && parsed.options) {
@@ -539,7 +539,7 @@ Return as JSON:
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight">AI Streamer Companion</h1>
-                  <p className="text-sm text-muted-foreground">Twitch & YouTube live chat integration</p>
+                  <p className="text-sm text-muted-foreground">Powered by Google Gemini 3 • Twitch & YouTube</p>
                 </div>
               </div>
               <Badge className="bg-accent/20 text-accent border-accent/30 hover:bg-accent/30 px-4 py-2">

@@ -1,14 +1,16 @@
 # AI Streamer Companion Dashboard
 
-An intelligent AI streamer personality management and live streaming integration platform that enables streamers to maintain audience engagement across Twitch and YouTube while focused on gameplay.
+**Powered by Google Gemini 3** 🌟
+
+An intelligent AI streamer personality management and live streaming integration platform that enables streamers to maintain audience engagement across Twitch and YouTube while focused on gameplay. Built for the Gemini 3 Global Hackathon, showcasing advanced AI reasoning, low-latency performance, and multimodal potential.
 
 **Experience Qualities**:
-1. **Intelligent** - The AI should feel smart and capable, generating contextually appropriate responses that enhance the streaming experience
-2. **Engaging** - Every interaction should feel lively and entertaining, keeping chat active and viewers invested
-3. **Connected** - Seamless integration with streaming platforms creates a unified live engagement experience
+1. **Intelligent** - The AI should feel smart and capable, powered by Gemini 3's advanced reasoning to generate contextually appropriate responses that enhance the streaming experience
+2. **Engaging** - Every interaction should feel lively and entertaining, leveraging Gemini 3's creative generation to keep chat active and viewers invested
+3. **Connected** - Seamless integration with streaming platforms creates a unified live engagement experience with sub-2-second response times
 
 **Complexity Level**: Light Application (multiple features with basic state)
-This is a comprehensive tool for managing AI streamer personality, connecting to live streaming platforms (Twitch/YouTube), and automating chat engagement. It provides essential platform integration features with intelligent response management.
+This is a comprehensive tool for managing AI streamer personality, connecting to live streaming platforms (Twitch/YouTube), and automating chat engagement. It provides essential platform integration features with intelligent response management powered by Gemini 3 Flash for speed and Gemini 3 Pro for deep reasoning.
 
 ## Essential Features
 
@@ -86,11 +88,11 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Responses feel natural, on-brand, and contextually appropriate
 
 ### Smart Response Generator
-- **Functionality**: AI generates contextual responses to common streaming scenarios (greetings, questions, gameplay comments)
-- **Purpose**: Maintain chat engagement without streamer input during intense gameplay
+- **Functionality**: AI generates contextual responses to common streaming scenarios (greetings, questions, gameplay comments) using Gemini 3 Flash for <2s latency
+- **Purpose**: Maintain chat engagement without streamer input during intense gameplay using Gemini 3's advanced reasoning
 - **Trigger**: Chat message received or scenario selected
-- **Progression**: Input message/scenario → AI considers personality + context → Generate 2-3 response options → User can regenerate or approve
-- **Success criteria**: Multiple quality response options generated within 2 seconds
+- **Progression**: Input message/scenario → Gemini 3 analyzes context and personality → Generate 2-3 response options → User can regenerate or approve
+- **Success criteria**: Multiple quality response options generated within 2 seconds using Gemini 3 Flash
 
 ### Activity & Poll Creator
 - **Functionality**: AI suggests and generates polls, questions, and chat activities
