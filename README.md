@@ -161,8 +161,17 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
   - Heroku, Railway, AWS, DigitalOcean guides
   - Security best practices
   - Rate limiting & error handling
-  - Troubleshooting guide
   - Architecture diagrams
+
+#### Troubleshooting
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** 🔧
+  - Common setup issues and solutions
+  - Voice synthesis problems
+  - Vision/screen capture fixes
+  - Platform connection errors
+  - Performance optimization tips
+  - Browser compatibility guide
+  - Debug mode and diagnostic tools
 
 #### Platform-Specific Guides
 - **[PLATFORM_GUIDE.md](./PLATFORM_GUIDE.md)** 🔌
