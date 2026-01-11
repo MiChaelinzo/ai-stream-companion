@@ -48,6 +48,10 @@ export function VoiceSettingsConfig({
     onUpdate({ ...settings, voiceName });
   };
 
+  const handleSSMLToggle = (enableSSML: boolean) => {
+    onUpdate({ ...settings, enableSSML });
+  };
+
   if (!isSupported) {
     return (
       <Card className="border-destructive/50 bg-destructive/5">
@@ -115,6 +119,22 @@ export function VoiceSettingsConfig({
             id="voice-enabled"
             checked={settings.enabled}
             onCheckedChange={handleToggle}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label htmlFor="ssml-enabled" className="text-base font-medium">
+              Enable SSML Support
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Advanced speech control with pauses, emphasis, and pitch
+            </p>
+          </div>
+          <Switch
+            id="ssml-enabled"
+            checked={settings.enableSSML ?? true}
+            onCheckedChange={handleSSMLToggle}
           />
         </div>
 

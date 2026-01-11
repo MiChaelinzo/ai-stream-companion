@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { parseSSML, SSMLSegment } from '@/lib/ssml-parser';
 
 export type VoiceGender = 'female' | 'male' | 'neutral';
 export type VoicePitch = 'low' | 'normal' | 'high';
@@ -11,6 +12,7 @@ export interface VoiceSettings {
   speed: VoiceSpeed;
   volume: number;
   voiceName?: string;
+  enableSSML?: boolean;
 }
 
 export interface SpeechState {
@@ -18,6 +20,8 @@ export interface SpeechState {
   isLoading: boolean;
   currentText: string;
   progress: number;
+  currentSegment?: number;
+  totalSegments?: number;
 }
 
 const DEFAULT_SETTINGS: VoiceSettings = {
@@ -26,6 +30,7 @@ const DEFAULT_SETTINGS: VoiceSettings = {
   pitch: 'normal',
   speed: 'normal',
   volume: 0.8,
+  enableSSML: true,
 };
 
 const PITCH_VALUES = {
@@ -105,24 +110,15 @@ export function useSpeechSynthesis(settings: VoiceSettings = DEFAULT_SETTINGS) {
     return englishVoice || availableVoices[0];
   }, [availableVoices]);
 
-  const speak = useCallback(
-    (text: string, onPhonemeChange?: (phoneme: string) => void) => {
-      if (!isSupported || !settings.enabled || !text.trim()) {
-        return Promise.resolve();
-      }
-
+  const speakSegment = useCallback(
+    (segment: SSMLSegment, basePitch: number, baseRate: number, baseVolume: number, onPhonemeChange?: (phoneme: string) => void) => {
       return new Promise<void>((resolve, reject) => {
-        if (speechSynthesisRef.current) {
-          speechSynthesisRef.current.cancel();
+        if (!segment.text.trim()) {
+          resolve();
+          return;
         }
 
-        setSpeechState(prev => ({
-          ...prev,
-          isLoading: true,
-          currentText: text,
-        }));
-
-        const utterance = new SpeechSynthesisUtterance(text);
+        const utterance = new SpeechSynthesisUtterance(segment.text);
         utteranceRef.current = utterance;
 
         const voice = selectVoice(settings.gender, settings.voiceName);
@@ -130,43 +126,52 @@ export function useSpeechSynthesis(settings: VoiceSettings = DEFAULT_SETTINGS) {
           utterance.voice = voice;
         }
 
-        utterance.pitch = PITCH_VALUES[settings.pitch];
-        utterance.rate = SPEED_VALUES[settings.speed];
-        utterance.volume = settings.volume;
+        let pitch = basePitch;
+        let rate = baseRate;
+        let volume = baseVolume;
+
+        if (segment.emphasis) {
+          const emphasisMap = {
+            strong: { pitch: 1.2, rate: 0.9, volume: 1.2 },
+            moderate: { pitch: 1.1, rate: 0.95, volume: 1.1 },
+            reduced: { pitch: 0.9, rate: 1.1, volume: 0.8 },
+            none: { pitch: 1.0, rate: 1.0, volume: 1.0 },
+          };
+          const emphasis = emphasisMap[segment.emphasis];
+          pitch *= emphasis.pitch;
+          rate *= emphasis.rate;
+          volume *= emphasis.volume;
+        }
+
+        if (segment.pitch !== undefined) {
+          pitch = Math.max(0, Math.min(2, segment.pitch));
+        }
+        if (segment.rate !== undefined) {
+          rate = Math.max(0.1, Math.min(10, segment.rate));
+        }
+        if (segment.volume !== undefined) {
+          volume = Math.max(0, Math.min(1, segment.volume));
+        }
+
+        utterance.pitch = pitch;
+        utterance.rate = rate;
+        utterance.volume = volume;
 
         utterance.onstart = () => {
-          setSpeechState(prev => ({
-            ...prev,
-            isSpeaking: true,
-            isLoading: false,
-            progress: 0,
-          }));
           if (onPhonemeChange) {
             onPhonemeChange('speech');
           }
         };
 
         utterance.onboundary = (event) => {
-          const progress = event.charIndex / text.length;
-          setSpeechState(prev => ({
-            ...prev,
-            progress: progress * 100,
-          }));
-
           if (onPhonemeChange && event.name === 'word') {
-            const currentWord = text.substring(event.charIndex, event.charIndex + 10).split(' ')[0];
+            const currentWord = segment.text.substring(event.charIndex, event.charIndex + 10).split(' ')[0];
             const phoneme = mapWordToPhoneme(currentWord);
             onPhonemeChange(phoneme);
           }
         };
 
         utterance.onend = () => {
-          setSpeechState({
-            isSpeaking: false,
-            isLoading: false,
-            currentText: '',
-            progress: 100,
-          });
           if (onPhonemeChange) {
             onPhonemeChange('silence');
           }
@@ -175,12 +180,6 @@ export function useSpeechSynthesis(settings: VoiceSettings = DEFAULT_SETTINGS) {
 
         utterance.onerror = (error) => {
           console.error('Speech synthesis error:', error);
-          setSpeechState({
-            isSpeaking: false,
-            isLoading: false,
-            currentText: '',
-            progress: 0,
-          });
           if (onPhonemeChange) {
             onPhonemeChange('silence');
           }
@@ -190,7 +189,90 @@ export function useSpeechSynthesis(settings: VoiceSettings = DEFAULT_SETTINGS) {
         speechSynthesisRef.current?.speak(utterance);
       });
     },
-    [isSupported, settings, selectVoice]
+    [settings, selectVoice]
+  );
+
+  const speak = useCallback(
+    async (text: string, onPhonemeChange?: (phoneme: string) => void) => {
+      if (!isSupported || !settings.enabled || !text.trim()) {
+        return Promise.resolve();
+      }
+
+      if (speechSynthesisRef.current) {
+        speechSynthesisRef.current.cancel();
+      }
+
+      setSpeechState(prev => ({
+        ...prev,
+        isLoading: true,
+        currentText: text,
+        progress: 0,
+      }));
+
+      try {
+        const parseResult = settings.enableSSML ? parseSSML(text) : { segments: [{ text }], plainText: text, hasSSML: false };
+        const segments = parseResult.segments;
+        
+        setSpeechState(prev => ({
+          ...prev,
+          isSpeaking: true,
+          isLoading: false,
+          totalSegments: segments.length,
+          currentSegment: 0,
+        }));
+
+        const basePitch = PITCH_VALUES[settings.pitch];
+        const baseRate = SPEED_VALUES[settings.speed];
+        const baseVolume = settings.volume;
+
+        for (let i = 0; i < segments.length; i++) {
+          const segment = segments[i];
+          
+          setSpeechState(prev => ({
+            ...prev,
+            currentSegment: i,
+            progress: (i / segments.length) * 100,
+          }));
+
+          if (segment.pause && segment.pause > 0) {
+            if (onPhonemeChange) {
+              onPhonemeChange('silence');
+            }
+            await new Promise(resolve => setTimeout(resolve, segment.pause));
+          }
+
+          if (segment.text.trim()) {
+            await speakSegment(segment, basePitch, baseRate, baseVolume, onPhonemeChange);
+          }
+        }
+
+        setSpeechState({
+          isSpeaking: false,
+          isLoading: false,
+          currentText: '',
+          progress: 100,
+          currentSegment: segments.length,
+          totalSegments: segments.length,
+        });
+        
+        if (onPhonemeChange) {
+          onPhonemeChange('silence');
+        }
+      } catch (error) {
+        console.error('Speech synthesis error:', error);
+        setSpeechState({
+          isSpeaking: false,
+          isLoading: false,
+          currentText: '',
+          progress: 0,
+        });
+        if (onPhonemeChange) {
+          onPhonemeChange('silence');
+        }
+        throw error;
+      }
+    },
+    [isSupported, settings, speakSegment]
   );
 
   const stop = useCallback(() => {

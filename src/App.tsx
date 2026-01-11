@@ -27,6 +27,9 @@ import { CommentaryHistory } from "@/components/CommentaryHistory";
 import { CommentarySyncMonitor } from "@/components/CommentarySyncMonitor";
 import { VoiceSettingsConfig } from "@/components/VoiceSettingsConfig";
 import { VoiceActivityMonitor } from "@/components/VoiceActivityMonitor";
+import { SSMLEditor } from "@/components/SSMLEditor";
+import { AutoSSMLEnhancer } from "@/components/AutoSSMLEnhancer";
+import { SSMLInfoCard } from "@/components/SSMLInfoCard";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -86,6 +89,7 @@ const defaultVoiceSettings: VoiceSettings = {
   pitch: 'normal',
   speed: 'normal',
   volume: 0.8,
+  enableSSML: true,
 };
 
 function App() {
@@ -618,6 +622,31 @@ Return as JSON:
     }
   };
 
+  const enhanceTextWithSSML = async (text: string, sentiment: 'positive' | 'neutral' | 'negative'): Promise<string> => {
+    try {
+      const prompt = (window.spark.llmPrompt as any)`You are an SSML expert. Given a text and its sentiment, enhance it with SSML tags for more expressive speech.
+
+Text: "${text}"
+Sentiment: ${sentiment}
+
+Guidelines:
+- Add <break time="Xms"/> for natural pauses (use 300-500ms for dramatic pauses)
+- Add <emphasis level="strong|moderate|reduced"> for important words
+- Add <prosody pitch="high|low" rate="fast|slow"> for emotional expression
+- For positive sentiment: use higher pitch, moderate emphasis on positive words, shorter pauses
+- For negative sentiment: use lower pitch, slower rate, longer pauses
+- For neutral sentiment: use balanced prosody, natural pauses
+
+Return ONLY the SSML-enhanced text, no explanations.`;
+
+      const enhanced = await window.spark.llm(prompt, "gpt-4o");
+      return enhanced.trim();
+    } catch (error) {
+      console.error('Failed to enhance text with SSML:', error);
+      return text;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,oklch(0.65_0.25_300_/_0.1),transparent_50%)] pointer-events-none" />
@@ -716,6 +745,29 @@ Return as JSON:
                 onTestVoice={handleTestVoice}
                 isSupported={isSupported}
               />
+              <SSMLInfoCard />
+              <SSMLEditor
+                onSpeak={async (text) => {
+                  setAvatarSpeaking(true);
+                  setAvatarEmotion("happy");
+                  setCurrentSpeechText(text);
+                  await speak(text, setAvatarCurrentPhoneme);
+                  setTimeout(() => {
+                    setAvatarSpeaking(false);
+                    setAvatarEmotion("neutral");
+                    setCurrentSpeechText("");
+                  }, 500);
+                }}
+                isSpeaking={avatarSpeaking}
+                onStop={stop}
+                ssmlEnabled={currentVoiceSettings.enableSSML ?? true}
+                onToggleSSML={(enabled) => setVoiceSettings((current) => ({ 
+                  ...currentVoiceSettings,
+                  ...current,
+                  enableSSML: enabled 
+                }))}
+              />
+              <AutoSSMLEnhancer onEnhance={enhanceTextWithSSML} />
             </TabsContent>
 
             <TabsContent value="vision" className="space-y-6">
