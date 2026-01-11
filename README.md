@@ -25,6 +25,7 @@ This project showcases **Google Gemini 3's** capabilities in real-time streaming
 ### ✅ Fully Functional (No Backend Required)
 - **AI Personality Configuration** - 6 presets + custom personalities powered by Gemini 3
 - **🎮 Gameplay Vision Analysis** - Real-time screen capture with AI commentary (NEW!)
+- **🔊 Voice Synthesis (TTS)** - Avatar speaks audibly with configurable voice (NEW!)
 - **Chat Simulation** - Test with realistic generated chat messages
 - **AI Response Generation** - Powered by Gemini 3 Flash for <2s latency
 - **Sentiment Analysis** - Real-time emotion and engagement tracking via Gemini 3 Pro
@@ -54,20 +55,27 @@ This project showcases **Google Gemini 3's** capabilities in real-time streaming
    - Click "Start Analysis" to capture screen
    - Watch AI analyze and comment on gameplay
 
-3. **Test Chat Responses**
+3. **🔊 Configure Voice (NEW!)**
+   - Go to Voice tab
+   - Enable voice synthesis
+   - Choose gender, pitch, speed, and volume
+   - Click "Test Voice" to preview
+   - Avatar now speaks all responses!
+
+4. **Test Chat Responses**
    - Use Chat Simulator tab
    - Try different scenarios
    - Refine personality
 
-4. **Enable Chat Simulation**
+5. **Enable Chat Simulation**
    - Go to Monitor tab
    - Toggle "Auto-generate messages"
-   - Watch AI respond in real-time
+   - Watch AI respond in real-time with voice
 
-5. **Customize Avatar**
+6. **Customize Avatar**
    - Select skin in Personality tab
    - Watch avatar react to chat
-   - See lip-sync in action
+   - See lip-sync in action with voice
 
 ## 📚 Documentation
 
@@ -88,6 +96,7 @@ These guides include:
 
 ### 📖 Other Documentation
 
+- **[VOICE_SYNTHESIS_GUIDE.md](./VOICE_SYNTHESIS_GUIDE.md)** - 🔊 Complete voice/TTS setup and configuration
 - **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Feature overview and backend integration guide
 - **[PLATFORM_GUIDE.md](./PLATFORM_GUIDE.md)** - Platform connection details
 - **[PRD.md](./PRD.md)** - Complete feature specifications

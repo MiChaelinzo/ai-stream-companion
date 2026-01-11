@@ -157,11 +157,31 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Rating system integrated in chat UI, scores persist, and analytics show response quality trends over time
 
 ### VTuber Avatar Model
-- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, reactive movements synchronized to AI activity, realistic phoneme-based lip-sync for speech animation, advanced emotion-to-commentary synchronization, and customizable visual skins for personalized appearance
-- **Purpose**: Provide a visual personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations, natural speech movements, intelligent emotion transitions synced to commentary content, and unique visual styles matching the streamer's brand
-- **Trigger**: Avatar automatically appears in the Monitor tab and animates continuously when monitoring or simulation is active, skin selection accessed via Personality configuration
-- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Receives commentary text with sentiment → Analyzes text for emotional keywords and patterns → Generates synchronized emotion timeline → Converts text to phoneme sequence → Coordinates emotion transitions with lip movements → Reacts with intensity-based expressions (happy, excited, thinking, confused, surprised, sad) → Mouth morphs through phoneme shapes with emotion-amplified intensity → Headphone speakers pulse with speaking tension → Eyes and head movements reflect emotional state → Smooth transitions between emotional states → Returns to neutral when idle → User selects skin from gallery → Avatar instantly updates with new color palette and style
-- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, realistic phoneme-accurate mouth sync during AI responses with proper mouth shapes for each sound, emotion changes based on commentary content analysis (not just sentiment), smooth emotion transitions with intensity curves, phoneme intensity boosted by active emotion (excited = 1.4x, sad = 0.8x), real-time sync indicators showing current phoneme and emotion, instant skin switching without visual glitches, distinctive character design with headphones and anime-inspired aesthetic
+- **Functionality**: 3D animated avatar that appears in the stream interface with automatic idle animations, emotional expressions, reactive movements synchronized to AI activity, realistic phoneme-based lip-sync for speech animation, advanced emotion-to-commentary synchronization, text-to-speech voice synthesis for audible responses, and customizable visual skins for personalized appearance
+- **Purpose**: Provide a visual and audible personality representation similar to VTuber models (like Neuro-sama) that brings the AI companion to life with expressive animations, natural speech movements, realistic voice output, intelligent emotion transitions synced to commentary content, and unique visual styles matching the streamer's brand
+- **Trigger**: Avatar automatically appears in the Monitor tab and animates continuously when monitoring or simulation is active, speaks when AI generates responses, skin selection accessed via Personality configuration
+- **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Receives commentary text with sentiment → Analyzes text for emotional keywords and patterns → Generates synchronized emotion timeline → Converts text to phoneme sequence → Text-to-speech engine speaks the text audibly → Coordinates emotion transitions with lip movements and audio → Reacts with intensity-based expressions (happy, excited, thinking, confused, surprised, sad) → Mouth morphs through phoneme shapes synchronized with actual speech → Headphone speakers pulse with speaking tension → Eyes and head movements reflect emotional state → Smooth transitions between emotional states → Returns to neutral when idle → User selects skin from gallery → Avatar instantly updates with new color palette and style
+- **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, realistic phoneme-accurate mouth sync during AI responses with proper mouth shapes for each sound, emotion changes based on commentary content analysis (not just sentiment), smooth emotion transitions with intensity curves, phoneme intensity boosted by active emotion (excited = 1.4x, sad = 0.8x), real-time sync indicators showing current phoneme and emotion, instant skin switching without visual glitches, clear and natural voice output synchronized with visuals, configurable voice settings (gender, pitch, speed, volume), distinctive character design with headphones and anime-inspired aesthetic
+
+### Voice Synthesis (Text-to-Speech) (NEW)
+- **Functionality**: Browser-native speech synthesis that converts AI-generated text responses into audible speech with configurable voice settings including gender, pitch, speed, volume, and specific voice selection
+- **Purpose**: Make the avatar speak out loud, creating a more immersive and engaging streaming companion experience similar to Neuro-sama where viewers can hear the AI's personality through voice
+- **Trigger**: Automatically triggered when AI generates a response (chat reply, vision commentary, simulated message response), or manually via voice test button
+- **Progression**: AI generates text response → Voice synthesis enabled check → Text passed to speech engine → Voice configured (gender, pitch, speed, volume) → Audio playback begins → Phoneme detection for lip-sync → Progress tracking (0-100%) → Speech completes → Avatar returns to silent state
+- **Success criteria**: Natural-sounding voice output, accurate synchronization between audio and lip movements, configurable voice characteristics that persist, clear voice activity indicators, sub-500ms latency from text to speech start, smooth integration with existing emotion and phoneme systems
+
+**Voice Synthesis Features**:
+- **Browser Compatibility**: Web Speech API support detection with graceful fallback
+- **Voice Selection**: Auto-select best voice based on gender preference or manually choose from available voices
+- **Gender Options**: Female, Male, Neutral voice presets with intelligent voice matching
+- **Pitch Control**: Low (0.8x), Normal (1.0x), High (1.3x) pitch adjustment
+- **Speed Control**: Slow (0.8x), Normal (1.0x), Fast (1.3x) speech rate
+- **Volume Control**: 0-100% volume slider with visual indicator
+- **Voice Activity Monitor**: Real-time indicator showing speaking status, progress bar, current text being spoken
+- **Phoneme Integration**: Speech boundary events trigger phoneme changes for accurate lip-sync
+- **Test Function**: Preview voice with sample phrases to test settings before going live
+- **Persistence**: Voice settings saved and restored across sessions
+- **Multi-trigger**: Works with chat responses, vision commentary, and simulated messages
 
 **Phoneme Lip-Sync System**:
 - **Phoneme Detection**: Analyzes AI response text and converts to phoneme sequence with timing

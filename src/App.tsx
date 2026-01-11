@@ -25,6 +25,8 @@ import { VisionSettingsConfig } from "@/components/VisionSettingsConfig";
 import { VisionStatsCard } from "@/components/VisionStatsCard";
 import { CommentaryHistory } from "@/components/CommentaryHistory";
 import { CommentarySyncMonitor } from "@/components/CommentarySyncMonitor";
+import { VoiceSettingsConfig } from "@/components/VoiceSettingsConfig";
+import { VoiceActivityMonitor } from "@/components/VoiceActivityMonitor";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -37,7 +39,8 @@ import {
   VisionSettings,
   GameplayAnalysis
 } from "@/lib/types";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye } from "@phosphor-icons/react";
+import { useSpeechSynthesis, VoiceSettings } from "@/hooks/use-speech-synthesis";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -77,6 +80,14 @@ const defaultVisionSettings: VisionSettings = {
   reactToActions: true,
 };
 
+const defaultVoiceSettings: VoiceSettings = {
+  enabled: true,
+  gender: 'female',
+  pitch: 'normal',
+  speed: 'normal',
+  volume: 0.8,
+};
+
 function App() {
   const [personality, setPersonality] = useKV<AIPersonality>("ai-personality", defaultPersonality);
   const [messages, setMessages] = useKV<ChatMessage[]>("chat-messages", []);
@@ -89,6 +100,7 @@ function App() {
   const [commands, setCommands] = useKV<ChatCommand[]>("chat-commands", []);
   const [visionSettings, setVisionSettings] = useKV<VisionSettings>("vision-settings", defaultVisionSettings);
   const [gameplayAnalyses, setGameplayAnalyses] = useKV<GameplayAnalysis[]>("gameplay-analyses", []);
+  const [voiceSettings, setVoiceSettings] = useKV<VoiceSettings>("voice-settings", defaultVoiceSettings);
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResponses, setGeneratedResponses] = useState<string[]>([]);
@@ -105,6 +117,9 @@ function App() {
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
+  const currentVoiceSettings = voiceSettings || defaultVoiceSettings;
+
+  const { speak, stop, speechState, availableVoices, isSupported } = useSpeechSynthesis(currentVoiceSettings);
 
   useEffect(() => {
     if ((liveMessages || []).length > 0) {
@@ -186,7 +201,6 @@ Return ONLY the classification word, nothing else.`;
     setCurrentSpeechText("");
 
     try {
-      setAvatarSpeaking(true);
       const aiResponse = await generateAIResponse(content);
       setCurrentSpeechText(aiResponse);
       
@@ -199,12 +213,15 @@ Return ONLY the classification word, nothing else.`;
       };
       setMessages((current) => [...(current || []), aiMessage]);
       
+      setAvatarSpeaking(true);
+      await speak(aiResponse, setAvatarCurrentPhoneme);
+      
       setTimeout(() => {
         setAvatarSpeaking(false);
         setCurrentSpeechText("");
         setAvatarEmotion("neutral");
         setCurrentSentiment('neutral');
-      }, 5000);
+      }, 1000);
     } catch (error) {
       toast.error("Failed to generate AI response");
       console.error(error);
@@ -437,7 +454,7 @@ Return as JSON:
     }
   };
 
-  const handleVisionCommentary = (commentary: string) => {
+  const handleVisionCommentary = async (commentary: string) => {
     setAvatarSpeaking(true);
     setCurrentSpeechText(commentary);
     setAvatarEmotion("excited");
@@ -452,12 +469,14 @@ Return as JSON:
     };
     setLiveMessages((current) => [...(current || []), commentaryMessage]);
 
+    await speak(commentary, setAvatarCurrentPhoneme);
+
     setTimeout(() => {
       setAvatarSpeaking(false);
       setCurrentSpeechText("");
       setAvatarEmotion("neutral");
       setCurrentSentiment('neutral');
-    }, 4000);
+    }, 1000);
   };
 
   const handleSimulateMessage = async (content: string, sentiment: 'positive' | 'neutral' | 'negative') => {
@@ -482,7 +501,6 @@ Return as JSON:
       
       setTimeout(async () => {
         try {
-          setAvatarSpeaking(true);
           const aiResponse = await generateAIResponse(content);
           setCurrentSpeechText(aiResponse);
           
@@ -495,12 +513,15 @@ Return as JSON:
           };
           setLiveMessages((current) => [...(current || []), aiMessage]);
           
+          setAvatarSpeaking(true);
+          await speak(aiResponse, setAvatarCurrentPhoneme);
+          
           setTimeout(() => {
             setAvatarSpeaking(false);
             setCurrentSpeechText("");
             setAvatarEmotion("neutral");
             setCurrentSentiment('neutral');
-          }, 4000);
+          }, 1000);
         } catch (error) {
           console.error('Failed to generate AI response', error);
           setAvatarSpeaking(false);
@@ -571,6 +592,32 @@ Return as JSON:
     }
   };
 
+  const handleTestVoice = async () => {
+    const testPhrases = [
+      `Hey everyone! I'm ${currentPersonality.name}, your AI streaming companion!`,
+      `Thanks for watching the stream! Let's have some fun together!`,
+      `That was an amazing play! Great job!`,
+    ];
+    const randomPhrase = testPhrases[Math.floor(Math.random() * testPhrases.length)];
+    
+    setAvatarSpeaking(true);
+    setAvatarEmotion("happy");
+    setCurrentSpeechText(randomPhrase);
+    
+    try {
+      await speak(randomPhrase, setAvatarCurrentPhoneme);
+      toast.success("Voice test complete!");
+    } catch (error) {
+      toast.error("Voice test failed");
+    } finally {
+      setTimeout(() => {
+        setAvatarSpeaking(false);
+        setAvatarEmotion("neutral");
+        setCurrentSpeechText("");
+      }, 500);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,oklch(0.65_0.25_300_/_0.1),transparent_50%)] pointer-events-none" />
@@ -598,10 +645,14 @@ Return as JSON:
 
         <main className="container mx-auto px-6 py-8">
           <Tabs defaultValue="setup" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-13 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-14 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
               <TabsTrigger value="setup" className="gap-2">
                 <Key size={18} weight="bold" />
                 <span className="hidden sm:inline">Setup</span>
+              </TabsTrigger>
+              <TabsTrigger value="voice" className="gap-2">
+                <SpeakerHigh size={18} weight="bold" />
+                <span className="hidden sm:inline">Voice</span>
               </TabsTrigger>
               <TabsTrigger value="vision" className="gap-2">
                 <Eye size={18} weight="bold" />
@@ -655,6 +706,16 @@ Return as JSON:
 
             <TabsContent value="setup" className="space-y-6">
               <TwitchIntegrationGuide />
+            </TabsContent>
+
+            <TabsContent value="voice" className="space-y-6">
+              <VoiceSettingsConfig
+                settings={currentVoiceSettings}
+                onUpdate={setVoiceSettings}
+                availableVoices={availableVoices}
+                onTestVoice={handleTestVoice}
+                isSupported={isSupported}
+              />
             </TabsContent>
 
             <TabsContent value="vision" className="space-y-6">
@@ -713,6 +774,10 @@ Return as JSON:
                       setAvatarCurrentEmotion(emotion);
                       setAvatarEmotionIntensity(intensity);
                     }}
+                  />
+                  <VoiceActivityMonitor 
+                    speechState={speechState}
+                    isEnabled={currentVoiceSettings.enabled}
                   />
                   <CommentarySyncMonitor
                     isSpeaking={avatarSpeaking}
