@@ -247,3 +247,47 @@ export interface SupportChatSession {
   category?: string;
   tags?: string[];
 }
+
+export interface VideoFrame {
+  timestamp: number;
+  dataUrl: string;
+  analysis?: GameplayAnalysis;
+}
+
+export interface VideoAnalysisResult {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  duration: number;
+  frameCount: number;
+  fps: number;
+  analyzedFrames: VideoFrame[];
+  overallSummary: string;
+  keyMoments: {
+    timestamp: number;
+    description: string;
+    type: 'highlight' | 'action' | 'event' | 'scene-change';
+  }[];
+  gameDetection?: {
+    gameName: string;
+    confidence: number;
+    genre: string;
+  };
+  commentary: string[];
+  performanceInsights?: {
+    skillLevel: string;
+    strengths: string[];
+    improvements: string[];
+  };
+  uploadedAt: Date;
+  processingTime: number;
+}
+
+export interface VideoAnalysisSettings {
+  frameInterval: number;
+  maxFrames: number;
+  detectKeyMoments: boolean;
+  generateCommentary: boolean;
+  analyzePerformance: boolean;
+  commentaryStyle: 'hype' | 'analytical' | 'casual' | 'educational' | 'comedic';
+}

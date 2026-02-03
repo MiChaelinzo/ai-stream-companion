@@ -39,6 +39,7 @@ import { PerformanceSimulator } from "@/components/PerformanceSimulator";
 import { BackendConnection } from "@/components/BackendConnection";
 import { AISupportChatbox } from "@/components/AISupportChatbox";
 import { ScreenshotAnalyzer } from "@/components/ScreenshotAnalyzer";
+import { VideoAnalyzer } from "@/components/VideoAnalyzer";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -54,7 +55,8 @@ import {
   PerformanceSession,
   AICoachingSuggestion,
   SkillProgress,
-  SupportChatMessage
+  SupportChatMessage,
+  VideoAnalysisResult
 } from "@/lib/types";
 import { useSpeechSynthesis, VoiceSettings } from "@/hooks/use-speech-synthesis";
 import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy, MagnifyingGlass, House, PlugsConnected, Headset } from "@phosphor-icons/react";
@@ -147,6 +149,7 @@ function App() {
   const [tabSearchQuery, setTabSearchQuery] = useState("");
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [supportChatMessages, setSupportChatMessages] = useKV<SupportChatMessage[]>("support-chat-messages", []);
+  const [videoAnalyses, setVideoAnalyses] = useKV<VideoAnalysisResult[]>("video-analyses", []);
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
@@ -1341,9 +1344,19 @@ Return as JSON:
               <Alert className="bg-primary/10 border-primary/30">
                 <Eye size={20} className="text-primary" />
                 <AlertDescription className="text-sm">
-                  <strong className="text-primary">Vision AI Features:</strong> Upload screenshots for instant analysis, or use automated gameplay vision. Get AI-powered commentary suggestions, detected elements, and streamer response ideas.
+                  <strong className="text-primary">Vision AI Features:</strong> Upload screenshots or videos for instant analysis, or use automated gameplay vision. Get AI-powered commentary suggestions, detected elements, and streamer response ideas.
                 </AlertDescription>
               </Alert>
+              
+              <VideoAnalyzer 
+                onAnalysisComplete={(result) => {
+                  setVideoAnalyses((current) => [result, ...(current || [])].slice(0, 50));
+                  toast.success('Video analysis complete!');
+                }}
+                maxFileSizeMB={100}
+                frameInterval={2}
+                maxFrames={30}
+              />
               
               <ScreenshotAnalyzer 
                 onAnalysisComplete={(analysis) => {

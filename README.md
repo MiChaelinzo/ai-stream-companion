@@ -15,7 +15,8 @@ A fully functional **AI companion simulator and development tool** for Twitch an
 - 🎨 **3D VTuber Avatar** - 8 visual skins with 7 emotions and 15-phoneme lip-sync
 - 🔊 **Voice Synthesis** - Text-to-speech with SSML support and AI enhancement
 - 👁️ **Gameplay Vision Analysis** - Real-time screen capture + Gemini 3 Vision commentary
-- 🖼️ **Screenshot Recognition** - Upload & analyze gameplay screenshots with AI (NEW! 🎉)
+- 🎬 **Video Recognition** - Upload & analyze full gameplay videos with AI (NEW! 🚀)
+- 🖼️ **Screenshot Recognition** - Upload & analyze gameplay screenshots with AI
 - 💬 **Chat Simulation** - Test with AI-generated realistic messages and sentiment
 - 📊 **Sentiment Analysis** - Real-time emotion detection and engagement scoring
 - ⚡ **Response Templates** - Save common responses with variable substitution
@@ -96,6 +97,7 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
 - **Gemini 3 Powered** - Maintains consistent personality across all interactions
 
 #### 👁️ **Gameplay Vision Analysis**
+- **Video Recognition** - Upload & analyze full gameplay videos with frame-by-frame AI analysis (NEW! 🎬)
 - **Screenshot Recognition** - Upload & analyze gameplay screenshots with AI (NEW! 🎉)
 - **Real-time Screen Capture** - Analyzes gameplay using Gemini 3 Vision API
 - **Automatic Commentary** - AI generates hype, tips, and reactions to your plays
@@ -204,9 +206,27 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
 
 📖 **[Read the Complete Vision Setup Guide](./VISION_SETUP_GUIDE.md)** for detailed configuration, troubleshooting, and best practices
 
-#### Step 3b: Upload & Analyze Screenshots (NEW!)
+#### Step 3b: Upload & Analyze Videos (NEW! 🎬)
 1. Stay in **Vision AI** tab
-2. Find **"Screenshot Analyzer"** section at top
+2. Find **"Video Analysis"** section at top
+3. Click upload area or drag & drop video file
+4. Supported formats: MP4, WebM, MOV (max 100MB)
+5. Click **"Analyze Video"** button
+6. Wait for AI to process (30-120 seconds depending on length)
+7. Review comprehensive results:
+   - Overall gameplay summary
+   - Game detection and genre
+   - Frame-by-frame analysis
+   - Key moments and highlights with timestamps
+   - AI-generated commentary lines
+   - Performance insights and coaching tips
+8. Use commentary for voiceovers or content creation!
+
+📖 **[Read the Video Recognition Guide](./VIDEO_RECOGNITION_GUIDE.md)** for detailed usage, optimization tips, and best practices
+
+#### Step 3c: Upload & Analyze Screenshots
+1. Stay in **Vision AI** tab
+2. Find **"Screenshot Analyzer"** section
 3. Click **"Select Screenshot"** button
 4. Choose a gameplay screenshot (PNG, JPG, WebP)
 5. Wait 5-10 seconds for AI analysis
@@ -335,7 +355,17 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
   - Best practices for each game type
   - Privacy & security recommendations
 
-- **[SCREENSHOT_RECOGNITION_GUIDE.md](./SCREENSHOT_RECOGNITION_GUIDE.md)** 🖼️ **NEW!**
+- **[VIDEO_RECOGNITION_GUIDE.md](./VIDEO_RECOGNITION_GUIDE.md)** 🎬 **NEW!**
+  - Upload & analyze full gameplay videos
+  - Frame-by-frame AI analysis
+  - Automatic highlight detection with timestamps
+  - Performance insights and coaching
+  - Commentary generation for content creation
+  - Integration with voice synthesis
+  - Optimization tips for fast processing
+  - Use cases: highlight reels, gameplay review, content creation
+
+- **[SCREENSHOT_RECOGNITION_GUIDE.md](./SCREENSHOT_RECOGNITION_GUIDE.md)** 🖼️
   - Upload & analyze gameplay screenshots
   - AI-powered commentary suggestions
   - Game context identification

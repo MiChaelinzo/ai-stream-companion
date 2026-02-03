@@ -95,6 +95,31 @@ The 3D avatar's emotions are driven by Gemini 3's sentiment analysis:
 
 The avatar's lip-sync is synchronized with Gemini 3's response timing, creating natural speech animation.
 
+### 7. Gameplay Vision Analysis
+**Gemini 3 Feature:** Multimodal Vision API + contextual understanding
+
+#### Video Analysis (NEW! 🎬)
+Gemini 3 Vision analyzes full gameplay videos frame-by-frame:
+- **Frame extraction**: Captures key moments at configurable intervals
+- **Scene understanding**: Identifies game, genre, and what's happening
+- **Highlight detection**: Automatically finds epic plays and key moments
+- **Commentary generation**: Creates streamer-ready commentary lines
+- **Performance insights**: Evaluates skill level and provides coaching tips
+
+Example workflow:
+1. Upload 2-minute gameplay clip
+2. AI extracts 30 frames (1 every 4 seconds)
+3. Each frame analyzed for game context, actions, emotions
+4. Overall analysis generates: summary, highlights, commentary, coaching
+5. Output: Ready-to-use content for highlight reels or VOD reviews
+
+#### Screenshot Analysis
+Gemini 3 Vision provides instant analysis of gameplay screenshots:
+- **Object detection**: Identifies characters, UI, items, environment
+- **Context understanding**: Determines game state and situation
+- **Commentary suggestions**: Generates streamer response ideas
+- **Mood detection**: Assesses scene atmosphere and energy
+
 ## Technical Implementation
 
 ### API Integration
@@ -123,10 +148,17 @@ This hybrid approach balances speed and intelligence for optimal streaming perfo
 ## Unique Gemini 3 Advantages
 
 ### 1. Multimodal Future-Proofing
-While currently focused on text chat, the app is architected to leverage Gemini 3's vision capabilities:
-- **Gameplay analysis**: "Wow, that boss is huge! Chat, should we use fire or ice?"
-- **Viewer screenshots**: Respond to shared images in chat
-- **Stream highlights**: Auto-generate clip descriptions
+Gemini 3's vision capabilities are actively utilized:
+- **Video analysis**: Upload gameplay videos for frame-by-frame AI analysis with commentary generation
+- **Screenshot analysis**: Instant AI analysis of gameplay screenshots with context understanding
+- **Gameplay monitoring**: Real-time screen capture and commentary (requires permissions)
+- **Stream highlights**: Auto-generate clip descriptions and key moment detection
+
+Active multimodal features:
+- 🎬 Full video recognition with highlight detection
+- 🖼️ Screenshot upload and instant analysis
+- 🎮 Live gameplay vision with commentary sync
+- 💬 Text chat analysis with sentiment detection
 
 ### 2. Extended Context Window
 Gemini 3's large context window enables:
