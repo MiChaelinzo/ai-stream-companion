@@ -38,6 +38,7 @@ import { SkillProgressDashboard } from "@/components/SkillProgressDashboard";
 import { PerformanceSimulator } from "@/components/PerformanceSimulator";
 import { BackendConnection } from "@/components/BackendConnection";
 import { AISupportChatbox } from "@/components/AISupportChatbox";
+import { ScreenshotAnalyzer } from "@/components/ScreenshotAnalyzer";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -1337,6 +1338,22 @@ Return as JSON:
             </TabsContent>
 
             <TabsContent value="vision" className="space-y-6">
+              <Alert className="bg-primary/10 border-primary/30">
+                <Eye size={20} className="text-primary" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-primary">Vision AI Features:</strong> Upload screenshots for instant analysis, or use automated gameplay vision. Get AI-powered commentary suggestions, detected elements, and streamer response ideas.
+                </AlertDescription>
+              </Alert>
+              
+              <ScreenshotAnalyzer 
+                onAnalysisComplete={(analysis) => {
+                  toast.success('Screenshot analysis complete!');
+                  if (analysis.analysis.suggestedResponse) {
+                    console.log('Suggested response:', analysis.analysis.suggestedResponse);
+                  }
+                }}
+              />
+              
               <VisionStatsCard 
                 analyses={gameplayAnalyses || []}
                 isActive={visionSettings?.enabled || false}

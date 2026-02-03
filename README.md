@@ -15,6 +15,7 @@ A fully functional **AI companion simulator and development tool** for Twitch an
 - 🎨 **3D VTuber Avatar** - 8 visual skins with 7 emotions and 15-phoneme lip-sync
 - 🔊 **Voice Synthesis** - Text-to-speech with SSML support and AI enhancement
 - 👁️ **Gameplay Vision Analysis** - Real-time screen capture + Gemini 3 Vision commentary
+- 🖼️ **Screenshot Recognition** - Upload & analyze gameplay screenshots with AI (NEW! 🎉)
 - 💬 **Chat Simulation** - Test with AI-generated realistic messages and sentiment
 - 📊 **Sentiment Analysis** - Real-time emotion detection and engagement scoring
 - ⚡ **Response Templates** - Save common responses with variable substitution
@@ -95,6 +96,7 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
 - **Gemini 3 Powered** - Maintains consistent personality across all interactions
 
 #### 👁️ **Gameplay Vision Analysis**
+- **Screenshot Recognition** - Upload & analyze gameplay screenshots with AI (NEW! 🎉)
 - **Real-time Screen Capture** - Analyzes gameplay using Gemini 3 Vision API
 - **Automatic Commentary** - AI generates hype, tips, and reactions to your plays
 - **Highlight Detection** - Identifies epic moments, clutch plays, and fails
@@ -105,6 +107,7 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
 - **Strategic Tips** - Optional gameplay advice based on visual analysis
 
 📖 **[Complete Vision Setup Guide](./VISION_SETUP_GUIDE.md)** - Full configuration and usage instructions
+📖 **[Screenshot Recognition Guide](./SCREENSHOT_RECOGNITION_GUIDE.md)** - Upload & analyze screenshots (NEW!)
 
 #### 🔊 **Voice Synthesis & SSML (NEW!)**
 - **Text-to-Speech** - Avatar speaks all responses audibly
@@ -200,6 +203,23 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
 11. Watch AI generate commentary automatically! 🎮
 
 📖 **[Read the Complete Vision Setup Guide](./VISION_SETUP_GUIDE.md)** for detailed configuration, troubleshooting, and best practices
+
+#### Step 3b: Upload & Analyze Screenshots (NEW!)
+1. Stay in **Vision AI** tab
+2. Find **"Screenshot Analyzer"** section at top
+3. Click **"Select Screenshot"** button
+4. Choose a gameplay screenshot (PNG, JPG, WebP)
+5. Wait 5-10 seconds for AI analysis
+6. Review:
+   - AI-generated description
+   - Detected objects and game context
+   - Suggested streamer responses
+   - Commentary talking points
+   - Mood and highlights
+7. Click screenshot to enlarge
+8. Use suggested responses for content creation!
+
+📖 **[Read the Screenshot Recognition Guide](./SCREENSHOT_RECOGNITION_GUIDE.md)** for detailed usage and best practices
 
 #### Step 4: Test Chat Responses
 1. Use **Chat** tab simulator
@@ -305,7 +325,7 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
   - Troubleshooting common issues
 
 ### 👁️ **Gameplay Vision Analysis**
-- **[VISION_SETUP_GUIDE.md](./VISION_SETUP_GUIDE.md)** 🎮 **NEW!**
+- **[VISION_SETUP_GUIDE.md](./VISION_SETUP_GUIDE.md)** 🎮
   - Complete setup walkthrough (5 minutes)
   - Configuration options explained
   - All 5 commentary styles with examples
@@ -314,6 +334,15 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
   - Troubleshooting screen capture issues
   - Best practices for each game type
   - Privacy & security recommendations
+
+- **[SCREENSHOT_RECOGNITION_GUIDE.md](./SCREENSHOT_RECOGNITION_GUIDE.md)** 🖼️ **NEW!**
+  - Upload & analyze gameplay screenshots
+  - AI-powered commentary suggestions
+  - Game context identification
+  - Streamer response generation
+  - Best practices for screenshot capture
+  - Integration with voice and avatar
+  - Use cases and workflows
 
 ### 🎭 **Advanced Avatar Features**
 - **[EMOTION_SYNC_GUIDE.md](./EMOTION_SYNC_GUIDE.md)**
