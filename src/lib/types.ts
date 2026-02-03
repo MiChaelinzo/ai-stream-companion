@@ -210,3 +210,40 @@ export interface SkillProgress {
     achievedAt?: Date;
   }[];
 }
+
+export interface SupportChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'support';
+  timestamp: Date;
+  type?: 'text' | 'image' | 'video' | 'audio' | 'file';
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  voiceRecording?: boolean;
+  duration?: number;
+  isRecommendation?: boolean;
+  recommendationType?: 'quick-reply' | 'suggestion' | 'tip' | 'guide';
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
+  reactions?: string[];
+}
+
+export interface SupportChatRecommendation {
+  id: string;
+  text: string;
+  category: 'setup' | 'troubleshooting' | 'feature' | 'best-practice' | 'general';
+  priority: number;
+  context?: string;
+}
+
+export interface SupportChatSession {
+  id: string;
+  startTime: Date;
+  endTime?: Date;
+  messages: SupportChatMessage[];
+  resolved?: boolean;
+  rating?: number;
+  feedback?: string;
+  category?: string;
+  tags?: string[];
+}
