@@ -4,8 +4,29 @@ Complete solutions for common setup issues and errors with the AI Streamer Compa
 
 ---
 
+## 🎯 Quick Reference: What Works & What Doesn't
+
+### ✅ **Works Immediately (No Backend)**
+- AI personality and chat responses
+- Voice synthesis and SSML
+- Avatar animations and emotions
+- Gameplay vision analysis
+- Chat simulation
+- Sentiment analysis
+- Analytics dashboard
+
+### ⚠️ **Requires Backend Setup**
+- Live Twitch chat connection
+- Live YouTube chat connection
+- Real-time platform integration
+
+**If you're trying to connect to live chat:** See [QUICK_START.md](./QUICK_START.md) for backend setup.
+
+---
+
 ## 📋 Table of Contents
 
+- [Understanding Simulation vs Live Mode](#-understanding-simulation-vs-live-mode)
 - [Voice Synthesis Issues](#-voice-synthesis-issues)
 - [Vision/Screen Capture Problems](#-visionscreen-capture-problems)
 - [Avatar Rendering Issues](#-avatar-rendering-issues)
@@ -18,6 +39,58 @@ Complete solutions for common setup issues and errors with the AI Streamer Compa
 - [Backend Connection Failures](#-backend-connection-failures)
 - [Data Persistence Problems](#-data-persistence-problems)
 - [General Debugging Tips](#-general-debugging-tips)
+
+---
+
+## 🎭 Understanding Simulation vs Live Mode
+
+### What is Simulation Mode?
+
+**Simulation Mode** is the default way this app works - it generates realistic chat messages using AI to test your companion's personality, responses, and behavior.
+
+**Features:**
+- ✅ Generates realistic viewer messages
+- ✅ Various sentiment levels (positive, neutral, negative)
+- ✅ Tests AI personality responses
+- ✅ Voice synthesis and avatar animations
+- ✅ Sentiment analysis and analytics
+- ✅ No backend required
+
+**How to Use:**
+1. Go to **Monitor** tab
+2. Click "Auto-generate messages" toggle
+3. Watch AI-generated chat appear
+4. Observe your AI companion respond
+
+### What is Live Mode?
+
+**Live Mode** connects to real Twitch/YouTube chat during your actual stream. This requires a separate backend server.
+
+**Why Backend is Required:**
+- 🔒 **Security** - Tokens cannot be exposed in browser
+- 🚫 **CORS** - Platforms block direct browser connections
+- 🔌 **WebSockets** - Persistent connections need server infrastructure
+
+**Setup Live Mode:**
+1. See [QUICK_START.md](./QUICK_START.md) for backend code
+2. Deploy Node.js/Python server
+3. Configure OAuth tokens
+4. Connect to platforms
+
+### Common Confusion
+
+❌ **"I'm live on Twitch but the app doesn't show my chat"**
+- This is expected! The app needs a backend server to connect.
+- Use **Simulation Mode** to test, then deploy backend for live use.
+
+❌ **"The Setup/Platforms tab stores my tokens but nothing happens"**
+- Correct - it's storing credentials for when you add a backend.
+- The frontend alone cannot connect to live chat.
+
+✅ **"How do I test if my AI works?"**
+- Use **Monitor** tab → enable "Auto-generate messages"
+- Or use **Chat** tab to manually type test messages
+- Everything except live platform connection works immediately!
 
 ---
 

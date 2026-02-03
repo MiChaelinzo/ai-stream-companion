@@ -57,7 +57,7 @@ export function PlatformConnection({
     setTwitchToken("");
     setTwitchChannel("");
     setShowTwitchForm(false);
-    toast.success("Twitch connection configured!");
+    toast.success("Twitch credentials saved! Deploy backend to connect.");
   };
 
   const handleYoutubeConnect = () => {
@@ -74,23 +74,30 @@ export function PlatformConnection({
     setYoutubeApiKey("");
     setYoutubeLiveId("");
     setShowYoutubeForm(false);
-    toast.success("YouTube connection configured!");
+    toast.success("YouTube credentials saved! Deploy backend to connect.");
   };
 
   return (
     <div className="space-y-6">
       <div className="space-y-4">
+        <Alert className="bg-destructive/10 border-destructive/30">
+          <Info size={20} className="text-destructive" />
+          <AlertDescription className="text-sm">
+            <strong className="text-destructive">Important:</strong> This page only <strong>stores</strong> your credentials. It does not connect to live chat. Browser-based apps cannot directly connect to Twitch/YouTube due to CORS, security, and WebSocket limitations.
+          </AlertDescription>
+        </Alert>
+
         <Alert className="bg-primary/10 border-primary/30">
           <Info size={20} className="text-primary" />
           <AlertDescription className="text-sm">
-            <strong className="text-primary">Status:</strong> This is a configuration interface that stores your platform credentials. Real-time chat requires a backend service to connect to Twitch IRC / YouTube Live Chat APIs.
+            <strong className="text-primary">To connect to live chat:</strong> You need a backend server. See <strong>QUICK_START.md</strong> for complete Node.js/Python code (30-minute setup) or <strong>BACKEND_DEPLOYMENT_GUIDE.md</strong> for production deployment.
           </AlertDescription>
         </Alert>
 
         <Alert className="bg-accent/10 border-accent/30">
           <Info size={20} className="text-accent" />
           <AlertDescription className="text-sm">
-            <strong className="text-accent">Want to test now?</strong> Use the <strong>Chat Simulation</strong> feature in the Monitor tab to test your AI companion with realistic chat messages and sentiment analysis - no backend required!
+            <strong className="text-accent">Want to test your AI now?</strong> Go to the <strong>Monitor</strong> tab and enable <strong>Chat Simulation</strong> to test with realistic AI-generated messages - works immediately with no backend!
           </AlertDescription>
         </Alert>
       </div>
@@ -104,7 +111,7 @@ export function PlatformConnection({
               </div>
               <div>
                 <CardTitle>Twitch</CardTitle>
-                <CardDescription>Connect to Twitch chat via IRC</CardDescription>
+                <CardDescription>Store credentials for backend connection</CardDescription>
               </div>
             </div>
             {twitchConnection?.isConnected ? (
@@ -151,7 +158,7 @@ export function PlatformConnection({
                 className="w-full border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => {
                   onDisconnect('twitch');
-                  toast.success("Disconnected from Twitch");
+                  toast.success("Twitch credentials removed");
                 }}
               >
                 Disconnect
@@ -165,7 +172,7 @@ export function PlatformConnection({
                   onClick={() => setShowTwitchForm(true)}
                 >
                   <LinkIcon size={18} className="mr-2" />
-                  Connect Twitch
+                  Store Credentials
                 </Button>
               ) : (
                 <div className="space-y-4">
@@ -219,7 +226,7 @@ export function PlatformConnection({
                   </div>
                   <div className="flex gap-2">
                     <Button className="flex-1" onClick={handleTwitchConnect}>
-                      Connect
+                      Save Credentials
                     </Button>
                     <Button
                       variant="outline"
@@ -245,7 +252,7 @@ export function PlatformConnection({
               </div>
               <div>
                 <CardTitle>YouTube</CardTitle>
-                <CardDescription>Connect to YouTube Live Chat API</CardDescription>
+                <CardDescription>Store credentials for backend connection</CardDescription>
               </div>
             </div>
             {youtubeConnection?.isConnected ? (
@@ -290,7 +297,7 @@ export function PlatformConnection({
                 className="w-full border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => {
                   onDisconnect('youtube');
-                  toast.success("Disconnected from YouTube");
+                  toast.success("YouTube credentials removed");
                 }}
               >
                 Disconnect
@@ -304,7 +311,7 @@ export function PlatformConnection({
                   onClick={() => setShowYoutubeForm(true)}
                 >
                   <LinkIcon size={18} className="mr-2" />
-                  Connect YouTube
+                  Store Credentials
                 </Button>
               ) : (
                 <div className="space-y-4">
@@ -345,7 +352,7 @@ export function PlatformConnection({
                   </div>
                   <div className="flex gap-2">
                     <Button className="flex-1" onClick={handleYoutubeConnect}>
-                      Connect
+                      Save Credentials
                     </Button>
                     <Button
                       variant="outline"

@@ -43,7 +43,8 @@ import {
   GameplayAnalysis
 } from "@/lib/types";
 import { useSpeechSynthesis, VoiceSettings } from "@/hooks/use-speech-synthesis";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info } from "@phosphor-icons/react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -702,12 +703,12 @@ Return as JSON:
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight">AI Streamer Companion</h1>
-                  <p className="text-sm text-muted-foreground">Powered by Google Gemini 3 • Twitch & YouTube</p>
+                  <p className="text-sm text-muted-foreground">Development Tool & Simulator • Powered by Gemini 3</p>
                 </div>
               </div>
               <Badge className="bg-accent/20 text-accent border-accent/30 hover:bg-accent/30 px-4 py-2">
                 <span className="w-2 h-2 rounded-full bg-accent mr-2 animate-pulse" />
-                Active
+                Simulation Ready
               </Badge>
             </div>
           </div>
@@ -775,6 +776,12 @@ Return as JSON:
             </TabsList>
 
             <TabsContent value="setup" className="space-y-6">
+              <Alert className="bg-accent/10 border-accent/30">
+                <Info size={20} className="text-accent" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-accent">Ready to test!</strong> This is a fully functional AI companion simulator. Use the <strong>Monitor</strong> tab to enable chat simulation and see your AI respond in real-time with voice, emotions, and gameplay commentary.
+                </AlertDescription>
+              </Alert>
               <TwitchIntegrationGuide />
             </TabsContent>
 
@@ -923,6 +930,12 @@ Return as JSON:
             </TabsContent>
 
             <TabsContent value="platforms" className="space-y-6">
+              <Alert className="bg-destructive/10 border-destructive/30">
+                <Info size={20} className="text-destructive" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-destructive">Backend Required:</strong> This stores your platform credentials, but live chat integration requires a separate backend server. See <strong>QUICK_START.md</strong> or <strong>BACKEND_DEPLOYMENT_GUIDE.md</strong> for complete setup instructions with working code.
+                </AlertDescription>
+              </Alert>
               <PlatformConnection
                 twitchConnection={twitchConnection || null}
                 youtubeConnection={youtubeConnection || null}
