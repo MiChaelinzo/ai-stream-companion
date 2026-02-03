@@ -153,3 +153,60 @@ export interface VisionSettings {
   includeGameplayTips?: boolean;
   reactToActions?: boolean;
 }
+
+export interface PerformanceMetric {
+  id: string;
+  timestamp: Date;
+  apm: number;
+  accuracy: number;
+  combo: number;
+  reactionTime?: number;
+  decisionsPerMinute?: number;
+}
+
+export interface PerformanceSession {
+  id: string;
+  startTime: Date;
+  endTime?: Date;
+  game: string;
+  gameType: 'fps' | 'moba' | 'fighting' | 'racing' | 'rhythm' | 'strategy' | 'other';
+  metrics: PerformanceMetric[];
+  averageAPM: number;
+  averageAccuracy: number;
+  maxCombo: number;
+  totalActions: number;
+  duration: number;
+  skillRating?: number;
+}
+
+export interface AICoachingSuggestion {
+  id: string;
+  timestamp: Date;
+  category: 'apm' | 'accuracy' | 'combo' | 'strategy' | 'positioning' | 'timing' | 'mechanics';
+  severity: 'info' | 'suggestion' | 'warning' | 'critical';
+  title: string;
+  message: string;
+  improvementTips: string[];
+  targetMetric?: string;
+  currentValue?: number;
+  targetValue?: number;
+  priority: number;
+}
+
+export interface SkillProgress {
+  game: string;
+  gameType: string;
+  sessionsPlayed: number;
+  totalPlayTime: number;
+  averageAPM: number;
+  averageAccuracy: number;
+  maxCombo: number;
+  skillRating: number;
+  trend: 'improving' | 'stable' | 'declining';
+  lastPlayed: Date;
+  milestones: {
+    title: string;
+    achieved: boolean;
+    achievedAt?: Date;
+  }[];
+}

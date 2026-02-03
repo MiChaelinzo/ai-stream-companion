@@ -30,6 +30,11 @@ import { VoiceActivityMonitor } from "@/components/VoiceActivityMonitor";
 import { SSMLEditor } from "@/components/SSMLEditor";
 import { AutoSSMLEnhancer } from "@/components/AutoSSMLEnhancer";
 import { SSMLInfoCard } from "@/components/SSMLInfoCard";
+import { PerformanceMetricsTracker } from "@/components/PerformanceMetricsTracker";
+import { AICoachingPanel } from "@/components/AICoachingPanel";
+import { PerformanceSessionManager } from "@/components/PerformanceSessionManager";
+import { SkillProgressDashboard } from "@/components/SkillProgressDashboard";
+import { PerformanceSimulator } from "@/components/PerformanceSimulator";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -40,10 +45,14 @@ import {
   ResponseTemplate,
   ChatCommand,
   VisionSettings,
-  GameplayAnalysis
+  GameplayAnalysis,
+  PerformanceMetric,
+  PerformanceSession,
+  AICoachingSuggestion,
+  SkillProgress
 } from "@/lib/types";
 import { useSpeechSynthesis, VoiceSettings } from "@/hooks/use-speech-synthesis";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy } from "@phosphor-icons/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
@@ -106,6 +115,9 @@ function App() {
   const [visionSettings, setVisionSettings] = useKV<VisionSettings>("vision-settings", defaultVisionSettings);
   const [gameplayAnalyses, setGameplayAnalyses] = useKV<GameplayAnalysis[]>("gameplay-analyses", []);
   const [voiceSettings, setVoiceSettings] = useKV<VoiceSettings>("voice-settings", defaultVoiceSettings);
+  const [performanceSessions, setPerformanceSessions] = useKV<PerformanceSession[]>("performance-sessions", []);
+  const [coachingSuggestions, setCoachingSuggestions] = useKV<AICoachingSuggestion[]>("coaching-suggestions", []);
+  const [skillProgress, setSkillProgress] = useKV<SkillProgress[]>("skill-progress", []);
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResponses, setGeneratedResponses] = useState<string[]>([]);
@@ -119,6 +131,13 @@ function App() {
   const [avatarCurrentPhoneme, setAvatarCurrentPhoneme] = useState<string>('silence');
   const [avatarCurrentEmotion, setAvatarCurrentEmotion] = useState<string>('neutral');
   const [avatarEmotionIntensity, setAvatarEmotionIntensity] = useState<number>(0);
+  const [isPerformanceTracking, setIsPerformanceTracking] = useState(false);
+  const [currentPerformanceSession, setCurrentPerformanceSession] = useState<PerformanceSession | null>(null);
+  const [latestPerformanceMetric, setLatestPerformanceMetric] = useState<PerformanceMetric | null>(null);
+  const [performanceSimulationInterval, setPerformanceSimulationInterval] = useState<NodeJS.Timeout | null>(null);
+  const [simulationSpeed, setSimulationSpeed] = useState(1);
+  const [simulationSkillLevel, setSimulationSkillLevel] = useState(50);
+  const [isAnalyzingPerformance, setIsAnalyzingPerformance] = useState(false);
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
@@ -689,6 +708,273 @@ Return as JSON:
     }
   };
 
+  const startPerformanceSession = (game: string, gameType: PerformanceSession['gameType']) => {
+    const newSession: PerformanceSession = {
+      id: Date.now().toString(),
+      startTime: new Date(),
+      game,
+      gameType,
+      metrics: [],
+      averageAPM: 0,
+      averageAccuracy: 0,
+      maxCombo: 0,
+      totalActions: 0,
+      duration: 0,
+    };
+    setCurrentPerformanceSession(newSession);
+    setIsPerformanceTracking(true);
+    toast.success(`Performance tracking started for ${game}`);
+  };
+
+  const stopPerformanceSession = async () => {
+    if (!currentPerformanceSession) return;
+
+    const endTime = new Date();
+    const duration = Math.floor((endTime.getTime() - currentPerformanceSession.startTime.getTime()) / 1000);
+    
+    const completedSession: PerformanceSession = {
+      ...currentPerformanceSession,
+      endTime,
+      duration,
+    };
+
+    setPerformanceSessions((current) => [completedSession, ...(current || [])].slice(0, 100));
+    
+    await updateSkillProgress(completedSession);
+    
+    setIsPerformanceTracking(false);
+    setCurrentPerformanceSession(null);
+    setLatestPerformanceMetric(null);
+    toast.success("Performance session saved");
+  };
+
+  const addPerformanceMetric = (metric: PerformanceMetric) => {
+    if (!currentPerformanceSession) return;
+
+    const updatedMetrics = [...currentPerformanceSession.metrics, metric];
+    const totalAPM = updatedMetrics.reduce((sum, m) => sum + m.apm, 0);
+    const totalAccuracy = updatedMetrics.reduce((sum, m) => sum + m.accuracy, 0);
+    const maxCombo = Math.max(currentPerformanceSession.maxCombo, metric.combo);
+    
+    const updatedSession: PerformanceSession = {
+      ...currentPerformanceSession,
+      metrics: updatedMetrics,
+      averageAPM: totalAPM / updatedMetrics.length,
+      averageAccuracy: totalAccuracy / updatedMetrics.length,
+      maxCombo,
+      totalActions: currentPerformanceSession.totalActions + Math.floor(metric.apm / 3),
+    };
+
+    setCurrentPerformanceSession(updatedSession);
+    setLatestPerformanceMetric(metric);
+
+    if (updatedMetrics.length % 5 === 0) {
+      analyzePerformanceAndCoach(updatedSession);
+    }
+  };
+
+  const analyzePerformanceAndCoach = async (session: PerformanceSession) => {
+    setIsAnalyzingPerformance(true);
+    
+    try {
+      const recentMetrics = session.metrics.slice(-10);
+      const avgAPM = recentMetrics.reduce((sum, m) => sum + m.apm, 0) / recentMetrics.length;
+      const avgAccuracy = recentMetrics.reduce((sum, m) => sum + m.accuracy, 0) / recentMetrics.length;
+      const avgCombo = recentMetrics.reduce((sum, m) => sum + m.combo, 0) / recentMetrics.length;
+
+      const prompt = (window.spark.llmPrompt as any)`You are an expert gaming performance coach analyzing a player's metrics in ${session.game} (${session.gameType}).
+
+**Current Performance:**
+- Average APM: ${avgAPM.toFixed(1)}
+- Average Accuracy: ${avgAccuracy.toFixed(1)}%
+- Average Combo: ${avgCombo.toFixed(1)}
+- Session Duration: ${Math.floor(session.metrics.length / 2)} minutes
+
+**Analysis Task:**
+Generate 1-3 actionable coaching suggestions to help improve their gameplay. Focus on the weakest areas.
+
+Return as JSON:
+{
+  "suggestions": [
+    {
+      "category": "apm|accuracy|combo|strategy|positioning|timing|mechanics",
+      "severity": "info|suggestion|warning|critical",
+      "title": "Brief title",
+      "message": "Clear explanation",
+      "improvementTips": ["tip1", "tip2", "tip3"],
+      "targetMetric": "metric name",
+      "currentValue": ${avgAPM},
+      "targetValue": target_number,
+      "priority": 1-10
+    }
+  ]
+}`;
+
+      const response = await window.spark.llm(prompt, "gpt-4o", true);
+      const parsed = JSON.parse(response);
+      
+      if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+        const newSuggestions: AICoachingSuggestion[] = parsed.suggestions.map((s: any) => ({
+          id: Date.now().toString() + Math.random(),
+          timestamp: new Date(),
+          category: s.category || 'strategy',
+          severity: s.severity || 'suggestion',
+          title: s.title,
+          message: s.message,
+          improvementTips: s.improvementTips || [],
+          targetMetric: s.targetMetric,
+          currentValue: s.currentValue,
+          targetValue: s.targetValue,
+          priority: s.priority || 5,
+        }));
+
+        setCoachingSuggestions((current) => [...newSuggestions, ...(current || [])].slice(0, 20));
+      }
+    } catch (error) {
+      console.error('Failed to analyze performance:', error);
+    } finally {
+      setIsAnalyzingPerformance(false);
+    }
+  };
+
+  const updateSkillProgress = async (session: PerformanceSession) => {
+    const existingSkill = (skillProgress || []).find(s => s.game === session.game);
+
+    const skillRating = calculateSkillRating(session);
+
+    if (existingSkill) {
+      const updatedSkill: SkillProgress = {
+        ...existingSkill,
+        sessionsPlayed: existingSkill.sessionsPlayed + 1,
+        totalPlayTime: existingSkill.totalPlayTime + session.duration,
+        averageAPM: (existingSkill.averageAPM * existingSkill.sessionsPlayed + session.averageAPM) / (existingSkill.sessionsPlayed + 1),
+        averageAccuracy: (existingSkill.averageAccuracy * existingSkill.sessionsPlayed + session.averageAccuracy) / (existingSkill.sessionsPlayed + 1),
+        maxCombo: Math.max(existingSkill.maxCombo, session.maxCombo),
+        skillRating,
+        trend: skillRating > existingSkill.skillRating ? 'improving' : skillRating < existingSkill.skillRating ? 'declining' : 'stable',
+        lastPlayed: new Date(),
+        milestones: updateMilestones(existingSkill.milestones, session),
+      };
+
+      setSkillProgress((current) => 
+        (current || []).map(s => s.game === session.game ? updatedSkill : s)
+      );
+    } else {
+      const newSkill: SkillProgress = {
+        game: session.game,
+        gameType: session.gameType,
+        sessionsPlayed: 1,
+        totalPlayTime: session.duration,
+        averageAPM: session.averageAPM,
+        averageAccuracy: session.averageAccuracy,
+        maxCombo: session.maxCombo,
+        skillRating,
+        trend: 'stable',
+        lastPlayed: new Date(),
+        milestones: [
+          { title: 'First Session', achieved: true, achievedAt: new Date() },
+          { title: '50 APM Average', achieved: session.averageAPM >= 50 },
+          { title: '100 APM Average', achieved: session.averageAPM >= 100 },
+          { title: '60% Accuracy', achieved: session.averageAccuracy >= 60 },
+          { title: '80% Accuracy', achieved: session.averageAccuracy >= 80 },
+          { title: '10+ Combo', achieved: session.maxCombo >= 10 },
+          { title: '50+ Combo', achieved: session.maxCombo >= 50 },
+        ],
+      };
+
+      setSkillProgress((current) => [newSkill, ...(current || [])]);
+    }
+  };
+
+  const calculateSkillRating = (session: PerformanceSession): number => {
+    const apmScore = Math.min((session.averageAPM / 300) * 40, 40);
+    const accuracyScore = (session.averageAccuracy / 100) * 40;
+    const comboScore = Math.min((session.maxCombo / 100) * 20, 20);
+    return Math.floor(apmScore + accuracyScore + comboScore);
+  };
+
+  const updateMilestones = (existing: SkillProgress['milestones'], session: PerformanceSession) => {
+    return existing.map(m => {
+      if (m.achieved) return m;
+      
+      if (m.title === '50 APM Average' && session.averageAPM >= 50) {
+        return { ...m, achieved: true, achievedAt: new Date() };
+      }
+      if (m.title === '100 APM Average' && session.averageAPM >= 100) {
+        return { ...m, achieved: true, achievedAt: new Date() };
+      }
+      if (m.title === '60% Accuracy' && session.averageAccuracy >= 60) {
+        return { ...m, achieved: true, achievedAt: new Date() };
+      }
+      if (m.title === '80% Accuracy' && session.averageAccuracy >= 80) {
+        return { ...m, achieved: true, achievedAt: new Date() };
+      }
+      if (m.title === '10+ Combo' && session.maxCombo >= 10) {
+        return { ...m, achieved: true, achievedAt: new Date() };
+      }
+      if (m.title === '50+ Combo' && session.maxCombo >= 50) {
+        return { ...m, achieved: true, achievedAt: new Date() };
+      }
+      
+      return m;
+    });
+  };
+
+  const generateSimulatedMetric = (skillLevel: number): PerformanceMetric => {
+    const baseAPM = 50 + (skillLevel / 100) * 250;
+    const baseAccuracy = 30 + (skillLevel / 100) * 65;
+    const baseCombo = 3 + (skillLevel / 100) * 47;
+
+    const variance = 0.15;
+    
+    return {
+      id: Date.now().toString() + Math.random(),
+      timestamp: new Date(),
+      apm: Math.max(0, baseAPM + (Math.random() - 0.5) * baseAPM * variance),
+      accuracy: Math.max(0, Math.min(100, baseAccuracy + (Math.random() - 0.5) * baseAccuracy * variance)),
+      combo: Math.max(0, Math.floor(baseCombo + (Math.random() - 0.5) * baseCombo * variance)),
+      reactionTime: Math.max(100, 500 - (skillLevel / 100) * 300 + (Math.random() - 0.5) * 100),
+      decisionsPerMinute: Math.max(10, 20 + (skillLevel / 100) * 80 + (Math.random() - 0.5) * 20),
+    };
+  };
+
+  const togglePerformanceSimulation = () => {
+    if (performanceSimulationInterval) {
+      clearInterval(performanceSimulationInterval);
+      setPerformanceSimulationInterval(null);
+      toast.info('Performance simulation stopped');
+    } else {
+      const interval = setInterval(() => {
+        const metric = generateSimulatedMetric(simulationSkillLevel);
+        addPerformanceMetric(metric);
+      }, 2000 / simulationSpeed);
+      
+      setPerformanceSimulationInterval(interval);
+      toast.success('Performance simulation started');
+    }
+  };
+
+  const handleTogglePerformanceTracking = () => {
+    if (isPerformanceTracking) {
+      if (performanceSimulationInterval) {
+        clearInterval(performanceSimulationInterval);
+        setPerformanceSimulationInterval(null);
+      }
+      stopPerformanceSession();
+    } else {
+      toast.error('Please configure a session first');
+    }
+  };
+
+  const dismissCoachingSuggestion = (id: string) => {
+    setCoachingSuggestions((current) => (current || []).filter(s => s.id !== id));
+  };
+
+  const clearAllCoachingSuggestions = () => {
+    setCoachingSuggestions(() => []);
+    toast.success('All suggestions cleared');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,oklch(0.65_0.25_300_/_0.1),transparent_50%)] pointer-events-none" />
@@ -716,10 +1002,14 @@ Return as JSON:
 
         <main className="container mx-auto px-6 py-8">
           <Tabs defaultValue="setup" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-14 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-15 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
               <TabsTrigger value="setup" className="gap-2">
                 <Key size={18} weight="bold" />
                 <span className="hidden sm:inline">Setup</span>
+              </TabsTrigger>
+              <TabsTrigger value="performance" className="gap-2">
+                <Trophy size={18} weight="bold" />
+                <span className="hidden sm:inline">Performance</span>
               </TabsTrigger>
               <TabsTrigger value="voice" className="gap-2">
                 <SpeakerHigh size={18} weight="bold" />
@@ -783,6 +1073,48 @@ Return as JSON:
                 </AlertDescription>
               </Alert>
               <TwitchIntegrationGuide />
+            </TabsContent>
+
+            <TabsContent value="performance" className="space-y-6">
+              <Alert className="bg-primary/10 border-primary/30">
+                <Trophy size={20} className="text-primary" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-primary">Performance Tracking:</strong> Track your gameplay metrics including APM (Actions Per Minute), accuracy, combos, and get AI-powered coaching suggestions to improve your skills.
+                </AlertDescription>
+              </Alert>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                  <PerformanceMetricsTracker
+                    isTracking={isPerformanceTracking}
+                    onToggleTracking={handleTogglePerformanceTracking}
+                    currentSession={currentPerformanceSession}
+                    latestMetric={latestPerformanceMetric || undefined}
+                  />
+                  <AICoachingPanel
+                    suggestions={coachingSuggestions || []}
+                    onDismiss={dismissCoachingSuggestion}
+                    onClearAll={clearAllCoachingSuggestions}
+                    isAnalyzing={isAnalyzingPerformance}
+                  />
+                </div>
+                <div className="space-y-6">
+                  <PerformanceSessionManager
+                    onStartSession={startPerformanceSession}
+                    isTracking={isPerformanceTracking}
+                  />
+                  <PerformanceSimulator
+                    isSimulating={!!performanceSimulationInterval}
+                    onToggleSimulation={togglePerformanceSimulation}
+                    simulationSpeed={simulationSpeed}
+                    onSpeedChange={setSimulationSpeed}
+                    skillLevel={simulationSkillLevel}
+                    onSkillLevelChange={setSimulationSkillLevel}
+                  />
+                </div>
+              </div>
+
+              <SkillProgressDashboard skillData={skillProgress || []} />
             </TabsContent>
 
             <TabsContent value="voice" className="space-y-6">
