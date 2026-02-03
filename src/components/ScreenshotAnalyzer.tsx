@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Image, Upload, X, Sparkle, Eye, Trash } from "@phosphor-icons/react";
+import { Image, Upload, X, Sparkle, Eye, Trash, Stack, Play, Pause } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface ScreenshotAnalysis {
@@ -37,6 +37,13 @@ interface ScreenshotAnalyzerProps {
   maxFileSize?: number;
 }
 
+interface BatchProgress {
+  total: number;
+  completed: number;
+  failed: number;
+  currentFile: string;
+}
+
 export function ScreenshotAnalyzer({ 
   onAnalysisComplete,
   maxFileSize = 10 * 1024 * 1024
@@ -45,36 +52,65 @@ export function ScreenshotAnalyzer({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  const [batchProgress, setBatchProgress] = useState<BatchProgress | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [queuedFiles, setQueuedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    const file = files[0];
+    const validFiles: File[] = [];
+    const invalidFiles: string[] = [];
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (!file.type.startsWith('image/')) {
+        invalidFiles.push(`${file.name} (not an image)`);
+        continue;
+      }
+
+      if (file.size > maxFileSize) {
+        invalidFiles.push(`${file.name} (too large)`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (invalidFiles.length > 0) {
+      toast.error(`Skipped ${invalidFiles.length} invalid file(s)`, {
+        description: invalidFiles.slice(0, 3).join(', ') + (invalidFiles.length > 3 ? '...' : ''),
+      });
+    }
+
+    if (validFiles.length === 0) {
+      toast.error('No valid files to analyze');
       return;
     }
 
-    if (file.size > maxFileSize) {
-      toast.error(`File size must be under ${(maxFileSize / 1024 / 1024).toFixed(0)}MB`);
-      return;
+    if (validFiles.length === 1) {
+      await analyzeScreenshot(validFiles[0]);
+    } else {
+      setIsBatchMode(true);
+      await analyzeBatch(validFiles);
     }
-
-    await analyzeScreenshot(file);
   };
 
-  const analyzeScreenshot = async (file: File) => {
-    setIsAnalyzing(true);
-    setUploadProgress(0);
+  const analyzeScreenshot = async (file: File, isBatch: boolean = false) => {
+    if (!isBatch) {
+      setIsAnalyzing(true);
+      setUploadProgress(0);
+    }
 
     try {
       const reader = new FileReader();
       
       reader.onprogress = (e) => {
-        if (e.lengthComputable) {
+        if (e.lengthComputable && !isBatch) {
           const progress = (e.loaded / e.total) * 50;
           setUploadProgress(progress);
         }
@@ -82,11 +118,11 @@ export function ScreenshotAnalyzer({
 
       reader.onload = async (e) => {
         const imageDataUrl = e.target?.result as string;
-        setUploadProgress(60);
+        if (!isBatch) setUploadProgress(60);
 
         const base64Data = imageDataUrl.split(',')[1];
 
-        setUploadProgress(70);
+        if (!isBatch) setUploadProgress(70);
 
         const prompt = (window.spark.llmPrompt as any)`You are an expert image analyst specializing in gaming screenshots and stream content analysis.
 
@@ -122,12 +158,12 @@ Return your analysis as JSON in this exact format:
 
 Be specific, enthusiastic, and helpful. If it's a gaming screenshot, provide game-specific insights.`;
 
-        setUploadProgress(80);
+        if (!isBatch) setUploadProgress(80);
 
         const response = await window.spark.llm(prompt, "gpt-4o", true);
         const analysisData = JSON.parse(response);
 
-        setUploadProgress(90);
+        if (!isBatch) setUploadProgress(90);
 
         const newAnalysis: ScreenshotAnalysis = {
           id: Date.now().toString() + Math.random(),
@@ -149,18 +185,18 @@ Be specific, enthusiastic, and helpful. If it's a gaming screenshot, provide gam
         };
 
         setAnalyses((current) => [newAnalysis, ...current]);
-        setUploadProgress(100);
+        if (!isBatch) {
+          setUploadProgress(100);
+          toast.success('Screenshot analyzed successfully!');
+          setSelectedImage(imageDataUrl);
+          setTimeout(() => {
+            setUploadProgress(0);
+          }, 1000);
+        }
         
         if (onAnalysisComplete) {
           onAnalysisComplete(newAnalysis);
         }
-
-        toast.success('Screenshot analyzed successfully!');
-        setSelectedImage(imageDataUrl);
-
-        setTimeout(() => {
-          setUploadProgress(0);
-        }, 1000);
       };
 
       reader.onerror = () => {
@@ -170,12 +206,17 @@ Be specific, enthusiastic, and helpful. If it's a gaming screenshot, provide gam
       reader.readAsDataURL(file);
     } catch (error) {
       console.error('Screenshot analysis error:', error);
-      toast.error('Failed to analyze screenshot');
-      setUploadProgress(0);
+      if (!isBatch) {
+        toast.error('Failed to analyze screenshot');
+        setUploadProgress(0);
+      }
+      throw error;
     } finally {
-      setIsAnalyzing(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      if (!isBatch) {
+        setIsAnalyzing(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
     }
   };
@@ -183,6 +224,81 @@ Be specific, enthusiastic, and helpful. If it's a gaming screenshot, provide gam
   const handleDeleteAnalysis = (id: string) => {
     setAnalyses((current) => current.filter(a => a.id !== id));
     toast.success('Analysis deleted');
+  };
+
+  const analyzeBatch = async (files: File[]) => {
+    setIsAnalyzing(true);
+    setIsPaused(false);
+    setQueuedFiles(files);
+    
+    const progress: BatchProgress = {
+      total: files.length,
+      completed: 0,
+      failed: 0,
+      currentFile: files[0]?.name || '',
+    };
+    
+    setBatchProgress(progress);
+    toast.success(`Starting batch analysis of ${files.length} screenshots`);
+
+    for (let i = 0; i < files.length; i++) {
+      if (isPaused) {
+        toast.info('Batch analysis paused');
+        setIsAnalyzing(false);
+        return;
+      }
+
+      const file = files[i];
+      progress.currentFile = file.name;
+      setBatchProgress({ ...progress });
+
+      try {
+        await analyzeScreenshot(file, true);
+        progress.completed++;
+      } catch (error) {
+        progress.failed++;
+        console.error(`Failed to analyze ${file.name}:`, error);
+      }
+
+      setBatchProgress({ ...progress });
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    setIsAnalyzing(false);
+    setIsBatchMode(false);
+    setQueuedFiles([]);
+    
+    const successCount = progress.completed;
+    const failCount = progress.failed;
+    
+    if (failCount === 0) {
+      toast.success(`Batch complete! Analyzed ${successCount} screenshot${successCount > 1 ? 's' : ''}`);
+    } else {
+      toast.warning(`Batch complete! ${successCount} succeeded, ${failCount} failed`);
+    }
+    
+    setBatchProgress(null);
+  };
+
+  const togglePause = () => {
+    setIsPaused((prev) => !prev);
+    if (isPaused) {
+      toast.info('Resuming batch analysis');
+      const remainingFiles = queuedFiles.slice(batchProgress?.completed || 0);
+      analyzeBatch(remainingFiles);
+    } else {
+      toast.info('Pausing batch analysis');
+    }
+  };
+
+  const cancelBatch = () => {
+    setIsPaused(false);
+    setIsAnalyzing(false);
+    setIsBatchMode(false);
+    setQueuedFiles([]);
+    setBatchProgress(null);
+    toast.info('Batch analysis cancelled');
   };
 
   const handleClearAll = () => {
@@ -230,6 +346,7 @@ Be specific, enthusiastic, and helpful. If it's a gaming screenshot, provide gam
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={handleFileSelect}
               className="hidden"
               disabled={isAnalyzing}
@@ -237,15 +354,19 @@ Be specific, enthusiastic, and helpful. If it's a gaming screenshot, provide gam
             
             <div className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Upload size={32} weight="bold" className="text-primary" />
+                {isBatchMode ? (
+                  <Stack size={32} weight="bold" className="text-primary" />
+                ) : (
+                  <Upload size={32} weight="bold" className="text-primary" />
+                )}
               </div>
               
               <div>
                 <p className="text-sm font-medium mb-1">
-                  Upload a screenshot to analyze
+                  {isBatchMode ? 'Batch Analysis Mode' : 'Upload screenshots to analyze'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  PNG, JPG, or WebP • Max {(maxFileSize / 1024 / 1024).toFixed(0)}MB
+                  PNG, JPG, or WebP • Max {(maxFileSize / 1024 / 1024).toFixed(0)}MB per file • Multiple files supported
                 </p>
               </div>
 
@@ -254,11 +375,83 @@ Be specific, enthusiastic, and helpful. If it's a gaming screenshot, provide gam
                 disabled={isAnalyzing}
                 className="gap-2"
               >
-                <Upload size={18} weight="bold" />
-                {isAnalyzing ? 'Analyzing...' : 'Select Screenshot'}
+                {isBatchMode ? (
+                  <Stack size={18} weight="bold" />
+                ) : (
+                  <Upload size={18} weight="bold" />
+                )}
+                {isAnalyzing ? 'Analyzing...' : 'Select Screenshot(s)'}
               </Button>
             </div>
           </div>
+
+          {batchProgress && (
+            <div className="space-y-3">
+              <Alert className="bg-primary/10 border-primary/30">
+                <Stack size={20} className="text-primary" />
+                <AlertDescription className="text-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">
+                      Batch Analysis Progress
+                    </span>
+                    <span className="text-xs">
+                      {batchProgress.completed + batchProgress.failed} / {batchProgress.total}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Current: {batchProgress.currentFile}
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="text-xs bg-accent/20 text-accent border-accent/30">
+                      ✓ {batchProgress.completed} completed
+                    </Badge>
+                    {batchProgress.failed > 0 && (
+                      <Badge variant="outline" className="text-xs bg-destructive/20 text-destructive border-destructive/30">
+                        ✗ {batchProgress.failed} failed
+                      </Badge>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-2">
+                <Progress 
+                  value={((batchProgress.completed + batchProgress.failed) / batchProgress.total) * 100} 
+                  className="h-2" 
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={togglePause}
+                    disabled={!isAnalyzing}
+                    className="gap-2 flex-1"
+                  >
+                    {isPaused ? (
+                      <>
+                        <Play size={16} weight="fill" />
+                        Resume
+                      </>
+                    ) : (
+                      <>
+                        <Pause size={16} weight="fill" />
+                        Pause
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={cancelBatch}
+                    className="gap-2 flex-1 text-destructive hover:bg-destructive/10"
+                  >
+                    <X size={16} weight="bold" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {isAnalyzing && uploadProgress > 0 && (
             <div className="space-y-2">
