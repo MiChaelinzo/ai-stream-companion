@@ -4,6 +4,8 @@
 
 A fully functional **AI companion simulator and development tool** for Twitch and YouTube streamers. Test and refine your AI personality with realistic chat simulation, voice synthesis, 3D avatar, and gameplay commentary - all powered by Google Gemini 3's multimodal AI. Like Neuro-sama, but customizable with your unique personality, voice, and visual style.
 
+**✨ NEW: Real backend server included for LIVE Twitch/YouTube chat integration!**
+
 ---
 
 ## ⚡ What Works Right Now (No Setup Required)
@@ -30,19 +32,37 @@ A fully functional **AI companion simulator and development tool** for Twitch an
 
 ## ⚠️ What Requires Additional Setup
 
-### 🌐 **Live Platform Integration** (Optional - Requires Backend)
-To connect to **real Twitch/YouTube chat** while you stream, you'll need:
-- ✅ A separate backend server (Node.js/Python)
-- ✅ WebSocket/IRC connection to platforms
-- ✅ OAuth authentication handling
-- ✅ Message forwarding to this frontend
+### 🌐 **Live Platform Integration** (NOW AVAILABLE!)
 
-**Why?** Browsers cannot directly connect to Twitch IRC or YouTube Live Chat due to CORS restrictions, token security requirements, and WebSocket limitations.
+**✨ NEW: Complete backend server now included in the `backend/` folder!**
 
-**Solution:** We provide complete backend deployment guides with working code:
-- 📖 **[QUICK_START.md](./QUICK_START.md)** - 30-minute backend setup
+To connect to **real Twitch/YouTube chat** while you stream, use our production-ready backend:
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Add your Twitch/YouTube credentials to .env
+npm run dev
+```
+
+Then connect via the **Backend Server** tab in the UI!
+
+**Includes:**
+- ✅ Real-time Twitch IRC integration
+- ✅ YouTube Live Chat API integration  
+- ✅ WebSocket communication with frontend
+- ✅ OAuth token management
+- ✅ AI response generation
+- ✅ Poll creation support
+
+**Documentation:**
+- 📖 **[backend/README.md](./backend/README.md)** - Backend quick start
+- 📖 **[BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)** - Integration overview
 - 📖 **[BACKEND_DEPLOYMENT_GUIDE.md](./BACKEND_DEPLOYMENT_GUIDE.md)** - Production deployment
 - 🔧 **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and fixes
+
+**Why is this needed?** Browsers cannot directly connect to Twitch IRC or YouTube Live Chat due to CORS restrictions, token security requirements, and WebSocket limitations. The backend server handles these connections securely.
 
 ---
 
@@ -200,12 +220,38 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
 ### Production Deployment (Optional - For Live Streaming)
 
 #### Step 6: Deploy Backend Service
-1. **Want live Twitch/YouTube integration?**
-2. See **[QUICK_START.md](./QUICK_START.md)** for 30-minute backend setup with code
-3. Or **[BACKEND_DEPLOYMENT_GUIDE.md](./BACKEND_DEPLOYMENT_GUIDE.md)** for full deployment
-4. Configure tokens in **Setup** tab
-5. Connect platforms in **Platforms** tab
-6. Start monitoring in **Monitor** tab
+
+**NEW: Backend server included! No need to build from scratch.**
+
+1. **Navigate to backend folder:**
+   ```bash
+   cd backend
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure credentials:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Twitch/YouTube/OpenAI credentials
+   ```
+
+4. **Start the backend:**
+   ```bash
+   npm run dev
+   ```
+
+5. **Connect from the UI:**
+   - Open the **Backend Server** tab
+   - Click "Connect to Backend"
+   - Use the **Platforms** tab to connect Twitch/YouTube
+
+**Complete guides:**
+- **[backend/README.md](./backend/README.md)** - Quick start guide
+- **[BACKEND_DEPLOYMENT_GUIDE.md](./BACKEND_DEPLOYMENT_GUIDE.md)** - Full deployment options
 
 ---
 

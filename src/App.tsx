@@ -36,6 +36,7 @@ import { AICoachingPanel } from "@/components/AICoachingPanel";
 import { PerformanceSessionManager } from "@/components/PerformanceSessionManager";
 import { SkillProgressDashboard } from "@/components/SkillProgressDashboard";
 import { PerformanceSimulator } from "@/components/PerformanceSimulator";
+import { BackendConnection } from "@/components/BackendConnection";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -53,7 +54,7 @@ import {
   SkillProgress
 } from "@/lib/types";
 import { useSpeechSynthesis, VoiceSettings } from "@/hooks/use-speech-synthesis";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy, MagnifyingGlass, House } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy, MagnifyingGlass, House, PlugsConnected } from "@phosphor-icons/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
@@ -141,6 +142,7 @@ function App() {
   const [isAnalyzingPerformance, setIsAnalyzingPerformance] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [tabSearchQuery, setTabSearchQuery] = useState("");
+  const [isBackendConnected, setIsBackendConnected] = useState(false);
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
@@ -1019,6 +1021,7 @@ Return as JSON:
               <TabsList className="w-full justify-start h-auto flex-wrap gap-2 bg-card/50 backdrop-blur-sm p-3">
                 {[
                   { value: "home", icon: House, label: "Home" },
+                  { value: "backend", icon: PlugsConnected, label: "Backend Server", badge: isBackendConnected ? "Connected" : "Disconnected" },
                   { value: "monitor", icon: Broadcast, label: "Live Monitor" },
                   { value: "personality", icon: Robot, label: "Personality" },
                   { value: "voice", icon: SpeakerHigh, label: "Voice & SSML" },
@@ -1041,10 +1044,21 @@ Return as JSON:
                   <TabsTrigger 
                     key={tab.value} 
                     value={tab.value} 
-                    className="gap-2 px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    className="gap-2 px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative"
                   >
                     <tab.icon size={18} weight="bold" />
                     <span>{tab.label}</span>
+                    {tab.badge && (
+                      <Badge 
+                        className={`ml-2 text-[10px] px-1.5 py-0 ${
+                          isBackendConnected 
+                            ? 'bg-accent/30 text-accent border-accent/40' 
+                            : 'bg-muted text-muted-foreground border-border'
+                        }`}
+                      >
+                        {tab.badge}
+                      </Badge>
+                    )}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -1052,15 +1066,15 @@ Return as JSON:
               {tabSearchQuery && (
                 <p className="text-sm text-muted-foreground px-2">
                   Showing {[
-                    "home", "monitor", "personality", "voice", "vision", "performance",
+                    "home", "backend", "monitor", "personality", "voice", "vision", "performance",
                     "chat", "sentiment", "analytics", "responses", "templates",
                     "commands", "polls", "platforms", "settings"
                   ].filter(value => 
                     value.toLowerCase().includes(tabSearchQuery.toLowerCase()) ||
-                    ["Home", "Live Monitor", "Personality", "Voice & SSML", "Vision AI", "Performance",
+                    ["Home", "Backend Server", "Live Monitor", "Personality", "Voice & SSML", "Vision AI", "Performance",
                      "Chat Test", "Sentiment", "Analytics", "AI Responses", "Templates",
                      "Commands", "Polls", "Platforms", "Stream Settings"]
-                    .find((_, i) => ["home", "monitor", "personality", "voice", "vision", "performance",
+                    .find((_, i) => ["home", "backend", "monitor", "personality", "voice", "vision", "performance",
                                     "chat", "sentiment", "analytics", "responses", "templates",
                                     "commands", "polls", "platforms", "settings"][i] === value)
                     ?.toLowerCase().includes(tabSearchQuery.toLowerCase())
@@ -1071,6 +1085,24 @@ Return as JSON:
 
             <TabsContent value="home" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div 
+                  onClick={() => setActiveTab("backend")}
+                  className="group cursor-pointer bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20 rounded-lg p-6 hover:border-accent/40 transition-all hover:shadow-lg hover:shadow-accent/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-accent/20 group-hover:bg-accent/30 transition-colors">
+                      <PlugsConnected size={24} weight="bold" className="text-accent" />
+                    </div>
+                    <h3 className="font-bold text-lg">Backend Server</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Connect to backend server for REAL Twitch/YouTube chat integration
+                  </p>
+                  <Badge className={`mt-3 ${isBackendConnected ? 'bg-accent/20 text-accent border-accent/30' : 'bg-muted text-muted-foreground'}`}>
+                    {isBackendConnected ? 'Connected' : 'Not Connected'}
+                  </Badge>
+                </div>
+
                 <div 
                   onClick={() => setActiveTab("monitor")}
                   className="group cursor-pointer bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-all hover:shadow-lg hover:shadow-primary/10"
@@ -1165,11 +1197,17 @@ Return as JSON:
               <Alert className="bg-accent/10 border-accent/30">
                 <Info size={20} className="text-accent" />
                 <AlertDescription className="text-sm">
-                  <strong className="text-accent">Getting Started:</strong> This is a fully functional AI companion simulator powered by Gemini 3. Start with the <strong>Live Monitor</strong> tab to enable chat simulation and see your AI respond in real-time with voice, emotions, and gameplay commentary.
+                  <strong className="text-accent">Getting Started:</strong> Connect the <strong>Backend Server</strong> tab to enable REAL Twitch/YouTube chat, or use the <strong>Live Monitor</strong> tab for simulation mode. The AI companion features voice, emotions, and gameplay commentary powered by Gemini 3.
                 </AlertDescription>
               </Alert>
 
               <TwitchIntegrationGuide />
+            </TabsContent>
+
+            <TabsContent value="backend" className="space-y-6">
+              <BackendConnection 
+                onConnectionChange={(connected) => setIsBackendConnected(connected)}
+              />
             </TabsContent>
 
             <TabsContent value="setup" className="space-y-6">

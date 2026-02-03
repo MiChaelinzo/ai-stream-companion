@@ -4,6 +4,8 @@
 
 This guide provides complete backend implementation for connecting your AI Streamer Companion to **real** Twitch and YouTube live streams. The frontend you've built is the control panel - this backend handles the actual platform connections.
 
+**✨ NEW: Complete backend server implementation is now included in the `backend/` folder!**
+
 ---
 
 ## 📋 Table of Contents
@@ -78,24 +80,27 @@ This guide provides complete backend implementation for connecting your AI Strea
 3. Click "Generate Token"
 4. Save the **ACCESS TOKEN**, **REFRESH TOKEN**, and **CLIENT ID**
 
-### Step 2: Backend Server Code (Twitch)
+### Step 2: Backend Server Setup
 
-Create a new directory for your backend server:
-
-```bash
-mkdir ai-streamer-backend
-cd ai-streamer-backend
-npm init -y
-```
-
-Install required packages:
+The backend server is already included in the `backend/` folder. Navigate to it:
 
 ```bash
-npm install express ws tmi.js dotenv cors axios openai
-npm install --save-dev nodemon typescript @types/node @types/express @types/ws
+cd backend
 ```
 
-Create `.env` file:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create `.env` file from the example:
+
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file with your credentials:
 
 ```env
 # Twitch Configuration
@@ -103,11 +108,14 @@ TWITCH_CLIENT_ID=your_client_id_here
 TWITCH_CLIENT_SECRET=your_client_secret_here
 TWITCH_ACCESS_TOKEN=your_access_token_here
 TWITCH_REFRESH_TOKEN=your_refresh_token_here
-TWITCH_CHANNEL=michaelinzo
+TWITCH_CHANNEL=your_channel_name
 
 # YouTube Configuration
 YOUTUBE_API_KEY=your_youtube_api_key_here
-YOUTUBE_CHANNEL_ID=your_channel_id_here
+YOUTUBE_CLIENT_ID=your_youtube_client_id_here
+YOUTUBE_CLIENT_SECRET=your_youtube_client_secret_here
+YOUTUBE_REFRESH_TOKEN=your_youtube_refresh_token_here
+YOUTUBE_LIVE_CHAT_ID=your_live_chat_id_here
 
 # OpenAI Configuration
 OPENAI_API_KEY=your_openai_key_here
@@ -117,7 +125,33 @@ PORT=3001
 FRONTEND_URL=http://localhost:5173
 ```
 
-Create `server.js`:
+### Step 3: Start the Backend
+
+Development mode (with auto-restart):
+```bash
+npm run dev
+```
+
+Production mode:
+```bash
+npm run build
+npm start
+```
+
+The server will start on `http://localhost:3001` with WebSocket support.
+
+### Step 4: Connect from Frontend
+
+1. Open the frontend app: `http://localhost:5173`
+2. Navigate to the **Backend Server** tab
+3. Click "Connect to Backend"
+4. Backend URL: `ws://localhost:3001`
+5. Once connected, go to **Platforms** tab
+6. Enter your Twitch/YouTube credentials
+7. Click "Connect"
+8. Go to **Live Monitor** tab and toggle "Start Monitoring"
+
+**🎉 You're now connected to real chat!**
 
 ```javascript
 const express = require('express');
