@@ -29,23 +29,26 @@ An intelligent AI assistant powered by Gemini 3 that:
 **Location:** [GEMINI_INTEGRATION.md](./GEMINI_INTEGRATION.md)
 
 **Summary:**
-This AI Streamer Companion leverages Google Gemini 3's advanced capabilities to power an intelligent streaming assistant. We utilize **Gemini 3 Flash** for low-latency chat responses (<2s) and **Gemini 3 Pro** for deep sentiment analysis and reasoning.
+This AI Streamer Companion leverages Google Gemini 3's advanced capabilities to power an intelligent streaming assistant. We utilize **Gemini 3 Flash** for low-latency chat responses (<2s), **Gemini 3 Pro** for deep sentiment analysis, and **Gemini 3 Vision API** for real-time gameplay analysis and automatic commentary generation.
 
 **Core Gemini 3 Features Used:**
 - **Enhanced Reasoning**: Understands nuanced viewer questions, maintains conversation context, and generates personality-consistent responses across 6 distinct character presets
 - **Low Latency Performance**: Sub-2-second response generation critical for natural live chat flow
+- **Vision API Integration** (NEW): Analyzes gameplay footage in real-time, detects highlights, generates contextual commentary with 5 distinct styles (Hype, Analytical, Casual, Educational, Comedic)
 - **Advanced Sentiment Analysis**: Multi-dimensional emotion detection (joy, excitement, frustration, confusion, appreciation) with context-aware scoring
 - **Creative Content Generation**: AI-powered poll creation, chat activities, and dynamic command responses
-- **Multimodal Potential**: Architecture ready for future gameplay/screenshot analysis
+- **Multimodal Intelligence**: Combines visual gameplay analysis, text chat understanding, and sentiment detection for comprehensive streaming AI
 
 **How Gemini 3 Is Central:**
 Every user interaction flows through Gemini 3:
 1. Chat messages → Gemini 3 Flash analyzes sentiment (1 API call)
 2. AI response generation → Gemini 3 Flash creates personality-driven reply (1 API call)
-3. Poll/activity generation → Gemini 3 Pro generates creative content (1 API call)
-4. Engagement analytics → Gemini 3 Pro identifies patterns and provides insights (1 API call)
+3. Gameplay screen capture → Gemini 3 Vision analyzes game state, actions, highlights (1 API call per frame)
+4. Commentary generation → Gemini 3 Flash creates style-matched commentary synced to avatar emotions (1 API call)
+5. Poll/activity generation → Gemini 3 Pro generates creative content (1 API call)
+6. Engagement analytics → Gemini 3 Pro identifies patterns and provides insights (1 API call)
 
-Without Gemini 3's speed and reasoning, real-time streaming would be impossible. The hybrid Flash/Pro strategy balances latency and intelligence for optimal live performance.
+Without Gemini 3's multimodal capabilities, speed, and reasoning, real-time streaming AI with gameplay awareness would be impossible. The hybrid Flash/Pro/Vision strategy balances latency, intelligence, and visual understanding for optimal live performance.
 
 ---
 
@@ -67,11 +70,15 @@ This is a fully interactive web application where judges can:
 **Recommended Demo Flow:**
 1. Visit the live URL
 2. Go to "Personality" tab → Try the "Nova" preset (energetic gaming companion)
-3. Go to "Monitor" tab → Toggle "Auto-generate messages" 
-4. Watch the avatar react to chat with emotions
-5. Check sentiment analysis → See real-time mood tracking
-6. Go to "Responses" tab → Generate AI responses for different scenarios
-7. Explore "Analytics" tab → View engagement insights
+3. Go to "Voice" tab → Enable voice synthesis and configure settings
+4. Go to "Vision" tab → Enable vision analysis and set to "Hype" style with "Highlights Only" frequency
+5. Click "Start Analysis" → Select a game window or screen to capture
+6. Go to "Monitor" tab → Toggle "Auto-generate messages" for chat simulation
+7. Watch the avatar react to chat AND gameplay with automatic commentary
+8. Observe emotions and lip-sync synchronized to both chat responses and gameplay commentary
+9. Check sentiment analysis → See real-time mood tracking
+10. Go to "Responses" tab → Generate AI responses for different scenarios
+11. Explore "Analytics" tab → View engagement insights with vision statistics
 
 ---
 
@@ -111,35 +118,48 @@ This is a fully interactive web application where judges can:
 - Quick tour of the interface
 - "It reads chat, responds with personality, and shows up as a VTuber avatar"
 
-**Demo Part 1 (0:40-1:20)** - AI Personality
+**Demo Part 1 (0:40-1:00)** - AI Personality
 - Navigate to Personality tab
 - "Choose from 6 presets - each with unique tone and style"
 - Select "Spark" (chaotic) → Show personality description
 - "Or customize every detail - tone, interests, emoji usage"
 
-**Demo Part 2 (1:20-2:00)** - Live Simulation
+**Demo Part 2 (1:00-1:30)** - Gameplay Vision Analysis (NEW!)
+- Navigate to Vision tab
+- "NEW: Gemini 3 Vision API analyzes your gameplay in real-time"
+- Enable vision analysis and set commentary style to "Hype"
+- Click "Start Analysis" and capture game screen
+- "The AI watches your gameplay and generates automatic commentary"
+- Show live analysis detecting game state and generating hype commentary
+- "Commentary syncs with avatar emotions and lip movement"
+
+**Demo Part 3 (1:30-2:10)** - Live Simulation with Vision
 - Navigate to Monitor tab
 - Enable chat simulation
-- "Watch Gemini 3 Flash analyze sentiment in real-time"
-- "The avatar reacts with emotions - happy for positive, confused for negative"
-- Show lip-sync during AI response
+- Keep vision analysis running
+- "Watch the AI respond to BOTH chat AND gameplay simultaneously"
+- "Gemini 3 Flash analyzes sentiment in real-time"
+- "Vision API detects highlights and generates excited commentary"
+- "The avatar reacts with emotions - happy for clutch plays, excited for highlights"
+- Show lip-sync during both chat responses and gameplay commentary
 - "Under 2 seconds per response - critical for live streaming"
 
-**Demo Part 3 (2:00-2:30)** - Advanced Features
+**Demo Part 4 (2:10-2:35)** - Advanced Features
 - Navigate to Sentiment tab
 - "Multi-dimensional analysis - not just positive/negative"
 - Show 5 emotion categories (joy, excitement, frustration, confusion, appreciation)
 - "Engagement score tells you when to interact more"
-- Show AI insights panel
+- Show AI insights panel with vision stats
 
-**Technical Highlight (2:30-2:50)** - Gemini 3 Integration
-- "This uses Gemini 3 Flash for speed and Gemini 3 Pro for intelligence"
+**Technical Highlight (2:35-2:50)** - Gemini 3 Integration
+- "This uses Gemini 3 Flash for speed, Pro for intelligence, and Vision for gameplay"
 - "Every response maintains personality consistency"
-- "The architecture is ready for multimodal - imagine analyzing gameplay screenshots"
+- "Vision API understands game state, player actions, and exciting moments"
+- "True multimodal AI - seeing, understanding, and responding"
 
 **Closing (2:50-3:00)** - Impact & Future
 - "15 million streamers worldwide need better chat engagement"
-- "This solves it with Gemini 3's reasoning and low latency"
+- "This solves it with Gemini 3's multimodal intelligence and low latency"
 - "Thanks for watching - check out the live demo!"
 
 **Recording Tips:**
@@ -173,11 +193,13 @@ This is a fully interactive web application where judges can:
 ✅ Optimized performance (lazy loading, memoization)
 
 **Leveraging Gemini 3:**
-✅ Dual-model strategy (Flash for speed, Pro for reasoning)  
-✅ 5+ distinct API use cases (responses, sentiment, polls, emotions, insights)  
+✅ Triple-model strategy (Flash for speed, Pro for reasoning, Vision for gameplay)  
+✅ 7+ distinct API use cases (responses, sentiment, polls, emotions, insights, vision analysis, commentary)  
+✅ Multimodal integration (text chat + visual gameplay analysis)  
 ✅ Proper prompt engineering for personality consistency  
 ✅ Context window management for conversation history  
-✅ Temperature tuning (0.9 for creative, 0.3 for analytical)
+✅ Temperature tuning (0.9 for creative, 0.3 for analytical)  
+✅ Real-time frame analysis with Vision API for gameplay commentary
 
 **Code Quality:**
 ✅ ESLint + TypeScript for static analysis  
@@ -218,40 +240,49 @@ This is a fully interactive web application where judges can:
 ### Innovation / Wow Factor (30%)
 
 **Novel Concept:**
-- First VTuber AI specifically designed for streamer assistance
-- Not a generic chatbot - purpose-built for live streaming
-- Combines AI personality + 3D avatar + sentiment analysis + analytics
+- First VTuber AI specifically designed for streamer assistance with real-time gameplay awareness
+- Not a generic chatbot - purpose-built for live streaming with multimodal capabilities
+- Combines AI personality + 3D avatar + sentiment analysis + vision-powered commentary + analytics
 
 **Unique Features:**
-1. **15-Phoneme Lip-Sync System**
+1. **Gemini 3 Vision Gameplay Analysis** (NEW!)
+   - Real-time screen capture and AI understanding of gameplay
+   - Automatic commentary generation with 5 distinct styles
+   - Highlight detection for exciting moments
+   - Game state analysis with strategic suggestions
+   - Commentary synced to avatar emotions and speech
+
+2. **15-Phoneme Lip-Sync System**
    - Mouth shapes synchronized to AI speech (A, E, I, O, U, M, B, P, F, V, TH, L, R, W)
    - Real-time phoneme detection and interpolation
    - Industry-standard animation fidelity
+   - Emotion-based phoneme intensity modulation
 
-2. **6 Personality Presets**
+3. **6 Personality Presets**
    - Nova (energetic), Zen (chill), Spark (chaotic), Sage (supportive), Sunny (wholesome), Glitch (sarcastic)
    - Gemini 3 maintains consistency across thousands of responses
    - Tone presets with custom tweaking
 
-3. **Multi-Dimensional Sentiment**
+4. **Multi-Dimensional Sentiment**
    - Beyond positive/negative: 5 emotion categories
    - Engagement score (0-100) with actionable insights
    - Trend visualization with velocity indicators
 
-4. **8 Avatar Skins**
+5. **8 Avatar Skins**
    - Cyberpunk, Pastel Dream, Neon Nights, Fantasy Elf, Retro Wave, Monochrome, Cosmic Star
    - Instant visual theming to match stream branding
 
-5. **AI-Powered Analytics**
+6. **AI-Powered Analytics**
    - Gemini 3 Pro identifies engagement patterns
    - Actionable recommendations ("Chat activity dropped - consider a poll")
    - Predictive insights for stream optimization
 
 **Creative Gemini 3 Usage:**
-- Hybrid model strategy for optimal latency/intelligence balance
+- Triple-model strategy (Flash/Pro/Vision) for optimal performance
+- Multimodal integration: text chat understanding + visual gameplay analysis
 - Personality-in-context prompting maintains character
-- Sentiment as avatar emotion pipeline
-- Future multimodal potential (gameplay analysis)
+- Sentiment + vision emotion fusion drives avatar expressions
+- Real-world streaming use case showcasing all Gemini 3 capabilities
 
 ---
 

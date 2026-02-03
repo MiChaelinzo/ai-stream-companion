@@ -74,13 +74,17 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
 - **Emoji & Slang Toggle** - Fine-tune communication style
 - **Gemini 3 Powered** - Maintains consistent personality across all interactions
 
-#### 👁️ **Gameplay Vision Analysis (NEW!)**
+#### 👁️ **Gameplay Vision Analysis**
 - **Real-time Screen Capture** - Analyzes gameplay using Gemini 3 Vision API
 - **Automatic Commentary** - AI generates hype, tips, and reactions to your plays
 - **Highlight Detection** - Identifies epic moments, clutch plays, and fails
-- **Customizable Frequency** - Commentary on all actions or highlights only
+- **5 Commentary Styles** - Hype, Analytical, Casual, Educational, Comedic
+- **Configurable Frequency** - All actions, highlights only, or occasional
 - **Game Context Aware** - Tailors commentary to specific games you're playing
 - **Sync with Avatar** - Commentary triggers matching emotions and lip movement
+- **Strategic Tips** - Optional gameplay advice based on visual analysis
+
+📖 **[Complete Vision Setup Guide](./VISION_SETUP_GUIDE.md)** - Full configuration and usage instructions
 
 #### 🔊 **Voice Synthesis & SSML (NEW!)**
 - **Text-to-Speech** - Avatar speaks all responses audibly
@@ -152,14 +156,30 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
 5. Enable SSML for advanced speech control
 6. Try the **SSML Editor** for manual control or **Auto-Enhancement** for AI assistance
 
-#### Step 3: Set Up Gameplay Vision 👁️ (Optional)
+#### Step 3: Set Up Gameplay Vision 👁️
+**NEW: Automatic AI Commentary on Your Gameplay!**
+
 1. Go to **Vision** tab  
-2. Toggle "Enable Vision Analysis"
-3. Set analysis interval (10-60 seconds)
-4. Choose commentary style (Hype, Analytical, Casual, Educational, Funny)
-5. Select frequency (All Actions or Highlights Only)
-6. Enter game context (e.g., "Playing Elden Ring")
-7. Click "Start Analysis" to begin capturing screen
+2. Toggle **"Enable Vision Analysis"**
+3. Toggle **"Auto Commentary"**
+4. Set analysis interval (15-20 seconds recommended)
+5. Choose **commentary style**:
+   - **🔥 Hype** - High energy excitement
+   - **📊 Analytical** - Strategic insights
+   - **😎 Casual** - Relaxed and friendly
+   - **📚 Educational** - Teaching focused
+   - **😂 Comedic** - Funny observations
+6. Select **commentary frequency**:
+   - **Highlights Only** (recommended) - Only exciting moments
+   - **All** - Comment on every analysis
+   - **Occasional** - Balanced approach
+7. Enter game context (e.g., "Playing Elden Ring, action RPG")
+8. Click **"Start Analysis"** to begin capturing screen
+9. Grant screen sharing permission when prompted
+10. Select your game window
+11. Watch AI generate commentary automatically! 🎮
+
+📖 **[Read the Complete Vision Setup Guide](./VISION_SETUP_GUIDE.md)** for detailed configuration, troubleshooting, and best practices
 
 #### Step 4: Test Chat Responses
 1. Use **Chat** tab simulator
@@ -237,6 +257,17 @@ This project demonstrates **Google Gemini 3's** cutting-edge capabilities in rea
   - Phoneme mapping for lip-sync
   - Voice optimization tips
   - Troubleshooting common issues
+
+### 👁️ **Gameplay Vision Analysis**
+- **[VISION_SETUP_GUIDE.md](./VISION_SETUP_GUIDE.md)** 🎮 **NEW!**
+  - Complete setup walkthrough (5 minutes)
+  - Configuration options explained
+  - All 5 commentary styles with examples
+  - Avatar emotion sync details
+  - Performance optimization
+  - Troubleshooting screen capture issues
+  - Best practices for each game type
+  - Privacy & security recommendations
 
 ### 🎭 **Advanced Avatar Features**
 - **[EMOTION_SYNC_GUIDE.md](./EMOTION_SYNC_GUIDE.md)**
