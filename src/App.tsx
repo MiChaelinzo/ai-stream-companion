@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useKV } from "@github/spark/hooks";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { PersonalityConfig } from "@/components/PersonalityConfig";
 import { ChatSimulator } from "@/components/ChatSimulator";
 import { ResponseGenerator } from "@/components/ResponseGenerator";
@@ -52,7 +53,7 @@ import {
   SkillProgress
 } from "@/lib/types";
 import { useSpeechSynthesis, VoiceSettings } from "@/hooks/use-speech-synthesis";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy, MagnifyingGlass, House } from "@phosphor-icons/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
@@ -138,6 +139,8 @@ function App() {
   const [simulationSpeed, setSimulationSpeed] = useState(1);
   const [simulationSkillLevel, setSimulationSkillLevel] = useState(50);
   const [isAnalyzingPerformance, setIsAnalyzingPerformance] = useState(false);
+  const [activeTab, setActiveTab] = useState("home");
+  const [tabSearchQuery, setTabSearchQuery] = useState("");
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
@@ -1001,69 +1004,173 @@ Return as JSON:
         </header>
 
         <main className="container mx-auto px-6 py-8">
-          <Tabs defaultValue="setup" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-15 max-w-7xl mx-auto bg-card/50 backdrop-blur-sm">
-              <TabsTrigger value="setup" className="gap-2">
-                <Key size={18} weight="bold" />
-                <span className="hidden sm:inline">Setup</span>
-              </TabsTrigger>
-              <TabsTrigger value="performance" className="gap-2">
-                <Trophy size={18} weight="bold" />
-                <span className="hidden sm:inline">Performance</span>
-              </TabsTrigger>
-              <TabsTrigger value="voice" className="gap-2">
-                <SpeakerHigh size={18} weight="bold" />
-                <span className="hidden sm:inline">Voice</span>
-              </TabsTrigger>
-              <TabsTrigger value="vision" className="gap-2">
-                <Eye size={18} weight="bold" />
-                <span className="hidden sm:inline">Vision</span>
-              </TabsTrigger>
-              <TabsTrigger value="monitor" className="gap-2">
-                <Broadcast size={18} weight="bold" />
-                <span className="hidden sm:inline">Monitor</span>
-              </TabsTrigger>
-              <TabsTrigger value="sentiment" className="gap-2">
-                <Smiley size={18} weight="fill" />
-                <span className="hidden sm:inline">Sentiment</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2">
-                <ChartLine size={18} weight="bold" />
-                <span className="hidden sm:inline">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="platforms" className="gap-2">
-                <LinkIcon size={18} weight="bold" />
-                <span className="hidden sm:inline">Platforms</span>
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="gap-2">
-                <GearSix size={18} weight="bold" />
-                <span className="hidden sm:inline">Settings</span>
-              </TabsTrigger>
-              <TabsTrigger value="chat" className="gap-2">
-                <ChatCircle size={18} weight="bold" />
-                <span className="hidden sm:inline">Chat</span>
-              </TabsTrigger>
-              <TabsTrigger value="responses" className="gap-2">
-                <Lightning size={18} weight="fill" />
-                <span className="hidden sm:inline">Responses</span>
-              </TabsTrigger>
-              <TabsTrigger value="templates" className="gap-2">
-                <ListChecks size={18} weight="bold" />
-                <span className="hidden sm:inline">Templates</span>
-              </TabsTrigger>
-              <TabsTrigger value="commands" className="gap-2">
-                <Terminal size={18} weight="bold" />
-                <span className="hidden sm:inline">Commands</span>
-              </TabsTrigger>
-              <TabsTrigger value="polls" className="gap-2">
-                <Question size={18} weight="bold" />
-                <span className="hidden sm:inline">Polls</span>
-              </TabsTrigger>
-              <TabsTrigger value="personality" className="gap-2">
-                <Robot size={18} weight="bold" />
-                <span className="hidden sm:inline">Personality</span>
-              </TabsTrigger>
-            </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <div className="space-y-4">
+              <div className="relative max-w-md">
+                <MagnifyingGlass size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search tabs (e.g., 'voice', 'chat', 'performance')..."
+                  value={tabSearchQuery}
+                  onChange={(e) => setTabSearchQuery(e.target.value)}
+                  className="pl-10 bg-card/50 backdrop-blur-sm border-border/50"
+                />
+              </div>
+
+              <TabsList className="w-full justify-start h-auto flex-wrap gap-2 bg-card/50 backdrop-blur-sm p-3">
+                {[
+                  { value: "home", icon: House, label: "Home" },
+                  { value: "monitor", icon: Broadcast, label: "Live Monitor" },
+                  { value: "personality", icon: Robot, label: "Personality" },
+                  { value: "voice", icon: SpeakerHigh, label: "Voice & SSML" },
+                  { value: "vision", icon: Eye, label: "Vision AI" },
+                  { value: "performance", icon: Trophy, label: "Performance" },
+                  { value: "chat", icon: ChatCircle, label: "Chat Test" },
+                  { value: "sentiment", icon: Smiley, label: "Sentiment" },
+                  { value: "analytics", icon: ChartLine, label: "Analytics" },
+                  { value: "responses", icon: Lightning, label: "AI Responses" },
+                  { value: "templates", icon: ListChecks, label: "Templates" },
+                  { value: "commands", icon: Terminal, label: "Commands" },
+                  { value: "polls", icon: Question, label: "Polls" },
+                  { value: "platforms", icon: LinkIcon, label: "Platforms" },
+                  { value: "settings", icon: GearSix, label: "Stream Settings" },
+                ].filter(tab => 
+                  tabSearchQuery === "" || 
+                  tab.label.toLowerCase().includes(tabSearchQuery.toLowerCase()) ||
+                  tab.value.toLowerCase().includes(tabSearchQuery.toLowerCase())
+                ).map((tab) => (
+                  <TabsTrigger 
+                    key={tab.value} 
+                    value={tab.value} 
+                    className="gap-2 px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    <tab.icon size={18} weight="bold" />
+                    <span>{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {tabSearchQuery && (
+                <p className="text-sm text-muted-foreground px-2">
+                  Showing {[
+                    "home", "monitor", "personality", "voice", "vision", "performance",
+                    "chat", "sentiment", "analytics", "responses", "templates",
+                    "commands", "polls", "platforms", "settings"
+                  ].filter(value => 
+                    value.toLowerCase().includes(tabSearchQuery.toLowerCase()) ||
+                    ["Home", "Live Monitor", "Personality", "Voice & SSML", "Vision AI", "Performance",
+                     "Chat Test", "Sentiment", "Analytics", "AI Responses", "Templates",
+                     "Commands", "Polls", "Platforms", "Stream Settings"]
+                    .find((_, i) => ["home", "monitor", "personality", "voice", "vision", "performance",
+                                    "chat", "sentiment", "analytics", "responses", "templates",
+                                    "commands", "polls", "platforms", "settings"][i] === value)
+                    ?.toLowerCase().includes(tabSearchQuery.toLowerCase())
+                  ).length} tabs matching "{tabSearchQuery}"
+                </p>
+              )}
+            </div>
+
+            <TabsContent value="home" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div 
+                  onClick={() => setActiveTab("monitor")}
+                  className="group cursor-pointer bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-all hover:shadow-lg hover:shadow-primary/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                      <Broadcast size={24} weight="bold" className="text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg">Live Monitor</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Monitor live chat with AI responses, avatar reactions, and sentiment analysis
+                  </p>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("personality")}
+                  className="group cursor-pointer bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20 rounded-lg p-6 hover:border-accent/40 transition-all hover:shadow-lg hover:shadow-accent/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-accent/20 group-hover:bg-accent/30 transition-colors">
+                      <Robot size={24} weight="bold" className="text-accent" />
+                    </div>
+                    <h3 className="font-bold text-lg">Personality</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Configure AI personality, tone, interests, and avatar appearance
+                  </p>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("voice")}
+                  className="group cursor-pointer bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/20 rounded-lg p-6 hover:border-secondary/40 transition-all hover:shadow-lg hover:shadow-secondary/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-secondary/20 group-hover:bg-secondary/30 transition-colors">
+                      <SpeakerHigh size={24} weight="bold" className="text-secondary" />
+                    </div>
+                    <h3 className="font-bold text-lg">Voice & SSML</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Configure text-to-speech, SSML, and AI-enhanced voice expressiveness
+                  </p>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("vision")}
+                  className="group cursor-pointer bg-gradient-to-br from-chart-2/10 to-chart-2/5 border border-chart-2/20 rounded-lg p-6 hover:border-chart-2/40 transition-all hover:shadow-lg hover:shadow-chart-2/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-chart-2/20 group-hover:bg-chart-2/30 transition-colors">
+                      <Eye size={24} weight="bold" className="text-chart-2" />
+                    </div>
+                    <h3 className="font-bold text-lg">Vision AI</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Analyze gameplay with Gemini Vision and generate automatic commentary
+                  </p>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("performance")}
+                  className="group cursor-pointer bg-gradient-to-br from-chart-5/10 to-chart-5/5 border border-chart-5/20 rounded-lg p-6 hover:border-chart-5/40 transition-all hover:shadow-lg hover:shadow-chart-5/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-chart-5/20 group-hover:bg-chart-5/30 transition-colors">
+                      <Trophy size={24} weight="bold" className="text-chart-5" />
+                    </div>
+                    <h3 className="font-bold text-lg">Performance</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Track gameplay metrics (APM, accuracy, combos) with AI coaching
+                  </p>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("analytics")}
+                  className="group cursor-pointer bg-gradient-to-br from-chart-1/10 to-chart-1/5 border border-chart-1/20 rounded-lg p-6 hover:border-chart-1/40 transition-all hover:shadow-lg hover:shadow-chart-1/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-chart-1/20 group-hover:bg-chart-1/30 transition-colors">
+                      <ChartLine size={24} weight="bold" className="text-chart-1" />
+                    </div>
+                    <h3 className="font-bold text-lg">Analytics</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    View detailed chat analytics, engagement metrics, and trends
+                  </p>
+                </div>
+              </div>
+
+              <Alert className="bg-accent/10 border-accent/30">
+                <Info size={20} className="text-accent" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-accent">Getting Started:</strong> This is a fully functional AI companion simulator powered by Gemini 3. Start with the <strong>Live Monitor</strong> tab to enable chat simulation and see your AI respond in real-time with voice, emotions, and gameplay commentary.
+                </AlertDescription>
+              </Alert>
+
+              <TwitchIntegrationGuide />
+            </TabsContent>
 
             <TabsContent value="setup" className="space-y-6">
               <Alert className="bg-accent/10 border-accent/30">
