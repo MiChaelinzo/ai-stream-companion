@@ -1635,11 +1635,7 @@ Return as JSON:
         </div>
       )}
     </div>
-    </div>
   );
-}
-
-export default App;  );
 }
 
 export default App;
