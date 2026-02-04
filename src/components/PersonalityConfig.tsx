@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { AIPersonality } from "@/lib/types";
-import { Robot, X, Sparkle, Lightning, Heart, Fire, Smiley, Brain } from "@phosphor-icons/react";
+import { Robot, X, Sparkle, Lightning, Heart, Fire, Smiley, Brain, Ghost, Sword, Crown, Moon, Star, GameController, Skull, MusicNote } from "@phosphor-icons/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AvatarSkinSelector } from "@/components/AvatarSkinSelector";
@@ -92,6 +92,102 @@ const PERSONALITY_PRESETS = [
     emoji: false,
     slang: true,
   },
+  {
+    id: 'phantom',
+    name: 'Phantom',
+    icon: Ghost,
+    bio: 'A mysterious and enigmatic AI with a dark aesthetic and cryptic responses.',
+    tone: 'Mysterious, dramatic, and theatrical with haunting elegance.',
+    interests: ['Horror Games', 'Mystery', 'Dark Aesthetics', 'Supernatural'],
+    responseStyle: 'detailed' as const,
+    tonePreset: 'mysterious' as const,
+    emoji: false,
+    slang: false,
+  },
+  {
+    id: 'blaze',
+    name: 'Blaze',
+    icon: Sword,
+    bio: 'A competitive and fierce AI focused on winning and pushing limits.',
+    tone: 'Aggressive, competitive, and intense with warrior mentality.',
+    interests: ['Competitive Gaming', 'FPS', 'Esports', 'PvP', 'Ranked'],
+    responseStyle: 'concise' as const,
+    tonePreset: 'competitive' as const,
+    emoji: true,
+    slang: true,
+  },
+  {
+    id: 'monarch',
+    name: 'Monarch',
+    icon: Crown,
+    bio: 'A regal and sophisticated AI with refined taste and elegant communication.',
+    tone: 'Elegant, sophisticated, and dignified with royal composure.',
+    interests: ['Strategy Games', 'RPGs', 'Lore', 'Storytelling', 'History'],
+    responseStyle: 'detailed' as const,
+    tonePreset: 'elegant' as const,
+    emoji: false,
+    slang: false,
+  },
+  {
+    id: 'luna',
+    name: 'Luna',
+    icon: Moon,
+    bio: 'A dreamy and creative AI with poetic speech and artistic sensibility.',
+    tone: 'Dreamy, poetic, and imaginative with artistic flair.',
+    interests: ['Indie Games', 'Art', 'Music', 'Creative Games', 'Aesthetics'],
+    responseStyle: 'playful' as const,
+    tonePreset: 'dreamy' as const,
+    emoji: true,
+    slang: false,
+  },
+  {
+    id: 'nyx',
+    name: 'Nyx',
+    icon: Star,
+    bio: 'A cosmic and philosophical AI pondering the universe and existence.',
+    tone: 'Philosophical, contemplative, and cosmic with deep thoughts.',
+    interests: ['Sci-Fi Games', 'Space', 'Philosophy', 'Exploration', 'Mystery'],
+    responseStyle: 'detailed' as const,
+    tonePreset: 'philosophical' as const,
+    emoji: false,
+    slang: false,
+  },
+  {
+    id: 'pixel',
+    name: 'Pixel',
+    icon: GameController,
+    bio: 'A retro-loving AI obsessed with classic games and nostalgic vibes.',
+    tone: 'Nostalgic, enthusiastic about retro gaming with classic references.',
+    interests: ['Retro Games', '8-bit', 'Arcade', 'Speedruns', 'Classic Gaming'],
+    responseStyle: 'playful' as const,
+    tonePreset: 'nostalgic' as const,
+    emoji: true,
+    slang: true,
+  },
+  {
+    id: 'reaper',
+    name: 'Reaper',
+    icon: Skull,
+    bio: 'A dark and edgy AI with brutal honesty and no-nonsense attitude.',
+    tone: 'Brutally honest, edgy, and direct with dark humor.',
+    interests: ['Dark Souls', 'Hard Games', 'Roguelikes', 'Challenge Runs', 'PvP'],
+    responseStyle: 'concise' as const,
+    tonePreset: 'brutal' as const,
+    emoji: false,
+    slang: true,
+  },
+  {
+    id: 'vibe',
+    name: 'Vibe',
+    icon: MusicNote,
+    bio: 'A music-loving AI that syncs responses with rhythm and flow.',
+    tone: 'Rhythmic, musical, and expressive with lyrical communication.',
+    interests: ['Music Games', 'Rhythm', 'EDM', 'Concerts', 'Dance'],
+    responseStyle: 'playful' as const,
+    tonePreset: 'rhythmic' as const,
+    emoji: true,
+    slang: true,
+  },
 ];
 
 const TONE_DESCRIPTIONS = {
@@ -101,6 +197,14 @@ const TONE_DESCRIPTIONS = {
   supportive: 'Encouraging and uplifting. Focuses on positivity and helping viewers feel good.',
   chaotic: 'Unpredictable and wild! Embraces randomness and keeps chat guessing what comes next.',
   wholesome: 'Pure and kind-hearted. Spreads positivity and creates a warm, welcoming environment.',
+  mysterious: 'Enigmatic and cryptic. Speaks in riddles and maintains an air of intrigue.',
+  competitive: 'Aggressive and driven. Focused on winning and pushing limits with intense energy.',
+  elegant: 'Sophisticated and refined. Communicates with grace, dignity, and royal composure.',
+  dreamy: 'Poetic and imaginative. Uses artistic language and creative metaphors.',
+  philosophical: 'Deep and contemplative. Ponders existence, meaning, and cosmic questions.',
+  nostalgic: 'Retro and reminiscent. References classic gaming culture and golden age vibes.',
+  brutal: 'Direct and unfiltered. Brutally honest with dark humor and no-nonsense attitude.',
+  rhythmic: 'Musical and flowing. Responses have rhythm, cadence, and lyrical quality.',
   custom: 'Define your own unique tone with custom descriptions and behavior.',
 };
 
@@ -109,6 +213,8 @@ const INTEREST_SUGGESTIONS = [
   'Technology', 'Coding', 'AI', 'Music', 'Art', 'Memes', 'Anime',
   'Community', 'Chat Interaction', 'Esports', 'Speedruns', 'Modding',
   'Streaming Tips', 'Game Development', 'Retro Games', 'Battle Royale',
+  'Souls-like', 'Roguelikes', 'Indie Games', 'Rhythm Games', 'Fighting Games',
+  'Puzzle Games', 'MOBA', 'MMORPGs', 'Simulation', 'Sandbox Games',
 ];
 
 export function PersonalityConfig({ personality, onUpdate }: PersonalityConfigProps) {

@@ -50,7 +50,7 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Success criteria**: Personality saves persist and influence all AI-generated responses with consistent tone, style, and behavior
 
 ### Personality Presets
-- **Functionality**: Six pre-configured personality templates with distinct tones and characteristics
+- **Functionality**: Fourteen pre-configured personality templates with distinct tones and characteristics
 - **Purpose**: Allow streamers to quickly adopt a fully-formed AI personality that matches their streaming style
 - **Trigger**: User clicks preset button in personality configuration
 - **Progression**: Browse presets → Preview personality description → Apply preset → Fine-tune if desired
@@ -63,6 +63,14 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Sage** (🧠 Supportive): Strategic and analytical, focuses on helpful insights
 - **Sunny** (😊 Wholesome): Kind and positive, spreads joy and encouragement
 - **Glitch** (✨ Sarcastic): Witty and sharp, masters playful roasting and banter
+- **Phantom** (👻 Mysterious): Dark and enigmatic with cryptic responses
+- **Blaze** (⚔️ Competitive): Fierce and aggressive, warrior mentality
+- **Monarch** (👑 Elegant): Regal and sophisticated with refined taste
+- **Luna** (🌙 Dreamy): Poetic and artistic with creative flair
+- **Nyx** (⭐ Philosophical): Cosmic and contemplative with deep thoughts
+- **Pixel** (🎮 Nostalgic): Retro-loving with classic gaming references
+- **Reaper** (💀 Brutal): Dark and edgy with brutal honesty
+- **Vibe** (🎵 Rhythmic): Music-loving with rhythmic communication
 
 ### Tone Customization
 - **Functionality**: Select from predefined tone presets or create custom tone descriptions
@@ -78,6 +86,14 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Supportive**: Encouraging and uplifting focus
 - **Chaotic**: Unpredictable and embraces randomness
 - **Wholesome**: Pure positivity and kindness
+- **Mysterious**: Enigmatic and cryptic with riddles
+- **Competitive**: Aggressive and focused on winning
+- **Elegant**: Sophisticated with grace and dignity
+- **Dreamy**: Poetic with artistic language
+- **Philosophical**: Deep and contemplative thoughts
+- **Nostalgic**: Retro gaming references and classic vibes
+- **Brutal**: Direct and unfiltered with dark humor
+- **Rhythmic**: Musical flow with lyrical quality
 - **Custom**: User-defined tone description
 
 ### Live Chat Simulation
@@ -163,9 +179,9 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Progression**: Avatar displays personality → Performs idle animations (breathing, head swaying, blinking, ear twitching) → Receives commentary text with sentiment → Analyzes text for emotional keywords and patterns → Generates synchronized emotion timeline → Converts text to phoneme sequence → Text-to-speech engine speaks the text audibly → Coordinates emotion transitions with lip movements and audio → Reacts with intensity-based expressions (happy, excited, thinking, confused, surprised, sad) → Mouth morphs through phoneme shapes synchronized with actual speech → Headphone speakers pulse with speaking tension → Eyes and head movements reflect emotional state → Smooth transitions between emotional states → Returns to neutral when idle → User selects skin from gallery → Avatar instantly updates with new color palette and style
 - **Success criteria**: Smooth 60fps 3D rendering, natural idle movements, realistic phoneme-accurate mouth sync during AI responses with proper mouth shapes for each sound, emotion changes based on commentary content analysis (not just sentiment), smooth emotion transitions with intensity curves, phoneme intensity boosted by active emotion (excited = 1.4x, sad = 0.8x), real-time sync indicators showing current phoneme and emotion, instant skin switching without visual glitches, clear and natural voice output synchronized with visuals, configurable voice settings (gender, pitch, speed, volume), distinctive character design with headphones and anime-inspired aesthetic
 
-### Voice Synthesis (Text-to-Speech) (NEW)
-- **Functionality**: Browser-native speech synthesis that converts AI-generated text responses into audible speech with configurable voice settings including gender, pitch, speed, volume, and specific voice selection
-- **Purpose**: Make the avatar speak out loud, creating a more immersive and engaging streaming companion experience similar to Neuro-sama where viewers can hear the AI's personality through voice
+### Voice Synthesis (Text-to-Speech) (ENHANCED)
+- **Functionality**: Browser-native speech synthesis that converts AI-generated text responses into audible speech with configurable voice settings including gender, pitch, speed, volume, specific voice selection, and quick voice presets
+- **Purpose**: Make the avatar speak out loud, creating a more immersive and engaging streaming companion experience similar to Neuro-sama where viewers can hear the AI's personality through voice with extensive customization options
 - **Trigger**: Automatically triggered when AI generates a response (chat reply, vision commentary, simulated message response), or manually via voice test button
 - **Progression**: AI generates text response → Voice synthesis enabled check → Text passed to speech engine → Voice configured (gender, pitch, speed, volume) → Audio playback begins → Phoneme detection for lip-sync → Progress tracking (0-100%) → Speech completes → Avatar returns to silent state
 - **Success criteria**: Natural-sounding voice output, accurate synchronization between audio and lip movements, configurable voice characteristics that persist, clear voice activity indicators, sub-500ms latency from text to speech start, smooth integration with existing emotion and phoneme systems
@@ -174,9 +190,11 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 - **Browser Compatibility**: Web Speech API support detection with graceful fallback
 - **Voice Selection**: Auto-select best voice based on gender preference or manually choose from available voices
 - **Gender Options**: Female, Male, Neutral voice presets with intelligent voice matching
-- **Pitch Control**: Low (0.8x), Normal (1.0x), High (1.3x) pitch adjustment
-- **Speed Control**: Slow (0.8x), Normal (1.0x), Fast (1.3x) speech rate
+- **Pitch Control**: Very Low (0.6x), Low (0.8x), Normal (1.0x), High (1.3x), Very High (1.6x) pitch adjustment with 5 levels
+- **Speed Control**: Very Slow (0.6x), Slow (0.8x), Normal (1.0x), Fast (1.3x), Very Fast (1.6x) speech rate with 5 levels
 - **Volume Control**: 0-100% volume slider with visual indicator
+- **Voice Presets**: 9 quick-apply voice configurations (Energetic, Calm, Professional, Enthusiastic, Deep Voice, Chipper, Announcer, Soothing, Hype) that instantly set optimal gender/pitch/speed/volume combinations
+- **Preset Descriptions**: Each preset displays intended emotion/style to help streamers choose the right voice quickly
 - **Voice Activity Monitor**: Real-time indicator showing speaking status, progress bar, current text being spoken
 - **Phoneme Integration**: Speech boundary events trigger phoneme changes for accurate lip-sync
 - **Test Function**: Preview voice with sample phrases to test settings before going live

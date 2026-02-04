@@ -5,8 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { VoiceSettings, VoiceGender, VoicePitch, VoiceSpeed } from "@/hooks/use-speech-synthesis";
-import { SpeakerHigh, SpeakerSimpleX, Play } from "@phosphor-icons/react";
+import { SpeakerHigh, SpeakerSimpleX, Play, Sparkle } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface VoiceSettingsConfigProps {
   settings: VoiceSettings;
@@ -15,6 +16,90 @@ interface VoiceSettingsConfigProps {
   onTestVoice: () => void;
   isSupported: boolean;
 }
+
+const VOICE_PRESETS = [
+  {
+    id: 'energetic',
+    name: 'Energetic',
+    description: 'High-pitched and fast-paced',
+    gender: 'female' as VoiceGender,
+    pitch: 'high' as VoicePitch,
+    speed: 'fast' as VoiceSpeed,
+    volume: 0.9,
+  },
+  {
+    id: 'calm',
+    name: 'Calm',
+    description: 'Low-pitched and slow-paced',
+    gender: 'female' as VoiceGender,
+    pitch: 'low' as VoicePitch,
+    speed: 'slow' as VoiceSpeed,
+    volume: 0.7,
+  },
+  {
+    id: 'professional',
+    name: 'Professional',
+    description: 'Clear and measured',
+    gender: 'male' as VoiceGender,
+    pitch: 'normal' as VoicePitch,
+    speed: 'normal' as VoiceSpeed,
+    volume: 0.8,
+  },
+  {
+    id: 'enthusiastic',
+    name: 'Enthusiastic',
+    description: 'Very high energy',
+    gender: 'female' as VoiceGender,
+    pitch: 'very-high' as VoicePitch,
+    speed: 'fast' as VoiceSpeed,
+    volume: 0.95,
+  },
+  {
+    id: 'deep',
+    name: 'Deep Voice',
+    description: 'Low and commanding',
+    gender: 'male' as VoiceGender,
+    pitch: 'very-low' as VoicePitch,
+    speed: 'slow' as VoiceSpeed,
+    volume: 0.85,
+  },
+  {
+    id: 'chipper',
+    name: 'Chipper',
+    description: 'Bright and cheerful',
+    gender: 'female' as VoiceGender,
+    pitch: 'high' as VoicePitch,
+    speed: 'very-fast' as VoiceSpeed,
+    volume: 0.8,
+  },
+  {
+    id: 'announcer',
+    name: 'Announcer',
+    description: 'Bold and clear',
+    gender: 'male' as VoiceGender,
+    pitch: 'low' as VoicePitch,
+    speed: 'normal' as VoiceSpeed,
+    volume: 0.9,
+  },
+  {
+    id: 'soothing',
+    name: 'Soothing',
+    description: 'Soft and gentle',
+    gender: 'female' as VoiceGender,
+    pitch: 'low' as VoicePitch,
+    speed: 'very-slow' as VoiceSpeed,
+    volume: 0.6,
+  },
+  {
+    id: 'hype',
+    name: 'Hype',
+    description: 'Maximum excitement',
+    gender: 'female' as VoiceGender,
+    pitch: 'very-high' as VoicePitch,
+    speed: 'very-fast' as VoiceSpeed,
+    volume: 1.0,
+  },
+];
 
 export function VoiceSettingsConfig({ 
   settings, 
@@ -50,6 +135,17 @@ export function VoiceSettingsConfig({
 
   const handleSSMLToggle = (enableSSML: boolean) => {
     onUpdate({ ...settings, enableSSML });
+  };
+
+  const handleApplyPreset = (preset: typeof VOICE_PRESETS[0]) => {
+    onUpdate({
+      ...settings,
+      gender: preset.gender,
+      pitch: preset.pitch,
+      speed: preset.speed,
+      volume: preset.volume,
+    });
+    toast.success(`Applied ${preset.name} voice preset!`);
   };
 
   if (!isSupported) {
@@ -140,6 +236,34 @@ export function VoiceSettingsConfig({
 
         {settings.enabled && (
           <>
+            <Card className="border-accent/30 bg-gradient-to-br from-card to-card/50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkle size={20} weight="fill" className="text-accent" />
+                  <CardTitle className="text-lg">Voice Presets</CardTitle>
+                </div>
+                <CardDescription>Quick voice configurations for different styles</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {VOICE_PRESETS.map((preset) => (
+                    <Button
+                      key={preset.id}
+                      variant="outline"
+                      size="sm"
+                      className="h-auto flex-col gap-1 p-3 hover:bg-primary/10 hover:border-primary/50"
+                      onClick={() => handleApplyPreset(preset)}
+                    >
+                      <span className="font-semibold text-sm">{preset.name}</span>
+                      <span className="text-xs opacity-70 text-center">
+                        {preset.description}
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="space-y-3">
               <Label htmlFor="voice-gender">Voice Gender</Label>
               <Select value={settings.gender} onValueChange={handleGenderChange}>
@@ -183,9 +307,11 @@ export function VoiceSettingsConfig({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="very-low">Very Low (0.6x)</SelectItem>
+                  <SelectItem value="low">Low (0.8x)</SelectItem>
+                  <SelectItem value="normal">Normal (1.0x)</SelectItem>
+                  <SelectItem value="high">High (1.3x)</SelectItem>
+                  <SelectItem value="very-high">Very High (1.6x)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -197,9 +323,11 @@ export function VoiceSettingsConfig({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="very-slow">Very Slow (0.6x)</SelectItem>
                   <SelectItem value="slow">Slow (0.8x)</SelectItem>
                   <SelectItem value="normal">Normal (1.0x)</SelectItem>
                   <SelectItem value="fast">Fast (1.3x)</SelectItem>
+                  <SelectItem value="very-fast">Very Fast (1.6x)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

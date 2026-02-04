@@ -4,7 +4,7 @@ export interface AIPersonality {
   tone: string;
   interests: string[];
   responseStyle: 'concise' | 'detailed' | 'playful' | 'professional';
-  tonePreset?: 'energetic' | 'chill' | 'sarcastic' | 'supportive' | 'chaotic' | 'wholesome' | 'custom';
+  tonePreset?: 'energetic' | 'chill' | 'sarcastic' | 'supportive' | 'chaotic' | 'wholesome' | 'mysterious' | 'competitive' | 'elegant' | 'dreamy' | 'philosophical' | 'nostalgic' | 'brutal' | 'rhythmic' | 'custom';
   emoji?: boolean;
   slang?: boolean;
   avatarSkin?: 'default' | 'cyberpunk' | 'pastel' | 'neon' | 'fantasy' | 'retro' | 'monochrome' | 'cosmic';

@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { parseSSML, SSMLSegment } from '@/lib/ssml-parser';
 
 export type VoiceGender = 'female' | 'male' | 'neutral';
-export type VoicePitch = 'low' | 'normal' | 'high';
-export type VoiceSpeed = 'slow' | 'normal' | 'fast';
+export type VoicePitch = 'very-low' | 'low' | 'normal' | 'high' | 'very-high';
+export type VoiceSpeed = 'very-slow' | 'slow' | 'normal' | 'fast' | 'very-fast';
 
 export interface VoiceSettings {
   enabled: boolean;
@@ -34,15 +34,19 @@ const DEFAULT_SETTINGS: VoiceSettings = {
 };
 
 const PITCH_VALUES = {
-  low: 0.8,
-  normal: 1.0,
-  high: 1.3,
+  'very-low': 0.6,
+  'low': 0.8,
+  'normal': 1.0,
+  'high': 1.3,
+  'very-high': 1.6,
 };
 
 const SPEED_VALUES = {
-  slow: 0.8,
-  normal: 1.0,
-  fast: 1.3,
+  'very-slow': 0.6,
+  'slow': 0.8,
+  'normal': 1.0,
+  'fast': 1.3,
+  'very-fast': 1.6,
 };
 
 export function useSpeechSynthesis(settings: VoiceSettings = DEFAULT_SETTINGS) {
