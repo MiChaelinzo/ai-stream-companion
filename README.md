@@ -1174,13 +1174,13 @@ Found a bug? Have a feature request?
 - 📖 **Documentation** - Start with guides in this repo
 - 🐛 **Issues** - Report bugs or request features on GitHub
 - 💬 **Discussions** - Ask questions in GitHub Discussions
-- 📧 **Email** - [your-email@example.com]
+- 📧 **Email** - [michaelinzo77@gmail.com]
 
 ### Stay Updated
 - ⭐ **Star this repo** - Get notifications for updates
 - 👀 **Watch releases** - Be notified of new versions
-- 🐦 **Follow on Twitter** - [@yourhandle]
-- 📺 **YouTube Tutorials** - [Your channel]
+- 🐦 **Follow on Twitter** - [@michaelinzotech]
+- 📺 **YouTube Tutorials** - [youtube.com/@michaelinzo]
 
 ### Show Your Support
 If this project helped you, consider:
@@ -1255,14 +1255,17 @@ See individual packages for their respective licenses.
 
 ## 📊 Project Stats
 
-![GitHub Stars](https://img.shields.io/github/stars/yourusername/ai-streamer-companion?style=social)
-![GitHub Forks](https://img.shields.io/github/forks/yourusername/ai-streamer-companion?style=social)
-![GitHub Issues](https://img.shields.io/github/issues/yourusername/ai-streamer-companion)
-![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yourusername/ai-streamer-companion)
-![License](https://img.shields.io/github/license/yourusername/ai-streamer-companion)
+[![GitHub Stars](https://img.shields.io/github/stars/yourusername/ai-streamer-companion?style=social)
+](https://github.com/MiChaelinzo/ai-stream-companion)
+[![GitHub Forks](https://img.shields.io/github/forks/yourusername/ai-streamer-companion?style=social)
+](https://github.com/MiChaelinzo/ai-stream-companion/fork)
+[![GitHub Issues](https://img.shields.io/github/issues/yourusername/ai-streamer-companion)
+](https://github.com/MiChaelinzo/ai-stream-companion/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yourusername/ai-streamer-companion)
+](https://github.com/MiChaelinzo/ai-stream-companion/pulls)
+[![License](https://img.shields.io/github/license/yourusername/ai-streamer-companion)
+](https://github.com/MiChaelinzo/ai-stream-companion/blob/main/LICENSE)
 
 **Built with ❤️ for the streaming community**
 
 ---
-
-*Last Updated: January 2025*
