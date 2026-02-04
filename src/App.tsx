@@ -1589,7 +1589,6 @@ Return as JSON:
       </div>
       
       <Toaster position="bottom-right" />
-      
       {!showFloatingSupport && activeTab !== "support" && (
         <button
           onClick={() => setShowFloatingSupport(true)}
@@ -1602,7 +1601,7 @@ Return as JSON:
       )}
       
       {showFloatingSupport && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 max-h-[600px] bg-card/95 backdrop-blur-xl border-2 border-accent/30 rounded-2xl shadow-2xl overflow-hidden animate-slide-in-up">
+        <div className="fixed bottom-6 right-6 z-50 w-96 max-h-[600px] bg-card/95 backdrop-blur-xl border-2 border-accent/30 rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
           <div className="bg-gradient-to-r from-accent to-secondary p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
@@ -1636,7 +1635,11 @@ Return as JSON:
         </div>
       )}
     </div>
+    </div>
   );
+}
+
+export default App;  );
 }
 
 export default App;
