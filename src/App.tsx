@@ -988,10 +988,44 @@ Return as JSON:
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,oklch(0.65_0.25_300_/_0.1),transparent_50%)] pointer-events-none" />
+    <div className="min-h-screen bg-background relative overflow-x-hidden">
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10" />
+        
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+          <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-secondary/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '2s' }} />
+        </div>
+        
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,oklch(0.65_0.25_300_/_0.03)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.65_0.25_300_/_0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+        
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,oklch(0.65_0.25_300_/_0.05),transparent_70%)]" />
+        
+        <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="circuit-pattern" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+              <circle cx="100" cy="100" r="2" fill="oklch(0.65 0.25 300)" opacity="0.3">
+                <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="50" cy="50" r="1.5" fill="oklch(0.75 0.24 340)" opacity="0.4">
+                <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="150" cy="150" r="1.5" fill="oklch(0.70 0.20 240)" opacity="0.4">
+                <animate attributeName="opacity" values="0.4;0.9;0.4" dur="5s" repeatCount="indefinite" />
+              </circle>
+              <line x1="100" y1="100" x2="50" y2="50" stroke="oklch(0.65 0.25 300)" strokeWidth="0.5" opacity="0.2" />
+              <line x1="100" y1="100" x2="150" y2="150" stroke="oklch(0.65 0.25 300)" strokeWidth="0.5" opacity="0.2" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#circuit-pattern)" />
+        </svg>
+        
+        <div className="absolute top-1/4 left-1/2 w-1 h-32 bg-gradient-to-b from-transparent via-primary/20 to-transparent animate-scanning" />
+        <div className="absolute top-1/3 right-1/4 w-1 h-24 bg-gradient-to-b from-transparent via-accent/20 to-transparent animate-scanning" style={{ animationDelay: '2s', animationDuration: '8s' }} />
+      </div>
       
-      <div className="relative">
+      <div className="relative z-10">
         <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">

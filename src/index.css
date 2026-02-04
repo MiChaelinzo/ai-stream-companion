@@ -105,6 +105,20 @@
   }
 }
 
+@keyframes scanning {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
 .animate-slide-in {
   animation: slideInRight 0.2s ease-out;
 }
@@ -115,4 +129,8 @@
 
 .animate-typing {
   animation: typing-pulse 1.4s ease-in-out infinite;
+}
+
+.animate-scanning {
+  animation: scanning 10s ease-in-out infinite;
 }
