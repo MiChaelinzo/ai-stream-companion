@@ -150,6 +150,7 @@ function App() {
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [supportChatMessages, setSupportChatMessages] = useKV<SupportChatMessage[]>("support-chat-messages", []);
   const [videoAnalyses, setVideoAnalyses] = useKV<VideoAnalysisResult[]>("video-analyses", []);
+  const [showFloatingSupport, setShowFloatingSupport] = useState(false);
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
@@ -1588,6 +1589,52 @@ Return as JSON:
       </div>
       
       <Toaster position="bottom-right" />
+      
+      {!showFloatingSupport && activeTab !== "support" && (
+        <button
+          onClick={() => setShowFloatingSupport(true)}
+          className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-br from-accent to-secondary shadow-2xl hover:shadow-accent/50 transition-all duration-300 hover:scale-110 flex items-center justify-center group animate-pulse-glow"
+          aria-label="Open AI Support"
+        >
+          <Headset size={28} weight="bold" className="text-white group-hover:scale-110 transition-transform" />
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full animate-pulse" />
+        </button>
+      )}
+      
+      {showFloatingSupport && (
+        <div className="fixed bottom-6 right-6 z-50 w-96 max-h-[600px] bg-card/95 backdrop-blur-xl border-2 border-accent/30 rounded-2xl shadow-2xl overflow-hidden animate-slide-in-up">
+          <div className="bg-gradient-to-r from-accent to-secondary p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                <Headset size={20} weight="bold" className="text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-white text-sm">AI Support Assistant</h3>
+                <p className="text-xs text-white/80">Always here to help</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowFloatingSupport(false)}
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur flex items-center justify-center transition-colors"
+              aria-label="Close support"
+            >
+              <span className="text-white text-lg font-bold">×</span>
+            </button>
+          </div>
+          
+          <div className="h-[500px] overflow-hidden">
+            <AISupportChatbox
+              initialMessages={supportChatMessages || []}
+              onSendMessage={(message) => {
+                setSupportChatMessages((current) => [...(current || []), message]);
+              }}
+              autoRecommendations={true}
+              enableVoice={true}
+              enableFileUpload={true}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
