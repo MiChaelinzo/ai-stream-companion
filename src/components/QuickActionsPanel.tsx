@@ -1,42 +1,28 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { HandWaving, Heart, Fire, Question, Lightning, Sparkle } from "@phosphor-icons/react";
-import { toast } from "sonner";
+import { HandWaving, Heart, Fire, Question, Ligh
 
-interface QuickActionsProps {
   onActionClick: (template: string) => void;
-  onCustomAction: (text: string) => void;
 }
-
 interface QuickAction {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-  category: "greeting" | "gratitude" | "hype" | "question" | "gameplay";
-  template: string;
-  color: "primary" | "accent" | "secondary" | "destructive";
-}
 
-const quickActions: QuickAction[] = [
-  {
-    id: "welcome",
-    label: "Welcome Viewer",
-    icon: HandWaving,
-    category: "greeting",
-    template: "Hey everyone! Welcome to the stream! Glad to have you here! 👋",
+  category: "greeting" | "gra
+  color: "primary" | "accent" | "secondary" 
+
+ 
+
+interface QuickAction {wer",
+  id: string;dWaving,
     color: "primary",
   },
   {
     id: "thanks-follow",
     label: "Thank for Follow",
-    icon: Heart,
-    category: "gratitude",
+}   icon: Heart,
+
     template: "Thanks so much for the follow! I really appreciate it! ❤️",
-    color: "accent",
+  {accent",
   },
   {
     id: "thanks-sub",
@@ -106,6 +92,20 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
     ? quickActions
     : quickActions.filter(action => action.category === selectedCategory);
 
+  const handleActionClick = (template: string) => {
+    onActionClick(template);
+    toast.success("Quick action sent!");
+  };
+
+  const handleCustomSubmit = () => {
+    if (customText.trim()) {
+      onCustomAction(customText);
+      setCustomText("");
+      toast.success("Custom message sent!");
+    }
+  };
+
+  const handleGenerateCustom = async () => {
   const handleActionClick = (template: string) => {
     onActionClick(template);
     toast.success("Quick action sent!");
@@ -205,14 +205,3 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
           >
             <Sparkle size={16} weight="bold" className="mr-2" />
             {isGenerating ? "Generating..." : "Generate AI Message"}
-          </Button>
-        </div>
-
-        <Badge variant="outline" className="text-xs">
-          <Lightning size={12} weight="bold" className="mr-1" />
-          <span>Click any action to send to chat instantly</span>
-        </Badge>
-      </CardContent>
-    </Card>
-  );
-}
