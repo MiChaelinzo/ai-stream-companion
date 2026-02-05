@@ -291,3 +291,35 @@ export interface VideoAnalysisSettings {
   analyzePerformance: boolean;
   commentaryStyle: 'hype' | 'analytical' | 'casual' | 'educational' | 'comedic';
 }
+
+export interface StreamGoal {
+  id: string;
+  title: string;
+  description: string;
+  type: 'followers' | 'subscribers' | 'viewers' | 'donations' | 'custom';
+  currentValue: number;
+  targetValue: number;
+  icon: 'trophy' | 'users' | 'heart' | 'star' | 'fire';
+  color: string;
+  completed: boolean;
+  createdAt: Date;
+  completedAt?: Date;
+}
+
+export interface StreamHighlight {
+  id: string;
+  timestamp: Date;
+  type: 'chat-spike' | 'sentiment-peak' | 'key-moment' | 'milestone' | 'interaction';
+  title: string;
+  description: string;
+  intensity: number;
+  context: {
+    messageCount?: number;
+    averageSentiment?: number;
+    keyPhrases?: string[];
+    viewers?: number;
+  };
+  autoDetected: boolean;
+  clipWorthy: boolean;
+}
+

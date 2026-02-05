@@ -40,6 +40,10 @@ import { BackendConnection } from "@/components/BackendConnection";
 import { AISupportChatbox } from "@/components/AISupportChatbox";
 import { ScreenshotAnalyzer } from "@/components/ScreenshotAnalyzer";
 import { VideoAnalyzer } from "@/components/VideoAnalyzer";
+import { QuickActionsPanel } from "@/components/QuickActionsPanel";
+import { StreamGoals } from "@/components/StreamGoals";
+import { ViewerEngagementGames } from "@/components/ViewerEngagementGames";
+import { StreamHighlightsDetector } from "@/components/StreamHighlightsDetector";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -56,10 +60,12 @@ import {
   AICoachingSuggestion,
   SkillProgress,
   SupportChatMessage,
-  VideoAnalysisResult
+  VideoAnalysisResult,
+  StreamGoal,
+  StreamHighlight,
 } from "@/lib/types";
 import { useSpeechSynthesis, VoiceSettings } from "@/hooks/use-speech-synthesis";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy, MagnifyingGlass, House, PlugsConnected, Headset } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy, MagnifyingGlass, House, PlugsConnected, Headset, Target, GameController, Sparkle } from "@phosphor-icons/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
@@ -151,6 +157,8 @@ function App() {
   const [supportChatMessages, setSupportChatMessages] = useKV<SupportChatMessage[]>("support-chat-messages", []);
   const [videoAnalyses, setVideoAnalyses] = useKV<VideoAnalysisResult[]>("video-analyses", []);
   const [showFloatingSupport, setShowFloatingSupport] = useState(false);
+  const [streamGoals, setStreamGoals] = useKV<StreamGoal[]>("stream-goals", []);
+  const [streamHighlights, setStreamHighlights] = useKV<StreamHighlight[]>("stream-highlights", []);
 
   const currentPersonality = personality || defaultPersonality;
   const currentStreamSettings = streamSettings || defaultStreamSettings;
@@ -988,6 +996,72 @@ Return as JSON:
     toast.success('All suggestions cleared');
   };
 
+  const handleQuickAction = (template: string) => {
+    if (isMonitoring || isSimulating) {
+      const aiMessage: ChatMessage = {
+        id: Date.now().toString() + '_quick',
+        content: template,
+        sender: 'ai',
+        timestamp: new Date(),
+        platform: 'simulator',
+      };
+      setLiveMessages((current) => [...(current || []), aiMessage]);
+    } else {
+      toast.info('Start monitoring or simulation to send messages');
+    }
+  };
+
+  const handleCustomQuickAction = async (text: string) => {
+    handleQuickAction(text);
+  };
+
+  const handleCreateGoal = (goal: Omit<StreamGoal, "id" | "createdAt" | "completed" | "completedAt">) => {
+    const newGoal: StreamGoal = {
+      ...goal,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      completed: false,
+    };
+    setStreamGoals((current) => [newGoal, ...(current || [])]);
+  };
+
+  const handleUpdateGoalProgress = (goalId: string, newValue: number) => {
+    setStreamGoals((current) =>
+      (current || []).map((g) =>
+        g.id === goalId ? { ...g, currentValue: newValue } : g
+      )
+    );
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    setStreamGoals((current) => (current || []).filter((g) => g.id !== goalId));
+  };
+
+  const handleCompleteGoal = (goalId: string) => {
+    setStreamGoals((current) =>
+      (current || []).map((g) =>
+        g.id === goalId ? { ...g, completed: true, completedAt: new Date() } : g
+      )
+    );
+  };
+
+  const handleHighlightDetected = (highlight: StreamHighlight) => {
+    setStreamHighlights((current) => [highlight, ...(current || [])].slice(0, 100));
+  };
+
+  const handleEngagementGameMessage = (content: string) => {
+    if (isMonitoring || isSimulating) {
+      const aiMessage: ChatMessage = {
+        id: Date.now().toString() + '_game',
+        content,
+        sender: 'ai',
+        timestamp: new Date(),
+        platform: 'simulator',
+      };
+      setLiveMessages((current) => [...(current || []), aiMessage]);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
       <div className="fixed inset-0 pointer-events-none">
@@ -1070,6 +1144,10 @@ Return as JSON:
                   { value: "voice", icon: SpeakerHigh, label: "Voice & SSML" },
                   { value: "vision", icon: Eye, label: "Vision AI" },
                   { value: "performance", icon: Trophy, label: "Performance" },
+                  { value: "quick-actions", icon: Lightning, label: "Quick Actions" },
+                  { value: "stream-goals", icon: Target, label: "Stream Goals" },
+                  { value: "engagement-games", icon: GameController, label: "Engagement Games" },
+                  { value: "highlights", icon: Sparkle, label: "Highlights" },
                   { value: "chat", icon: ChatCircle, label: "Chat Test" },
                   { value: "sentiment", icon: Smiley, label: "Sentiment" },
                   { value: "analytics", icon: ChartLine, label: "Analytics" },
@@ -1110,14 +1188,17 @@ Return as JSON:
                 <p className="text-sm text-muted-foreground px-2">
                   Showing {[
                     "home", "backend", "support", "monitor", "personality", "voice", "vision", "performance",
+                    "quick-actions", "stream-goals", "engagement-games", "highlights",
                     "chat", "sentiment", "analytics", "responses", "templates",
                     "commands", "polls", "platforms", "settings"
                   ].filter(value => 
                     value.toLowerCase().includes(tabSearchQuery.toLowerCase()) ||
                     ["Home", "Backend Server", "AI Support", "Live Monitor", "Personality", "Voice & SSML", "Vision AI", "Performance",
+                     "Quick Actions", "Stream Goals", "Engagement Games", "Highlights",
                      "Chat Test", "Sentiment", "Analytics", "AI Responses", "Templates",
                      "Commands", "Polls", "Platforms", "Stream Settings"]
                     .find((_, i) => ["home", "backend", "support", "monitor", "personality", "voice", "vision", "performance",
+                                    "quick-actions", "stream-goals", "engagement-games", "highlights",
                                     "chat", "sentiment", "analytics", "responses", "templates",
                                     "commands", "polls", "platforms", "settings"][i] === value)
                     ?.toLowerCase().includes(tabSearchQuery.toLowerCase())
@@ -1237,6 +1318,78 @@ Return as JSON:
                   <p className="text-sm text-muted-foreground">
                     Track gameplay metrics (APM, accuracy, combos) with AI coaching
                   </p>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("quick-actions")}
+                  className="group cursor-pointer bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-all hover:shadow-lg hover:shadow-primary/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                      <Lightning size={24} weight="bold" className="text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg">Quick Actions</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    One-click preset messages for common stream moments
+                  </p>
+                  <Badge className="mt-3 bg-primary/20 text-primary border-primary/30">
+                    NEW ✨
+                  </Badge>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("stream-goals")}
+                  className="group cursor-pointer bg-gradient-to-br from-chart-1/10 to-chart-1/5 border border-chart-1/20 rounded-lg p-6 hover:border-chart-1/40 transition-all hover:shadow-lg hover:shadow-chart-1/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-chart-1/20 group-hover:bg-chart-1/30 transition-colors">
+                      <Target size={24} weight="bold" className="text-chart-1" />
+                    </div>
+                    <h3 className="font-bold text-lg">Stream Goals</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Track follower milestones and custom achievements
+                  </p>
+                  <Badge className="mt-3 bg-accent/20 text-accent border-accent/30">
+                    NEW ✨
+                  </Badge>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("engagement-games")}
+                  className="group cursor-pointer bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20 rounded-lg p-6 hover:border-accent/40 transition-all hover:shadow-lg hover:shadow-accent/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-accent/20 group-hover:bg-accent/30 transition-colors">
+                      <GameController size={24} weight="bold" className="text-accent" />
+                    </div>
+                    <h3 className="font-bold text-lg">Engagement Games</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Interactive trivia, predictions, and challenges for viewers
+                  </p>
+                  <Badge className="mt-3 bg-accent/20 text-accent border-accent/30">
+                    NEW ✨
+                  </Badge>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab("highlights")}
+                  className="group cursor-pointer bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/20 rounded-lg p-6 hover:border-secondary/40 transition-all hover:shadow-lg hover:shadow-secondary/10"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-full bg-secondary/20 group-hover:bg-secondary/30 transition-colors">
+                      <Sparkle size={24} weight="bold" className="text-secondary" />
+                    </div>
+                    <h3 className="font-bold text-lg">Highlights Detector</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    AI-powered detection of exciting moments and clip-worthy content
+                  </p>
+                  <Badge className="mt-3 bg-secondary/20 text-secondary border-secondary/30">
+                    NEW ✨
+                  </Badge>
                 </div>
 
                 <div 
@@ -1581,6 +1734,57 @@ Return as JSON:
                 onDeletePoll={handleDeletePoll}
                 onGeneratePoll={handleGeneratePoll}
                 isGenerating={isGenerating}
+              />
+            </TabsContent>
+
+            <TabsContent value="quick-actions" className="space-y-6">
+              <QuickActionsPanel
+                onActionClick={handleQuickAction}
+                onCustomAction={handleCustomQuickAction}
+              />
+            </TabsContent>
+
+            <TabsContent value="stream-goals" className="space-y-6">
+              <Alert className="bg-primary/10 border-primary/30">
+                <Target size={20} className="text-primary" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-primary">Track Your Progress:</strong> Set and achieve streaming milestones! Track follower goals, subscriber targets, and custom achievements to stay motivated and celebrate wins with your community.
+                </AlertDescription>
+              </Alert>
+              <StreamGoals
+                goals={streamGoals || []}
+                onCreateGoal={handleCreateGoal}
+                onUpdateProgress={handleUpdateGoalProgress}
+                onDeleteGoal={handleDeleteGoal}
+                onCompleteGoal={handleCompleteGoal}
+              />
+            </TabsContent>
+
+            <TabsContent value="engagement-games" className="space-y-6">
+              <Alert className="bg-accent/10 border-accent/30">
+                <GameController size={20} className="text-accent" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-accent">Boost Engagement:</strong> Launch interactive games in chat! Run trivia, predictions, word challenges, and reaction tests to keep your viewers engaged and entertained.
+                </AlertDescription>
+              </Alert>
+              <ViewerEngagementGames
+                messages={liveMessages || []}
+                onSendMessage={handleEngagementGameMessage}
+                isLive={isMonitoring || isSimulating}
+              />
+            </TabsContent>
+
+            <TabsContent value="highlights" className="space-y-6">
+              <Alert className="bg-accent/10 border-accent/30">
+                <Sparkle size={20} className="text-accent" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-accent">Never Miss a Moment:</strong> AI automatically detects exciting stream moments based on chat activity, sentiment spikes, and key events. Perfect for finding clip-worthy content!
+                </AlertDescription>
+              </Alert>
+              <StreamHighlightsDetector
+                messages={liveMessages || []}
+                isLive={isMonitoring || isSimulating}
+                onHighlightDetected={handleHighlightDetected}
               />
             </TabsContent>
 
