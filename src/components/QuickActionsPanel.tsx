@@ -1,10 +1,15 @@
 import { useState } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsConten
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { HandWaving, Heart, Fire, Question, Lightning } from "@phosphor-icons/react";
-import { toast } from "sonner";e, Question, Lightning, Sparkle } from "@phosphor-icons/react";
+import { HandWaving, Heart, Fire, Question, Lightning, Sparkle } from "@phosphor-icons/react";
+import { toast } from "sonner";
 
+interface QuickActionsProps {
+  onActionClick: (template: string) => void;
+  onCustomAction: (text: string) => void;
 }
 
 interface QuickAction {
