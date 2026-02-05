@@ -130,7 +130,7 @@ export function VoiceSettingsConfig({
   };
 
   const handleVoiceChange = (voiceName: string) => {
-    onUpdate({ ...settings, voiceName });
+    onUpdate({ ...settings, voiceName: voiceName === 'auto' ? undefined : voiceName });
   };
 
   const handleSSMLToggle = (enableSSML: boolean) => {
@@ -281,12 +281,12 @@ export function VoiceSettingsConfig({
             {relevantVoices.length > 0 && (
               <div className="space-y-3">
                 <Label htmlFor="voice-name">Specific Voice</Label>
-                <Select value={settings.voiceName || ''} onValueChange={handleVoiceChange}>
+                <Select value={settings.voiceName || 'auto'} onValueChange={handleVoiceChange}>
                   <SelectTrigger id="voice-name">
                     <SelectValue placeholder="Auto-select (Recommended)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Auto-select (Recommended)</SelectItem>
+                    <SelectItem value="auto">Auto-select (Recommended)</SelectItem>
                     {relevantVoices.map((voice) => (
                       <SelectItem key={voice.name} value={voice.name}>
                         {voice.name} ({voice.lang})
