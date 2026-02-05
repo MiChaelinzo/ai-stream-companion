@@ -6,14 +6,14 @@ import {
   Lightning,
   ChatCircle,
   Heart,
-  Fire,
-  GameController,
-  Question,
+  GameC
   Gift,
-  Sparkle,
   Trophy,
-  WarningCircle,
-  Smiley,
+  Smile
+import { t
+interface
+  label: string;
+  categor
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
@@ -30,84 +30,84 @@ const quickActions: QuickAction[] = [
   {
     id: "welcome",
     label: "Welcome New Viewer",
-    icon: Heart,
-    category: "greeting",
-    template: "Welcome to the stream! 🎉 Thanks for joining us!",
-    color: "accent",
-  },
-  {
-    id: "thanks-follow",
-    label: "Thank for Follow",
-    icon: Sparkle,
-    category: "gratitude",
-    template: "Thank you so much for the follow! 💜 You're awesome!",
+    category: "g
     color: "primary",
-  },
   {
-    id: "thanks-sub",
-    label: "Thank for Sub",
-    icon: Gift,
-    category: "gratitude",
-    template: "AMAZING! Thank you for subscribing! 🎊 Welcome to the community!",
-    color: "chart-5",
-  },
+    label: "Thank fo
+    
+   
   {
-    id: "hype-moment",
     label: "Hype Moment!",
-    icon: Fire,
-    category: "hype",
-    template: "LET'S GOOO! 🔥 That was INSANE! Chat, did you see that?!",
+    category: "hyp
     color: "destructive",
-  },
   {
-    id: "game-question",
-    label: "Ask Chat Question",
-    icon: GameController,
-    category: "game",
-    template: "Quick question for chat - what should I do next?",
-    color: "secondary",
-  },
+    label: "Ask Chat 
+    
+   
   {
-    id: "brb",
     label: "Be Right Back",
-    icon: WarningCircle,
-    category: "mod",
-    template: "BRB! Be back in just a moment - keep the chat vibes going! ✨",
+    category: "
     color: "muted",
-  },
   {
-    id: "thanks-chat",
-    label: "Thank Chat",
-    icon: ChatCircle,
-    category: "gratitude",
-    template: "You all are the BEST! 💙 Chat's been amazing today!",
-    color: "primary",
-  },
+    label: "Thank Cha
+    
+   
   {
-    id: "celebration",
-    label: "Celebrate Win",
-    icon: Trophy,
-    category: "hype",
-    template: "WE DID IT! 🏆 That was a team effort! Thanks everyone!",
+    label: "Celebrate Win"
+    category: "
     color: "chart-1",
-  },
   {
-    id: "gg",
     label: "Good Game",
-    icon: Smiley,
-    category: "game",
-    template: "GG! That was fun - on to the next one!",
-    color: "accent",
-  },
+    
+   
 ];
+interface QuickActionsPanelProp
+  onCustomAction?: (text:
 
-interface QuickActionsPanelProps {
-  onActionClick: (template: string) => void;
-  onCustomAction?: (text: string) => Promise<void>;
-}
+  const [selectedCategory, setSelectedCategory] = useState<string
 
-export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickActionsPanelProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+    
+   
+    { value: "
+    { value: "mod", label: 
+
+    selectedCategory
+      : quickActions.filter((action) => action.category === selectedCategory)
+  const handleActio
+    
+
+    if (!onCustomActio
+    setIsGenerating(true
+      const prompt = 
+      await onCustomAction
+    } catch (error) {
+      console.error(e
+    
+  }
+  return (
+      <CardHeader>
+          <div>
+              <Lightn
+            </CardTitle>
+          </div>
+    
+   
+      <CardCo
+          {categories.m
+              key
+              size="s
+              className="gap-2"
+              <cat.i
+    
+  
+
+            <Button
+              variant="outline"
+              onClick={() => handleActionClick(acti
+ 
+
+              <p className="text-xs text-muted-foreground text-left line-clamp-2">
+              </p>
   const [isGenerating, setIsGenerating] = useState(false);
 
   const categories = [
@@ -135,7 +135,7 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
     
     setIsGenerating(true);
     try {
-      const prompt = (window.spark.llmPrompt as any)`Generate a unique, engaging stream message that would be perfect for the current moment. Make it fun, positive, and natural. Keep it 1-2 sentences. No emojis at the end.`;
+      const prompt = window.spark.llmPrompt`Generate a unique, engaging stream message that would be perfect for the current moment. Make it fun, positive, and natural. Keep it 1-2 sentences. No emojis at the end.`;
       const response = await window.spark.llm(prompt, "gpt-4o-mini");
       await onCustomAction(response.trim());
       toast.success("Custom message generated!");
@@ -191,24 +191,24 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
                 <action.icon size={20} weight="bold" className={`text-${action.color}`} />
                 <span className="font-semibold text-sm">{action.label}</span>
               </div>
-              <p className="text-xs text-muted-foreground text-left line-clamp-2">
-                {action.template}
-              </p>
-            </Button>
-          ))}
-        </div>
 
-        {onCustomAction && (
-          <Button
-            onClick={handleGenerateCustom}
-            disabled={isGenerating}
-            className="w-full gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
-          >
-            <Sparkle size={20} weight="bold" />
-            {isGenerating ? "Generating..." : "Generate Custom Message"}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
