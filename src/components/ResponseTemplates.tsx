@@ -41,7 +41,7 @@ export function ResponseTemplates({ templates, onCreateTemplate, onDeleteTemplat
   const [templateContent, setTemplateContent] = useState("");
   const [templateCategory, setTemplateCategory] = useState<string>(TEMPLATE_CATEGORIES[0]);
   const [templateShortcut, setTemplateShortcut] = useState("");
-  const [filterCategory, setFilterCategory] = useState<string>("All");
+  const [filterCategory, setFilterCategory] = useState<string>("all-categories");
 
   const handleCreateTemplate = () => {
     if (!templateName.trim() || !templateContent.trim()) {
@@ -82,7 +82,7 @@ export function ResponseTemplates({ templates, onCreateTemplate, onDeleteTemplat
   };
 
   const filteredTemplates = templates.filter(
-    t => filterCategory === "All" || t.category === filterCategory
+    t => filterCategory === "all-categories" || t.category === filterCategory
   );
 
   return (
@@ -185,7 +185,7 @@ export function ResponseTemplates({ templates, onCreateTemplate, onDeleteTemplat
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="All">All Categories</SelectItem>
+                <SelectItem value="all-categories">All Categories</SelectItem>
                 {TEMPLATE_CATEGORIES.map(cat => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
