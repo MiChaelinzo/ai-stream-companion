@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-  Heart,
-  Lightning,
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { HandWaving, Heart, Fire, Question, Lightning, Sparkle } from "@phosphor-icons/react";
+import { toast } from "sonner";
 
-  id: st
-  icon:
-  template: strin
+interface QuickActionsProps {
+  onActionClick: (template: string) => void;
+  onCustomAction: (text: string) => void;
 }
-const quic
-    id: "welcome",
-    icon: HandWaving,
 
 interface QuickAction {
   id: string;
@@ -32,108 +29,120 @@ const quickActions: QuickAction[] = [
     category: "greeting",
     template: "Hey everyone! Welcome to the stream! Glad to have you here! 👋",
     color: "primary",
-  {
+  },
   {
     id: "thanks-follow",
     label: "Thank for Follow",
-    color: "dest
+    icon: Heart,
     category: "gratitude",
     template: "Thanks so much for the follow! I really appreciate it! ❤️",
     color: "accent",
-    
+  },
   {
     id: "thanks-sub",
     label: "Thank for Sub",
-    label: "Game
+    icon: Heart,
     category: "gratitude",
     template: "Thank you for subscribing! You're amazing! 🎉",
     color: "accent",
   },
   {
-  { value: "all
+    id: "hype",
     label: "Hype Moment",
     icon: Fire,
     category: "hype",
     template: "LET'S GOOO! That was insane! 🔥🔥🔥",
     color: "destructive",
-  on
+  },
   {
-
+    id: "question",
     label: "Ask Question",
-  const [customText
+    icon: Question,
     category: "question",
-  const filteredActions = selectedCategory === "all"
+    template: "What do you all think? Let me know in chat! 💭",
     color: "primary",
-
+  },
   {
-        </CardDescr
-      <CardContent className="
-          <TabsList class
-              <TabsTrigge
-              </TabsTrigger>
-          </TabsList>
-    
-  
+    id: "gg",
+    label: "Game Over - GG",
+    icon: Lightning,
+    category: "gameplay",
+    template: "GG! That was a great game! Thanks for watching! 🎮",
+    color: "secondary",
+  },
+  {
+    id: "brb",
+    label: "Be Right Back",
+    icon: HandWaving,
+    category: "greeting",
+    template: "Be right back everyone! Don't go anywhere! ⏸️",
+    color: "primary",
+  },
+  {
+    id: "starting",
+    label: "Starting Soon",
+    icon: Lightning,
+    category: "greeting",
+    template: "Starting in just a moment! Get hyped! 🚀",
+    color: "destructive",
+  },
+];
 
-                clas
-                <div className="f
-                    <action.icon size={20} w
-                  <div className="flex-1 text
-                      <span classNa
-                    </div>
-                  </div>
-  
+const categories = [
+  { value: "all", label: "All" },
+  { value: "greeting", label: "Greeting" },
+  { value: "gratitude", label: "Gratitude" },
+  { value: "hype", label: "Hype" },
+  { value: "question", label: "Question" },
+  { value: "gameplay", label: "Gameplay" },
+];
 
+export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickActionsProps) {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [customText, setCustomText] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-          <div className="flex gap-2">
-              placeholder="Type a custom 
- 
+  const filteredActions = selectedCategory === "all"
+    ? quickActions
+    : quickActions.filter(action => action.category === selectedCategory);
 
-                  handleCustomSubmit();
-              }}
-            <Button onClick={handleCustomSubmit} di
-            </Button>
+  const handleActionClick = (template: string) => {
+    onActionClick(template);
+    toast.success("Quick action sent!");
+  };
 
-            onClick={handleGenerateCustom}
-            classN
-            <Sparkle size={16} weight="bold" className="mr-2" />
+  const handleCustomSubmit = () => {
+    if (customText.trim()) {
+      onCustomAction(customText);
+      setCustomText("");
+      toast.success("Custom message sent!");
+    }
+  };
 
+  const handleGenerateCustom = async () => {
+    setIsGenerating(true);
+    try {
+      const prompt = (window.spark.llmPrompt as any)`Generate a short, engaging stream message that would be fun to send to chat. Make it natural and conversational. Keep it 1-2 sentences.`;
+      const response = await window.spark.llm(prompt, "gpt-4o");
+      setCustomText(response.trim());
+      toast.success("AI message generated!");
+    } catch (error) {
+      toast.error("Failed to generate message");
+      console.error(error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
-          <Lightning size={1
-        </Badge>
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  return (
+    <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Lightning size={24} weight="bold" className="text-primary" />
+          Quick Actions
+        </CardTitle>
+        <CardDescription>
+          Send preset messages instantly to your live chat with one click
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
