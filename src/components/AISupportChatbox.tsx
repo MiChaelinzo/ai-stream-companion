@@ -406,9 +406,6 @@ Return as JSON:
             <div className="space-y-4">
             {messages.length === 0 && (
               <div className="text-center py-12 space-y-4">
-            {messages.length === 0 && (
-              <div className="text-center py-12 space-y-4">
-                </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Welcome to Support! 👋</h3>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
