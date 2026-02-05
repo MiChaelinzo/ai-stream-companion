@@ -77,6 +77,7 @@ export function AISupportChatbox({
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -96,15 +97,27 @@ export function AISupportChatbox({
   }, [messages, autoRecommendations]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollViewportRef.current) {
+      scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
+    }
     setShowScrollButton(false);
   };
 
-  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    const target = event.currentTarget;
-    const isNearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 100;
-    setShowScrollButton(!isNearBottom);
+  const handleScroll = () => {
+    if (scrollViewportRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollViewportRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShowScrollButton(!isNearBottom);
+    }
   };
+
+  useEffect(() => {
+    const viewport = scrollViewportRef.current;
+    if (viewport) {
+      viewport.addEventListener('scroll', handleScroll);
+      return () => viewport.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   const generateAIResponse = async (userMessage: string): Promise<string> => {
     try {
@@ -331,8 +344,8 @@ Return as JSON:
   };
 
   return (
-    <Card className={cn("flex flex-col h-[700px]", className)}>
-      <CardHeader className="border-b border-border/50">
+    <Card className={cn("flex flex-col", className)}>
+      <CardHeader className="border-b border-border/50 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -352,9 +365,9 @@ Return as JSON:
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+      <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
         {showRecommendations && recommendations.length > 0 && (
-          <div className="p-4 border-b border-border/50 bg-muted/30">
+          <div className="p-4 border-b border-border/50 bg-muted/30 flex-shrink-0">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Lightbulb size={16} className="text-accent" weight="bold" />
@@ -385,12 +398,12 @@ Return as JSON:
           </div>
         )}
 
-        <ScrollArea
-          ref={scrollAreaRef}
-          onScroll={handleScroll}
-          className="flex-1 p-4"
-        >
-          <div className="space-y-4">
+        <div className="flex-1 relative min-h-0 overflow-hidden">
+          <div 
+            ref={scrollViewportRef}
+            className="h-full overflow-y-auto p-4 chat-scrollbar"
+          >
+            <div className="space-y-4">
             {messages.length === 0 && (
               <div className="text-center py-12 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto">
@@ -565,21 +578,24 @@ Return as JSON:
             )}
 
             <div ref={messagesEndRef} />
+            </div>
           </div>
-        </ScrollArea>
+        </div>
 
         {showScrollButton && (
-          <Button
-            size="sm"
-            onClick={scrollToBottom}
-            className="absolute bottom-24 right-8 rounded-full w-10 h-10 p-0 shadow-lg"
-          >
-            <ArrowDown size={18} weight="bold" />
-          </Button>
+          <div className="absolute bottom-28 right-8 z-10">
+            <Button
+              size="sm"
+              onClick={scrollToBottom}
+              className="rounded-full w-10 h-10 p-0 shadow-lg"
+            >
+              <ArrowDown size={18} weight="bold" />
+            </Button>
+          </div>
         )}
 
         {uploadingFile && (
-          <div className="px-4 py-2 border-t border-border/50 bg-muted/20">
+          <div className="px-4 py-2 border-t border-border/50 bg-muted/20 flex-shrink-0">
             <div className="space-y-1">
               <div className="flex items-center justify-between text-xs">
                 <span>Uploading {selectedFile?.name}...</span>
@@ -590,7 +606,7 @@ Return as JSON:
           </div>
         )}
 
-        <div className="p-4 border-t border-border/50">
+        <div className="p-4 border-t border-border/50 flex-shrink-0">
           <div className="flex gap-2">
             <div className="flex gap-1">
               {enableFileUpload && (

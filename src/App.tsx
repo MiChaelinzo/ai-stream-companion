@@ -1279,15 +1279,18 @@ Return as JSON:
                 </AlertDescription>
               </Alert>
               
-              <AISupportChatbox
-                initialMessages={supportChatMessages || []}
-                onSendMessage={(message) => {
-                  setSupportChatMessages((current) => [...(current || []), message]);
-                }}
-                autoRecommendations={true}
-                enableVoice={true}
-                enableFileUpload={true}
-              />
+              <div className="h-[700px]">
+                <AISupportChatbox
+                  initialMessages={supportChatMessages || []}
+                  onSendMessage={(message) => {
+                    setSupportChatMessages((current) => [...(current || []), message]);
+                  }}
+                  autoRecommendations={true}
+                  enableVoice={true}
+                  enableFileUpload={true}
+                  className="h-full"
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="setup" className="space-y-6">
@@ -1601,8 +1604,8 @@ Return as JSON:
       )}
       
       {showFloatingSupport && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 max-h-[600px] bg-card/95 backdrop-blur-xl border-2 border-accent/30 rounded-2xl shadow-2xl overflow-hidden animate-slide-in">
-          <div className="bg-gradient-to-r from-accent to-secondary p-4 flex items-center justify-between">
+        <div className="fixed bottom-6 right-6 z-50 w-96 h-[600px] bg-card/95 backdrop-blur-xl border-2 border-accent/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-in">
+          <div className="bg-gradient-to-r from-accent to-secondary p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
                 <Headset size={20} weight="bold" className="text-white" />
@@ -1621,7 +1624,7 @@ Return as JSON:
             </button>
           </div>
           
-          <div className="h-[500px] overflow-hidden">
+          <div className="flex-1 min-h-0">
             <AISupportChatbox
               initialMessages={supportChatMessages || []}
               onSendMessage={(message) => {
@@ -1630,6 +1633,7 @@ Return as JSON:
               autoRecommendations={true}
               enableVoice={true}
               enableFileUpload={true}
+              className="h-full border-0"
             />
           </div>
         </div>
