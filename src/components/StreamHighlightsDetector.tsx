@@ -22,6 +22,7 @@ import {
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { ChatMessage, StreamHighlight } from "@/lib/types";
+import { safeParseDate } from "@/lib/utils";
 
 interface StreamHighlightsDetectorProps {
   messages: ChatMessage[];
@@ -56,7 +57,7 @@ export function StreamHighlightsDetector({
     const now = Date.now();
     const recentWindow = 30000;
     const recentMessages = messages.filter(
-      (m) => new Date(m.timestamp).getTime() > now - recentWindow
+      (m) => safeParseDate(m.timestamp).getTime() > now - recentWindow
     );
 
     if (recentMessages.length === 0) return;
@@ -91,7 +92,7 @@ export function StreamHighlightsDetector({
     
     if (recentMessages.length < threshold) return null;
 
-    const averageRate = messages.length / Math.max(1, (Date.now() - new Date(messages[0]?.timestamp || Date.now()).getTime()) / 60000);
+    const averageRate = messages.length / Math.max(1, (Date.now() - safeParseDate(messages[0]?.timestamp || Date.now()).getTime()) / 60000);
     const currentRate = recentMessages.length / 0.5;
 
     if (currentRate > averageRate * 2 && currentRate > threshold) {
@@ -203,7 +204,7 @@ If NOT a key moment, return: {"isKeyMoment": false}`;
     const exists = highlights.some(
       (h) =>
         h.type === highlight.type &&
-        new Date(h.timestamp).getTime() > Date.now() - 60000
+        safeParseDate(h.timestamp).getTime() > Date.now() - 60000
     );
 
     if (exists) return;
@@ -410,7 +411,7 @@ Return JSON:
                               {highlight.description}
                             </p>
                             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                              <span>{new Date(highlight.timestamp).toLocaleTimeString()}</span>
+                              <span>{safeParseDate(highlight.timestamp).toLocaleTimeString()}</span>
                               <span>•</span>
                               <span>Intensity: {highlight.intensity}%</span>
                               {highlight.context.messageCount && (

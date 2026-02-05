@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { safeParseDate } from "@/lib/utils";
 
 interface PollCreatorProps {
   polls: Poll[];
@@ -199,7 +200,7 @@ export function PollCreator({ polls, onCreatePoll, onDeletePoll, onGeneratePoll,
                       ))}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(poll.createdAt).toLocaleString()}
+                      {safeParseDate(poll.createdAt).toLocaleString()}
                     </p>
                   </div>
                 ))

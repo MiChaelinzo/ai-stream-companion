@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatCommand } from "@/lib/types";
 import { Plus, Trash, Terminal, Clock, Shield } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { safeParseDate } from "@/lib/utils";
 
 interface ChatCommandsProps {
   commands: ChatCommand[];
@@ -190,7 +191,7 @@ export function ChatCommands({ commands, onCreateCommand, onDeleteCommand, onTog
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span>Used {command.usageCount} times</span>
                           {command.lastUsed && (
-                            <span>Last: {new Date(command.lastUsed).toLocaleString()}</span>
+                            <span>Last: {safeParseDate(command.lastUsed).toLocaleString()}</span>
                           )}
                         </div>
                       </div>
