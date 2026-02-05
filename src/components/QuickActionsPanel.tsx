@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, C
-import { HandWaving, Heart, Fire, Question, Ligh
-
-  onActionClick: (template: string) => void;
-}
-interface QuickAction {
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { HandWaving, Heart, Fire, Question, Lightning, GameController, Sparkle } from "@phosphor-icons/react";
+import { toast } from "sonner";
 
 interface QuickActionsProps {
   onActionClick: (template: string) => void;
@@ -16,62 +16,54 @@ interface QuickAction {
   id: string;
   label: string;
   icon: any;
-    category: "gratitude",
-    color: "accent"
-  {
- 
+  category: "greeting" | "gratitude" | "hype" | "question" | "gameplay";
+  template: string;
+  color: "primary" | "accent" | "secondary" | "destructive";
+}
 
-    color: "accent",
+const quickActions: QuickAction[] = [
   {
-    label: "Hype M
-    category: "hype",
-    color: "destructi
-  {
-    label: "Ask Question",
-    category: "questi
-    
-  {
-    label: "Game Over - 
-    category: "gameplay",
-    color: "seco
-    category: "gratitude",
-    label: "Be Right Back",
-    category: "greet
-    
-  {
-    label: "Starting 
+    id: "welcome",
+    label: "Welcome Viewers",
+    icon: HandWaving,
     category: "greeting",
-    color: "dest
-];
-const categories = [
-  { value: "greeting
-  { 
+    template: "Hey everyone! Welcome to the stream! 👋",
+    color: "primary",
+  },
   {
-
-  const [selectedCategory
-  const [isGene
-  const filteredActio
-    : quickActions.filter(action => action.category 
-  const handleActionClick
-    
-
-    if (customText.
-      setCustomText("");
-    }
-
-    setIsGenerating(true);
-      const prompt = 
-    
-   
-      console
-      setIsGenerating(false)
-  };
-  return (
-      <CardHeader>
-          <Lightning si
-    
-   
-      </CardHe
+    id: "thanks",
+    label: "Thank You",
+    icon: Heart,
+    category: "gratitude",
+    template: "Thank you so much for being here! You're awesome! ❤️",
+    color: "accent",
+  },
+  {
+    id: "hype",
+    label: "Hype Moment",
+    icon: Fire,
+    category: "hype",
+    template: "LET'S GOOO! That was incredible! 🔥",
+    color: "destructive",
+  },
+  {
+    id: "question",
+    label: "Ask Question",
+    icon: Question,
+    category: "question",
+    template: "What do you all think? Let me know in chat! 💬",
+    color: "accent",
+  },
+  {
+    id: "gameover",
+    label: "Game Over - GG",
+    icon: GameController,
+    category: "gameplay",
+    template: "GG! That was a great game! 🎮",
+    color: "secondary",
+  },
+  {
+    id: "brb",
     label: "Be Right Back",
     icon: HandWaving,
     category: "greeting",
@@ -109,7 +101,7 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
   const handleActionClick = (template: string) => {
     onActionClick(template);
     toast.success("Quick action sent!");
-    
+  };
 
   const handleCustomSubmit = () => {
     if (customText.trim()) {
@@ -134,13 +126,13 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
     }
   };
 
-  );
+  return (
     <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-
+      <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lightning size={24} weight="bold" className="text-primary" />
           Quick Actions
-
+        </CardTitle>
         <CardDescription>
           Send preset messages instantly to your live chat with one click
         </CardDescription>
@@ -152,7 +144,7 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
               <TabsTrigger key={cat.value} value={cat.value}>
                 <span>{cat.label}</span>
               </TabsTrigger>
-
+            ))}
           </TabsList>
 
           <TabsContent value={selectedCategory} className="space-y-3 mt-4">
@@ -166,7 +158,7 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
                 <div className="flex items-center gap-3 w-full">
                   <div className={`p-2 rounded-md bg-${action.color}/10`}>
                     <action.icon size={20} weight="bold" className={`text-${action.color}`} />
-
+                  </div>
                   <div className="flex-1 text-left">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-sm">{action.label}</span>
@@ -174,40 +166,40 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{action.template}</p>
                   </div>
-
+                </div>
               </Button>
-
+            ))}
           </TabsContent>
         </Tabs>
 
         <div className="pt-4 border-t space-y-3">
           <div className="flex gap-2">
-
+            <Input
               placeholder="Type a custom message..."
-
+              value={customText}
               onChange={(e) => setCustomText(e.target.value)}
-
+              onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
-
+                  e.preventDefault();
                   handleCustomSubmit();
                 }
               }}
-
+            />
             <Button onClick={handleCustomSubmit} disabled={!customText.trim()}>
-
+              Send
             </Button>
-
+          </div>
           <Button
             variant="outline"
             onClick={handleGenerateCustom}
-
+            disabled={isGenerating}
             className="w-full"
-
+          >
             <Sparkle size={16} weight="bold" className="mr-2" />
             {isGenerating ? "Generating..." : "Generate AI Message"}
-
-
-
-
-
-
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
