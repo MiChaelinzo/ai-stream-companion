@@ -1,36 +1,33 @@
 import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  ChatCircle,
 import {
   Lightning,
   ChatCircle,
   Heart,
-} from 
+  Fire,
+  Question,
+  GameController,
+  HandWaving,
+  Sparkle,
+} from "@phosphor-icons/react";
+import { toast } from "sonner";
 
-  id: str
-  icon:
-  template
+interface QuickAction {
+  id: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  category: "greeting" | "gratitude" | "hype" | "question" | "engagement";
+  template: string;
+  color: string;
 }
-const quick
-    id: "welcome
-    icon: Heart,
-    template: "Welcome to the s
 
-    id: "thank-follow",
-    icon: Hea
-    template: "T
-  },
-    id: "hype-moment",
-    icon: Fire,
-    template: "L
- 
-
-    icon: ChatCircle,
-   
-  },
-    id: "brb",
-    icon: Heart,
+const quickActions: QuickAction[] = [
+  {
+    id: "welcome",
+    label: "Welcome Message",
+    icon: HandWaving,
     category: "greeting",
     template: "Welcome to the stream! Thanks for joining us! 💜",
     color: "primary",
@@ -54,143 +51,111 @@ const quick
   {
     id: "ask-chat",
     label: "Ask Chat Question",
-    icon: Heart,
-    template: "Thanks for
+    icon: Question,
+    category: "question",
+    template: "What do you all think? Let me know in chat! 💬",
+    color: "secondary",
   },
-    id: "poll-question"
-    
-   
+  {
+    id: "thank-sub",
+    label: "Thank for Sub",
+    icon: Sparkle,
+    category: "gratitude",
+    template: "Thank you for the sub! You're amazing! ✨",
+    color: "accent",
   },
+  {
+    id: "start-game",
+    label: "Starting Game",
+    icon: GameController,
+    category: "engagement",
+    template: "Alright chat, let's get into it! 🎮",
+    color: "primary",
+  },
+  {
+    id: "clutch",
+    label: "Clutch Play!",
+    icon: Fire,
+    category: "hype",
+    template: "THAT WAS A CLUTCH PLAY! Did you see that?! 🔥",
+    color: "destructive",
+  },
+  {
+    id: "brb",
+    label: "Be Right Back",
+    icon: ChatCircle,
+    category: "engagement",
+    template: "BRB, chat! I'll be back in just a moment! 👋",
+    color: "muted",
+  },
+];
 
-  onActionClick: (tem
+interface QuickActionsPanelProps {
+  onActionClick: (template: string) => void;
+  onCustomAction?: (text: string) => void;
 }
-export function QuickActionsPanel({ onActionClick, onCustomAction }: 
-  const [isGenerati
-  co
-   
-    { value: "gratitu
-    { value: "question",
+
+export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickActionsPanelProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const categories = [
+    { value: "all", label: "All", icon: Lightning },
+    { value: "greeting", label: "Greetings", icon: HandWaving },
+    { value: "gratitude", label: "Gratitude", icon: Heart },
+    { value: "hype", label: "Hype", icon: Fire },
+    { value: "question", label: "Questions", icon: Question },
+    { value: "engagement", label: "Engagement", icon: ChatCircle },
   ];
+
   const filteredActions =
+    selectedCategory === "all"
       ? quickActions
+      : quickActions.filter((a) => a.category === selectedCategory);
 
-    
-  }
-  const handleGenerateCu
-    
+  const handleActionClick = (action: QuickAction) => {
+    onActionClick(action.template);
+    toast.success(`Sent: ${action.label}`);
+  };
+
+  const handleGenerateCustom = async () => {
+    if (!onCustomAction) return;
+
+    setIsGenerating(true);
     try {
-      const response 
-      toast.success("Custom message generated!"
-      toast.error("Fa
-    
-   
+      const prompt = (window.spark.llmPrompt as any)`Generate a short, energetic streaming message (1-2 sentences) that would be good for engaging with chat. Include 1-2 emojis.`;
+      const response = await window.spark.llm(prompt, "gpt-4o-mini");
+      onCustomAction(response.trim());
+      toast.success("Custom message generated!");
+    } catch (error) {
+      toast.error("Failed to generate custom message");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
-    <Card className="bg
-        <div className="f
-            <CardTitl
+  return (
+    <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Lightning size={24} weight="bold" className="text-primary" />
               Quick Actions
-            <CardDescri
-    
-   
-      </CardHeader>
-        <div className="
-            <Bu
-              variant={sel
-              onClick={() => setSelectedCategory(cat.value)}
-            >
-    
-   
-
-          {filteredActions.
-              key={a
-              classN
-            >
-                <acti
-    
-   
-            </Button>
+            </CardTitle>
+            <CardDescription>
+              One-click messages for common stream moments
+            </CardDescription>
+          </div>
+          <Badge variant="outline" className="gap-1">
+            {filteredActions.length} actions
+          </Badge>
         </div>
-        {onCusto
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat) => (
             <Button
-              disabled={isGenerating}
-              varian
-    
-   
-        )}
-    </Card>
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               key={cat.value}
               variant={selectedCategory === cat.value ? "default" : "outline"}
               size="sm"
@@ -215,27 +180,27 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }:
                 <action.icon size={20} weight="bold" className={`text-${action.color}`} />
                 <span className="font-semibold text-sm">{action.label}</span>
               </div>
+              <p className="text-xs text-muted-foreground text-left line-clamp-2">
+                {action.template}
+              </p>
+            </Button>
+          ))}
+        </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        {onCustomAction && (
+          <div className="pt-4 border-t border-border/50">
+            <Button
+              onClick={handleGenerateCustom}
+              disabled={isGenerating}
+              variant="secondary"
+              className="w-full gap-2"
+            >
+              <Sparkle size={18} weight="bold" />
+              {isGenerating ? "Generating..." : "Generate AI Message"}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
