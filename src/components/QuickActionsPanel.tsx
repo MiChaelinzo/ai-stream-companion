@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Badge } from "@/components/ui/badge";
-  Heart,
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { HandWaving, Heart, Fire, Question, Lightning, Sparkle } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface QuickActionsProps {
