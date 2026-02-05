@@ -6,14 +6,14 @@ import {
   Lightning,
   ChatCircle,
   Heart,
-  GameC
   Gift,
   Trophy,
-  Smile
-import { t
-interface
-  label: string;
-  categor
+  Smiley,
+  Fire,
+  Sparkle,
+  GameController,
+  Question,
+  WarningCircle,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
@@ -30,84 +30,108 @@ const quickActions: QuickAction[] = [
   {
     id: "welcome",
     label: "Welcome New Viewer",
-    category: "g
+    icon: Heart,
+    category: "greeting",
+    template: "Welcome to the stream! Thanks for joining us! 💜",
     color: "primary",
+  },
   {
-    label: "Thank fo
-    
-   
+    id: "thank-follow",
+    label: "Thank for Follow",
+    icon: Heart,
+    category: "gratitude",
+    template: "Thank you so much for the follow! I really appreciate your support! 🙏",
+    color: "accent",
+  },
   {
+    id: "hype-moment",
     label: "Hype Moment!",
-    category: "hyp
+    icon: Fire,
+    category: "hype",
+    template: "LET'S GOOOOO! That was INSANE! 🔥🔥🔥",
     color: "destructive",
+  },
   {
-    label: "Ask Chat 
-    
-   
+    id: "ask-chat",
+    label: "Ask Chat Question",
+    icon: ChatCircle,
+    category: "question",
+    template: "What do you all think? Let me know in chat!",
+    color: "secondary",
+  },
   {
+    id: "brb",
     label: "Be Right Back",
-    category: "
+    icon: ChatCircle,
+    category: "mod",
+    template: "BRB! Taking a quick break, be back in a few minutes!",
     color: "muted",
+  },
   {
-    label: "Thank Cha
-    
-   
+    id: "thank-chat",
+    label: "Thank Chat",
+    icon: Sparkle,
+    category: "gratitude",
+    template: "You all are the best! Thanks for the amazing vibes today! ✨",
+    color: "accent",
+  },
   {
-    label: "Celebrate Win"
-    category: "
+    id: "celebrate-win",
+    label: "Celebrate Win",
+    icon: Trophy,
+    category: "hype",
+    template: "WE DID IT! Victory secured! 🏆",
     color: "chart-1",
+  },
   {
+    id: "gg",
     label: "Good Game",
-    
-   
+    icon: GameController,
+    category: "game",
+    template: "GG! That was a fun match!",
+    color: "secondary",
+  },
+  {
+    id: "raid-thanks",
+    label: "Thank Raid",
+    icon: Gift,
+    category: "gratitude",
+    template: "HUGE thanks for the raid! Welcome everyone! 🎉",
+    color: "primary",
+  },
+  {
+    id: "starting-soon",
+    label: "Starting Soon",
+    icon: Lightning,
+    category: "mod",
+    template: "Starting in just a few minutes! Get hyped! ⚡",
+    color: "primary",
+  },
+  {
+    id: "ending-stream",
+    label: "Ending Stream",
+    icon: Heart,
+    category: "mod",
+    template: "Thanks for hanging out today! See you next stream! 💜",
+    color: "accent",
+  },
+  {
+    id: "poll-question",
+    label: "Poll Question",
+    icon: Question,
+    category: "question",
+    template: "Drop your votes in chat! What should we do next?",
+    color: "secondary",
+  },
 ];
-interface QuickActionsPanelProp
-  onCustomAction?: (text:
 
-  const [selectedCategory, setSelectedCategory] = useState<string
+interface QuickActionsPanelProps {
+  onActionClick: (template: string) => void;
+  onCustomAction?: (text: string) => void;
+}
 
-    
-   
-    { value: "
-    { value: "mod", label: 
-
-    selectedCategory
-      : quickActions.filter((action) => action.category === selectedCategory)
-  const handleActio
-    
-
-    if (!onCustomActio
-    setIsGenerating(true
-      const prompt = 
-      await onCustomAction
-    } catch (error) {
-      console.error(e
-    
-  }
-  return (
-      <CardHeader>
-          <div>
-              <Lightn
-            </CardTitle>
-          </div>
-    
-   
-      <CardCo
-          {categories.m
-              key
-              size="s
-              className="gap-2"
-              <cat.i
-    
-  
-
-            <Button
-              variant="outline"
-              onClick={() => handleActionClick(acti
- 
-
-              <p className="text-xs text-muted-foreground text-left line-clamp-2">
-              </p>
+export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickActionsPanelProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isGenerating, setIsGenerating] = useState(false);
 
   const categories = [
@@ -135,7 +159,7 @@ interface QuickActionsPanelProp
     
     setIsGenerating(true);
     try {
-      const prompt = window.spark.llmPrompt`Generate a unique, engaging stream message that would be perfect for the current moment. Make it fun, positive, and natural. Keep it 1-2 sentences. No emojis at the end.`;
+      const prompt = (window.spark.llmPrompt as any)`Generate a unique, engaging stream message that would be perfect for the current moment. Make it fun, positive, and natural. Keep it 1-2 sentences. No emojis at the end.`;
       const response = await window.spark.llm(prompt, "gpt-4o-mini");
       await onCustomAction(response.trim());
       toast.success("Custom message generated!");
@@ -191,24 +215,27 @@ interface QuickActionsPanelProp
                 <action.icon size={20} weight="bold" className={`text-${action.color}`} />
                 <span className="font-semibold text-sm">{action.label}</span>
               </div>
+              <p className="text-xs text-muted-foreground text-left line-clamp-2">
+                {action.template}
+              </p>
+            </Button>
+          ))}
+        </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        {onCustomAction && (
+          <div className="pt-4 border-t">
+            <Button
+              onClick={handleGenerateCustom}
+              disabled={isGenerating}
+              className="w-full gap-2"
+              variant="secondary"
+            >
+              <Sparkle size={18} weight="bold" />
+              {isGenerating ? "Generating..." : "Generate Custom Message"}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
