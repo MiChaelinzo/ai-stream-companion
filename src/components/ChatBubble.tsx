@@ -3,6 +3,7 @@ import { ChatMessage } from "@/lib/types";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Robot, User, ThumbsUp, ThumbsDown, Smiley, SmileyMeh, SmileyXEyes } from "@phosphor-icons/react";
+import { safeParseDate } from "@/lib/utils";
 
 interface ChatBubbleProps {
   message: ChatMessage;
@@ -72,7 +73,7 @@ export function ChatBubble({ message, onVote, showVoting = true }: ChatBubblePro
         <div className="flex items-center gap-2 mt-1 px-2">
           {getSentimentIcon()}
           <span className="text-xs text-muted-foreground">
-            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {safeParseDate(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
       </div>

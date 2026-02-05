@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SkillProgress } from "@/lib/types";
 import { Trophy, TrendUp, TrendDown, Circle, CheckCircle, Clock, Target } from "@phosphor-icons/react";
 import { formatDistanceToNow } from "date-fns";
+import { safeParseDate } from "@/lib/utils";
 
 interface SkillProgressDashboardProps {
   skillData: SkillProgress[];
@@ -144,7 +145,7 @@ export function SkillProgressDashboard({ skillData }: SkillProgressDashboardProp
 
                     <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border/50">
                       <Clock size={14} />
-                      Last played {formatDistanceToNow(skill.lastPlayed, { addSuffix: true })}
+                      Last played {formatDistanceToNow(safeParseDate(skill.lastPlayed), { addSuffix: true })}
                     </div>
                   </CardContent>
                 </Card>

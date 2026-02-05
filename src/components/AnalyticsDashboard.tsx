@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnalyticsData, ChatMessage, SentimentData } from "@/lib/types";
 import { ChartLine, ChatCircle, Lightning, TrendUp, Smiley, SmileyMeh, SmileyXEyes, Hash } from "@phosphor-icons/react";
 import { useMemo } from "react";
+import { safeParseDate } from "@/lib/utils";
 
 interface AnalyticsDashboardProps {
   messages: ChatMessage[];
@@ -36,7 +37,7 @@ export function AnalyticsDashboard({ messages }: AnalyticsDashboardProps) {
       .map(([word, count]) => ({ word, count }));
 
     const messagesPerHour = messages.reduce((acc, msg) => {
-      const hour = new Date(msg.timestamp).getHours();
+      const hour = safeParseDate(msg.timestamp).getHours();
       const key = `${hour}:00`;
       acc[key] = (acc[key] || 0) + 1;
       return acc;

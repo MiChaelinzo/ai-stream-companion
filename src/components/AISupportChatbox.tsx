@@ -44,7 +44,7 @@ import {
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { SupportChatMessage, SupportChatRecommendation } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, safeParseDate } from "@/lib/utils";
 
 interface AISupportChatboxProps {
   onSendMessage?: (message: SupportChatMessage) => void;
@@ -329,11 +329,12 @@ Return as JSON:
     }
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (date: Date | string) => {
+    const parsedDate = safeParseDate(date);
     return new Intl.DateTimeFormat('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-    }).format(date);
+    }).format(parsedDate);
   };
 
   const formatFileSize = (bytes?: number) => {

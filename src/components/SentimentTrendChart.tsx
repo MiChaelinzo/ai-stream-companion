@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChatMessage } from "@/lib/types";
 import { ChartLine } from "@phosphor-icons/react";
 import { useMemo } from "react";
+import { safeParseDate } from "@/lib/utils";
 
 interface SentimentTrendChartProps {
   messages: ChatMessage[];
@@ -22,7 +23,7 @@ export function SentimentTrendChart({ messages }: SentimentTrendChartProps) {
         return sum;
       }, 0) / windowSize;
 
-      const timestamp = new Date(window[window.length - 1].timestamp);
+      const timestamp = safeParseDate(window[window.length - 1].timestamp);
       const timeLabel = `${timestamp.getHours().toString().padStart(2, '0')}:${timestamp.getMinutes().toString().padStart(2, '0')}`;
 
       dataPoints.push({

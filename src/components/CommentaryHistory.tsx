@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { GameplayAnalysis } from "@/lib/types";
 import { ChatCircle, Clock, GameController, Sparkle, Trash } from "@phosphor-icons/react";
 import { Separator } from "@/components/ui/separator";
+import { safeParseDate } from "@/lib/utils";
 
 interface CommentaryHistoryProps {
   analyses: GameplayAnalysis[];
@@ -84,7 +85,7 @@ export function CommentaryHistory({ analyses, onClear }: CommentaryHistoryProps)
                       </Badge>
                       <Badge variant="outline" className="gap-1">
                         <Clock size={12} weight="bold" />
-                        {new Date(analysis.timestamp).toLocaleTimeString()}
+                        {safeParseDate(analysis.timestamp).toLocaleTimeString()}
                       </Badge>
                     </div>
                   </div>

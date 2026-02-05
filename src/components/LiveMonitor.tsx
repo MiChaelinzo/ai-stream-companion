@@ -14,6 +14,7 @@ import {
   Eye
 } from "@phosphor-icons/react";
 import { format } from "date-fns";
+import { safeParseDate } from "@/lib/utils";
 
 interface LiveMonitorProps {
   messages: ChatMessage[];
@@ -219,7 +220,7 @@ export function LiveMonitor({
                           </span>
                         </div>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(message.timestamp), 'HH:mm:ss')}
+                          {format(safeParseDate(message.timestamp), 'HH:mm:ss')}
                         </span>
                       </div>
                       <p className="text-sm leading-relaxed">{message.content}</p>
