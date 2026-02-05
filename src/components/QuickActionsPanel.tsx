@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import {
-  Lightning,
-  Question,
   Heart,
-  Fire,
-  GameController,
-  HandWaving,
-  Sparkle,
-} from "@phosphor-icons/react";
-import { toast } from "sonner";
+  Lightning,
+
+  id: st
+  icon:
+  template: strin
+}
+const quic
+    id: "welcome",
+    icon: HandWaving,
 
 interface QuickAction {
   id: string;
@@ -32,108 +32,108 @@ const quickActions: QuickAction[] = [
     category: "greeting",
     template: "Hey everyone! Welcome to the stream! Glad to have you here! 👋",
     color: "primary",
-  },
+  {
   {
     id: "thanks-follow",
     label: "Thank for Follow",
-    icon: Heart,
+    color: "dest
     category: "gratitude",
     template: "Thanks so much for the follow! I really appreciate it! ❤️",
     color: "accent",
-  },
+    
   {
     id: "thanks-sub",
     label: "Thank for Sub",
-    icon: Heart,
+    label: "Game
     category: "gratitude",
     template: "Thank you for subscribing! You're amazing! 🎉",
     color: "accent",
   },
   {
-    id: "hype",
+  { value: "all
     label: "Hype Moment",
     icon: Fire,
     category: "hype",
     template: "LET'S GOOO! That was insane! 🔥🔥🔥",
     color: "destructive",
-  },
+  on
   {
-    id: "question",
+
     label: "Ask Question",
-    icon: Question,
+  const [customText
     category: "question",
-    template: "What do you all think? Drop your thoughts in chat! 💭",
-    color: "primary",
-  },
-  {
-    id: "gameplay",
-    label: "Gameplay Comment",
-    icon: GameController,
-    category: "gameplay",
-    template: "This game is so fun! What are you all playing today? 🎮",
-    color: "secondary",
-  },
-];
-
-const categories = [
-  { value: "all", label: "All" },
-  { value: "greeting", label: "Greetings" },
-  { value: "gratitude", label: "Gratitude" },
-  { value: "hype", label: "Hype" },
-  { value: "question", label: "Questions" },
-  { value: "gameplay", label: "Gameplay" },
-];
-
-interface QuickActionsPanelProps {
-  onActionClick: (template: string) => void;
-  onCustomAction: (text: string) => void;
-}
-
-export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickActionsPanelProps) {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [customText, setCustomText] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-
   const filteredActions = selectedCategory === "all"
-    ? quickActions
-    : quickActions.filter(action => action.category === selectedCategory);
+    color: "primary",
 
-  const handleActionClick = (template: string) => {
-    onActionClick(template);
-    toast.success("Message sent!");
-  };
+  {
+        </CardDescr
+      <CardContent className="
+          <TabsList class
+              <TabsTrigge
+              </TabsTrigger>
+          </TabsList>
+    
+  
 
-  const handleCustomSubmit = () => {
-    if (customText.trim()) {
-      onCustomAction(customText);
-      toast.success("Custom message sent!");
-      setCustomText("");
-    }
-  };
+                clas
+                <div className="f
+                    <action.icon size={20} w
+                  <div className="flex-1 text
+                      <span classNa
+                    </div>
+                  </div>
+  
 
-  const handleGenerateCustom = async () => {
-    setIsGenerating(true);
-    try {
-      const prompt = (window.spark.llmPrompt as any)`Generate a friendly, engaging stream message that a streamer could send to their chat. Make it 1-2 sentences, casual, and include an appropriate emoji. Just return the message, nothing else.`;
-      const response = await window.spark.llm(prompt, "gpt-4o-mini");
-      setCustomText(response.trim());
-      toast.success("AI message generated!");
-    } catch (error) {
-      toast.error("Failed to generate message");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Lightning size={24} weight="bold" className="text-primary" />
-          Quick Actions
-        </CardTitle>
-        <CardDescription>
-          One-click preset messages for common stream moments
+          <div className="flex gap-2">
+              placeholder="Type a custom 
+ 
+
+                  handleCustomSubmit();
+              }}
+            <Button onClick={handleCustomSubmit} di
+            </Button>
+
+            onClick={handleGenerateCustom}
+            classN
+            <Sparkle size={16} weight="bold" className="mr-2" />
+
+
+          <Lightning size={1
+        </Badge>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
