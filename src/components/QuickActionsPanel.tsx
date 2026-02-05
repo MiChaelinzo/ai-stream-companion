@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
   Lightning,
-  ChatCi
+  ChatCircle,
+  Heart,
+  Fire,
+  GameController,
+  Question,
   Gift,
-  Sparkl
+  Sparkle,
   Trophy,
-  WarningCircle,
-} from 
-
-  id: stri
-  icon: Rea
-  templat
-}
   WarningCircle,
   Smiley,
 } from "@phosphor-icons/react";
@@ -62,70 +60,54 @@ const quickActions: QuickAction[] = [
     color: "destructive",
   },
   {
-  },
     id: "game-question",
-    icon: GameCon
-    template: "Quick 
+    label: "Ask Chat Question",
+    icon: GameController,
+    category: "game",
+    template: "Quick question for chat - what should I do next?",
+    color: "secondary",
   },
+  {
     id: "brb",
-    
-   
+    label: "Be Right Back",
+    icon: WarningCircle,
+    category: "mod",
+    template: "BRB! Be back in just a moment - keep the chat vibes going! ✨",
+    color: "muted",
   },
+  {
     id: "thanks-chat",
-    icon: ChatCircl
-    template: "You all ar
+    label: "Thank Chat",
+    icon: ChatCircle,
+    category: "gratitude",
+    template: "You all are the BEST! 💙 Chat's been amazing today!",
+    color: "primary",
   },
+  {
     id: "celebration",
-    
-   
+    label: "Celebrate Win",
+    icon: Trophy,
+    category: "hype",
+    template: "WE DID IT! 🏆 That was a team effort! Thanks everyone!",
+    color: "chart-1",
   },
+  {
     id: "gg",
+    label: "Good Game",
     icon: Smiley,
-    template: "GG! That w
+    category: "game",
+    template: "GG! That was fun - on to the next one!",
+    color: "accent",
   },
+];
 
-  on
+interface QuickActionsPanelProps {
+  onActionClick: (template: string) => void;
+  onCustomAction?: (text: string) => Promise<void>;
 }
-export functio
-  const [isGenerating, setI
-  const categories = [
-    { value: "greeti
-    { value: "gratitude", label: "Thanks", icon: Sparkle },
-    { value: "quest
-  ];
-  c
-      ? quickActions
 
-    onActionClick(act
-  };
-  const handleGenerateCustom = async () => {
-    
-    
-   
-      toast.success("C
-      toast.error("Fail
-    } finally {
-    }
-
-    <Card className="
-    
-   
-             
-            <CardDescript
-          <Badge 
-          </Badge>
-      </CardHeader>
-        <div classNam
-    
-  
-
-            >
-              {cat.label}
-          ))}
-
-
-              key={action.id}
-              className="h-auto p-4 flex flex-col items-start gap-2 hover:
+export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickActionsPanelProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isGenerating, setIsGenerating] = useState(false);
 
   const categories = [
@@ -153,7 +135,7 @@ export functio
     
     setIsGenerating(true);
     try {
-      const prompt = window.spark.llmPrompt`Generate a unique, engaging stream message that would be perfect for the current moment. Make it fun, positive, and natural. Keep it 1-2 sentences. No emojis at the end.`;
+      const prompt = (window.spark.llmPrompt as any)`Generate a unique, engaging stream message that would be perfect for the current moment. Make it fun, positive, and natural. Keep it 1-2 sentences. No emojis at the end.`;
       const response = await window.spark.llm(prompt, "gpt-4o-mini");
       await onCustomAction(response.trim());
       toast.success("Custom message generated!");
@@ -203,33 +185,6 @@ export functio
               key={action.id}
               variant="outline"
               className="h-auto p-4 flex flex-col items-start gap-2 hover:border-primary/50 transition-all"
-              onClick={() => handleActionClick(action)}
-            >
-              <div className="flex items-center gap-2 w-full">
-                <action.icon size={20} weight="bold" className={`text-${action.color}`} />
-                <span className="font-semibold text-sm">{action.label}</span>
-              </div>
-              <p className="text-xs text-muted-foreground text-left line-clamp-2">
-                {action.template}
-              </p>
-            </Button>
-          ))}
-        </div>
-
-        {onCustomAction && (
-          <Button
-            onClick={handleGenerateCustom}
-            disabled={isGenerating}
-            className="w-full gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
-          >
-            <Sparkle size={20} weight="bold" />
-            {isGenerating ? "Generating..." : "Generate Custom Message"}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
               onClick={() => handleActionClick(action)}
             >
               <div className="flex items-center gap-2 w-full">
