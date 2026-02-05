@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { HandWaving, Heart, Fire, Question, Lightning, GameController, Sparkle } from "@phosphor-icons/react";
-import { toast } from "sonner";
+
+  onActionClick: (template: string) => void;
+}
+interface QuickAction {
 
 interface QuickActionsProps {
   onActionClick: (template: string) => void;
@@ -16,54 +16,54 @@ interface QuickAction {
   id: string;
   label: string;
   icon: any;
-  category: "greeting" | "gratitude" | "hype" | "question" | "gameplay";
-  template: string;
-  color: "primary" | "accent" | "secondary" | "destructive";
-}
-
-const quickActions: QuickAction[] = [
-  {
-    id: "welcome",
-    label: "Welcome Viewers",
-    icon: HandWaving,
-    category: "greeting",
-    template: "Hey everyone! Welcome to the stream! 👋",
-    color: "primary",
-  },
-  {
-    id: "thanks",
-    label: "Thank You",
-    icon: Heart,
     category: "gratitude",
-    template: "Thank you so much for being here! You're awesome! ❤️",
-    color: "accent",
-  },
+    color: "accent"
   {
-    id: "hype",
-    label: "Hype Moment",
-    icon: Fire,
-    category: "hype",
-    template: "LET'S GOOO! That was incredible! 🔥",
+ 
+
     color: "destructive",
-  },
   {
-    id: "question",
-    label: "Ask Question",
-    icon: Question,
+    label: "Ask Qu
     category: "question",
-    template: "What do you all think? Let me know in chat! 💬",
     color: "accent",
-  },
   {
-    id: "gameover",
     label: "Game Over - GG",
-    icon: GameController,
-    category: "gameplay",
-    template: "GG! That was a great game! 🎮",
-    color: "secondary",
-  },
+    category: "gamepl
+    
   {
-    id: "brb",
+    label: "Be Ri
+    category: "greeting
+    color: "prim
+    category: "gratitude",
+    label: "Starting Soon",
+    category: "greet
+    
+  {
+const categorie
+  { value: "greeting", la
+  { value: "hyp
+  { value: "gameplay"
+
+    color: "destructive",
+  co
+  c
+    : quickActions.
+  const handleActionClick 
+    toast.success("
+    category: "question",
+    if (customText.trim()) {
+    color: "accent",
+    
+
+    setIsGenerating
+    label: "Game Over - GG",
+      setCustomText(respo
+    } catch (error) {
+      console.error(error);
+      setIsGenerating(f
+  };
+  {
+      <CardHea
     label: "Be Right Back",
     icon: HandWaving,
     category: "greeting",
@@ -130,73 +130,73 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
     <Card className="bg-card/50 backdrop-blur-sm border-border/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Lightning size={24} weight="bold" className="text-primary" />
-          Quick Actions
+
+
         </CardTitle>
-        <CardDescription>
-          Send preset messages instantly to your live chat with one click
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-          <TabsList className="w-full flex-wrap h-auto">
-            {categories.map((cat) => (
-              <TabsTrigger key={cat.value} value={cat.value}>
-                <span>{cat.label}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
 
-          <TabsContent value={selectedCategory} className="space-y-3 mt-4">
-            {filteredActions.map((action) => (
-              <Button
-                key={action.id}
-                variant="outline"
-                onClick={() => handleActionClick(action.template)}
-                className="w-full justify-start h-auto py-3"
-              >
-                <div className="flex items-center gap-3 w-full">
-                  <div className={`p-2 rounded-md bg-${action.color}/10`}>
-                    <action.icon size={20} weight="bold" className={`text-${action.color}`} />
+
+
+
+
+
+
+
+
+
+
+            ))}
+
+
+
+
+
+
+
+
+
+
+
+
+
                   </div>
-                  <div className="flex-1 text-left">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm">{action.label}</span>
-                      <Badge variant="secondary" className="text-xs">{action.category}</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">{action.template}</p>
-                  </div>
+
+
+
+
+
+
+
                 </div>
-              </Button>
-            ))}
-          </TabsContent>
-        </Tabs>
 
-        <div className="pt-4 border-t space-y-3">
-          <div className="flex gap-2">
+            ))}
+
+
+
+
+
             <Input
-              placeholder="Type a custom message..."
+
               value={customText}
-              onChange={(e) => setCustomText(e.target.value)}
+
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+
                   e.preventDefault();
-                  handleCustomSubmit();
-                }
-              }}
+
+
+
             />
-            <Button onClick={handleCustomSubmit} disabled={!customText.trim()}>
+
               Send
-            </Button>
+
           </div>
-          <Button
-            variant="outline"
-            onClick={handleGenerateCustom}
+
+
+
             disabled={isGenerating}
-            className="w-full"
+
           >
-            <Sparkle size={16} weight="bold" className="mr-2" />
-            {isGenerating ? "Generating..." : "Generate AI Message"}
+
+
           </Button>
         </div>
       </CardContent>
