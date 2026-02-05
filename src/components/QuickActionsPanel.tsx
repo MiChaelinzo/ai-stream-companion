@@ -1,10 +1,22 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Lightning, HandWaving, Heart, Question, GameController, Fire, Sparkle } from "@phosphor-icons/react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { 
+  Heart, 
+  HelpCircle, 
+  Gamepad2, 
+  Sparkles, 
+  Hand, 
+  Zap, 
+  MessageSquare, 
+  Wand2, 
+  Send
+} from "lucide-react";
+
+// --- Types & Interfaces ---
 
 interface QuickActionsProps {
   onActionClick: (template: string) => void;
@@ -14,73 +26,67 @@ interface QuickActionsProps {
 interface QuickAction {
   id: string;
   label: string;
-  icon: any;
-  category: "greeting" | "gratitude" | "hype" | "question" | "gameplay";
+  icon: any; // Lucide Icon type
   template: string;
-  color: "primary" | "secondary" | "accent" | "destructive";
+  category: "greeting" | "gratitude" | "hype" | "question" | "gameplay";
+  color: "default" | "secondary" | "destructive" | "outline";
 }
 
+// --- Data Configuration ---
+
 const quickActions: QuickAction[] = [
-  {
-    id: "welcome",
-    label: "Welcome",
-    icon: HandWaving,
-    category: "greeting",
-    template: "Welcome to the stream! Thanks for being here! 👋",
-    color: "primary",
-  },
   {
     id: "thanks",
     label: "Thank You",
     icon: Heart,
     category: "gratitude",
-    template: "Thank you so much for your support! Really appreciate you! 💜",
-    color: "accent",
+    template: "Thank you so much for the support! You're amazing! 💜",
+    color: "default", // mapped to primary
   },
   {
     id: "hype",
-    label: "Get Hyped",
-    icon: Fire,
+    label: "Hype Train",
+    icon: Zap,
     category: "hype",
-    template: "Let's gooo! This is going to be epic! 🔥",
+    template: "Let's gooo! This is getting intense! 🔥🚀",
     color: "destructive",
   },
   {
     id: "question",
-    label: "Ask Question",
-    icon: Question,
+    label: "Ask Chat",
+    icon: HelpCircle,
     category: "question",
-    template: "What do you all think we should do next? Let me know in chat! 🤔",
-    color: "accent",
-  },
-  {
-    id: "gg",
-    label: "Game Over - GG",
-    icon: GameController,
-    category: "gameplay",
-    template: "GG! That was intense! 🎮",
+    template: "What do you all think? Let me know in chat! 👇",
     color: "secondary",
   },
   {
-    id: "clutch",
-    label: "Clutch Play",
-    icon: Sparkle,
+    id: "gg",
+    label: "Good Game",
+    icon: Gamepad2,
     category: "gameplay",
-    template: "That was clutch! Did you see that?! ✨",
-    color: "accent",
+    template: "GG! That was a close one. 🎮",
+    color: "outline",
+  },
+  {
+    id: "clutch",
+    label: "Clutch Moment",
+    icon: Sparkles,
+    category: "gameplay",
+    template: "Totally meant to do that... Clutch! ✨",
+    color: "default",
   },
   {
     id: "brb",
     label: "Be Right Back",
-    icon: HandWaving,
+    icon: Hand,
     category: "greeting",
     template: "Be right back everyone! Don't go anywhere! ⏸️",
-    color: "primary",
+    color: "secondary",
   },
   {
     id: "starting",
     label: "Starting Soon",
-    icon: Lightning,
+    icon: Zap,
     category: "greeting",
     template: "Starting in just a moment! Get hyped! 🚀",
     color: "destructive",
@@ -95,6 +101,20 @@ const categories = [
   { value: "question", label: "Question" },
   { value: "gameplay", label: "Gameplay" },
 ];
+
+// --- Helper Functions ---
+
+const getBadgeVariant = (category: string) => {
+  switch (category) {
+    case "greeting": return "default";
+    case "gratitude": return "secondary";
+    case "hype": return "destructive";
+    case "gameplay": return "outline";
+    default: return "secondary";
+  }
+};
+
+// --- Main Component ---
 
 export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickActionsProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -121,8 +141,10 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
   const handleGenerateCustom = async () => {
     setIsGenerating(true);
     try {
-      const prompt = (window.spark.llmPrompt as any)`Generate a short, engaging stream message that would be fun to send to chat. Make it natural and conversational. Keep it 1-2 sentences.`;
-      const response = await window.spark.llm(prompt, "gpt-4o");
+      // Assuming window.spark is available in your environment types
+      // If not, you might need a global type declaration
+      const prompt = (window as any).spark.llmPrompt`Generate a short, engaging stream message that would be fun to send to chat. Make it natural and conversational. Keep it 1-2 sentences.`;
+      const response = await (window as any).spark.llm(prompt, "gpt-4o");
       setCustomText(response.trim());
       toast.success("AI message generated!");
     } catch (error) {
@@ -133,72 +155,47 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
     }
   };
 
-  const getColorClasses = (color: QuickAction["color"]) => {
-    switch (color) {
-      case "primary":
-        return "bg-primary/10 hover:bg-primary/20 border-primary/30 text-primary";
-      case "secondary":
-        return "bg-secondary/10 hover:bg-secondary/20 border-secondary/30 text-secondary";
-      case "accent":
-        return "bg-accent/10 hover:bg-accent/20 border-accent/30 text-accent";
-      case "destructive":
-        return "bg-destructive/10 hover:bg-destructive/20 border-destructive/30 text-destructive";
-      default:
-        return "bg-muted hover:bg-muted/80 border-border";
-    }
-  };
-
   return (
-    <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Lightning size={24} weight="bold" className="text-primary" />
+    <Card className="bg-card/50 backdrop-blur-sm border-border/50 h-full flex flex-col">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <MessageSquare className="w-5 h-5 text-primary" />
           Quick Actions
         </CardTitle>
-        <CardDescription>
-          One-click preset messages for common stream moments
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex gap-2 flex-wrap">
-          {categories.map((category) => (
-            <Button
-              key={category.value}
-              variant={selectedCategory === category.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category.value)}
+        
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-2 mt-2">
+          {categories.map((cat) => (
+            <Badge
+              key={cat.value}
+              variant={selectedCategory === cat.value ? "default" : "outline"}
+              className="cursor-pointer hover:bg-primary/80 transition-colors"
+              onClick={() => setSelectedCategory(cat.value)}
             >
-              {category.label}
+              {cat.label}
+            </Badge>
+          ))}
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
+        {/* Quick Action Grid */}
+        <div className="grid grid-cols-2 gap-2 overflow-y-auto pr-1 max-h-[300px]">
+          {filteredActions.map((action) => (
+            <Button
+              key={action.id}
+              variant="outline"
+              className="h-auto py-3 flex flex-col items-center gap-2 justify-center text-center hover:border-primary/50 hover:bg-accent/50 group"
+              onClick={() => handleActionClick(action.template)}
+            >
+              <action.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-medium">{action.label}</span>
             </Button>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {filteredActions.map((action) => (
-            <button
-              key={action.id}
-              onClick={() => handleActionClick(action.template)}
-              className={`p-4 rounded-lg border transition-all text-left group ${getColorClasses(action.color)}`}
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <action.icon size={20} weight="bold" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm mb-1">{action.label}</div>
-                  <div className="text-xs opacity-80 line-clamp-2">{action.template}</div>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        <div className="space-y-3 pt-4 border-t border-border/50">
-          <div className="flex items-center gap-2">
-            <Sparkle size={20} weight="bold" className="text-accent" />
-            <h4 className="font-semibold">Custom Message</h4>
-          </div>
-          
+        {/* Custom Input Section */}
+        <div className="mt-auto space-y-3 pt-4 border-t border-border/50">
           <div className="flex gap-2">
             <Input
               placeholder="Type a custom message..."
@@ -210,23 +207,29 @@ export function QuickActionsPanel({ onActionClick, onCustomAction }: QuickAction
                   handleCustomSubmit();
                 }
               }}
+              className="flex-1"
             />
-            <Button onClick={handleCustomSubmit} disabled={!customText.trim()}>
-              Send
+            <Button 
+              size="icon" 
+              onClick={handleCustomSubmit}
+              disabled={!customText.trim()}
+            >
+              <Send className="w-4 h-4" />
             </Button>
           </div>
 
           <Button
-            variant="outline"
-            className="w-full"
+            variant="secondary"
+            className="w-full flex items-center gap-2"
             onClick={handleGenerateCustom}
             disabled={isGenerating}
           >
-            <Sparkle size={16} weight="bold" className="mr-2" />
-            {isGenerating ? "Generating..." : "AI Generate Message"}
+            <Wand2 className={`w-4 h-4 ${isGenerating ? "animate-spin" : ""}`} />
+            {isGenerating ? "Generating..." : "Generate with AI"}
           </Button>
         </div>
       </CardContent>
     </Card>
   );
 }
+
