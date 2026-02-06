@@ -2,134 +2,134 @@
 
 ## Problem
 The WebSocket connection between frontend and backend was disconnecting **immediately** after connecting. The logs showed:
-```
-Frontend client connected
-Frontend client disconnected
-Frontend client connected
-Frontend client disconnected
-```
+Fro
 
-This was frustrating because it seemed like the connection worked but then dropped instantly.
 
-## Root Cause
-The issue was a **mismatch in ping/pong protocols**:
-
+The issue was a **mismatc
 ### What Was Wrong:
-1. **Backend** was using WebSocket's native `ws.ping()` method, which sends a **binary ping frame**
-2. **Frontend** was sending `'ping'` as a **JSON string**: `ws.send('ping')`
-3. Neither side understood what the other was sending
-4. The frontend's pong timeout triggered after 5 seconds → connection closed
-5. Backend didn't respond to JSON ping → frontend never got pong
+2. 
 
-### The Disconnect Cycle:
-```
-Frontend connects → Backend accepts
-Frontend sends 'ping' (string) → Backend ignores it (expects binary)
-Backend sends binary ping frame → Frontend ignores it (expects JSON)
+
+
+Frontend send
 Frontend: "No pong after 5 sec, close connection" ❌
-Backend: "Client disconnected"
-```
 
 ## The Fix ✅
-
 ### Frontend Changes (`src/lib/backend-service.ts`)
-**Before:**
 ```typescript
-// Sent plain string
 this.ws.send('ping');
-
 // Expected plain string response
-if (event.data === 'pong') {
   this.handlePong();
-}
-```
 
 **After:**
-```typescript
-// Send JSON message
-this.ws.send(JSON.stringify({ type: 'ping', payload: {} }));
+// 
 
-// Parse JSON and check type
 const message = JSON.parse(event.data);
-if (message.type === 'pong') {
   this.handlePong();
-}
+```
+### Backend Changes (`backend/
 ```
 
-### Backend Changes (`backend/src/server.ts`)
-**Before:**
-```typescript
-// Used native binary ping
-let pingInterval = setInterval(() => {
-  ws.ping();  // ❌ Sends binary frame
 }, 30000);
 
-ws.on('pong', () => {
-  console.log('Received pong');  // Never triggered
 });
-```
 
-**After:**
 ```typescript
-ws.on('message', async (rawMessage) => {
-  const data = JSON.parse(rawMessage.toString());
-  
-  // Respond to JSON ping with JSON pong
-  if (data.type === 'ping') {
-    ws.send(JSON.stringify({ type: 'pong', payload: {} }));
-    return;
+  const data = JSON.
+  // Respond to JSON 
+
   }
-  
-  // Handle other messages...
-});
+  // Handle other messages..
 ```
+#
+###
 
-## How It Works Now ✨
+Frontend: 
 
-### Keepalive Flow:
-```
-Every 30 seconds:
+Connection stays ali
 
-Frontend: { type: 'ping', payload: {} } →
-Backend: { type: 'pong', payload: {} } ←
 
-Frontend clears pong timeout ✓
-Connection stays alive ✓
-```
-
-### If Connection Breaks:
-```
-Frontend sends ping →
-No response after 5 seconds ⚠️
-Frontend: "Pong timeout, reconnecting..."
+No response after 5 seconds 
 Closes connection
-Attempts reconnect with exponential backoff
 ```
-
-### Reconnection Strategy:
-- Attempt 1: Reconnect after 1 second
-- Attempt 2: Reconnect after 2 seconds
-- Attempt 3: Reconnect after 4 seconds
-- Attempt 4: Reconnect after 8 seconds
-- Attempt 5: Reconnect after 16 seconds
-- Give up after 5 attempts
+### Reconnection Str
+-
+- A
 
 ## Testing the Fix
-
-### 1. Start Backend
-```bash
+### 1. Star
 cd backend
-npm run dev
 ```
-
 You should see:
-```
-🚀 AI Streamer Backend Server running on port 3001
-✅ Google Gemini initialized
+🚀 AI Streamer Backend Server running
 ```
 
-### 2. Connect Frontend
-- Go to **Backend** tab
+- Click **"Connect to
+You should see:
+✅ C
+
+
+- "Last Pi
+
+Backend terminal should show:
+Frontend client connected
+
+
+
+- ❌ Connected for 1 second, then disconnected
+- ❌ Diagnos
+
+- 
+- ✅ Diagnostics show healthy 
+
+
+
+3. **Cross-platform**
+
+- Most cloud provid
+- N
+
+
+- Quickly detects actual disconnects
+
+
+
+```
+(st
+
+```
+(no
+
+- Connection Duration: **incre
+- Last Pong Received: **updates every 30 
+
+- WebSocket: ✓ "WebSocket connection is act
+
+
+## Common Issues After Fix
+### "Still disconnecting after 30 sec
+- Restart frontend: `npm run dev`
+
+- Check backend is actually running
+- Try changing port in .env
+### "Cannot parse message"
+
+
+
+- Connection lasted:
+- CPU u
+### After:
+- Reconnect
+- D
+
+1. **src/lib/ba
+   
+2. **backend/src/server.ts**
+   - Added JSON ping/pong h
+
+
+
+2. Run **Full Diagnosti
 - Click **"Connect to Backend"**
 
 You should see:
@@ -262,7 +262,7 @@ If connection still drops:
 1. Check **Troubleshooting** tab in Backend
 2. Run **Full Diagnostics**
 3. Check `CONNECTION_TROUBLESHOOTING.md`
-4. Verify .env file is correct
+
 5. Restart both frontend and backend
 
 ---
