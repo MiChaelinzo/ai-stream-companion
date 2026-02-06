@@ -1,131 +1,135 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { backendService } from '@/lib/backend-
-import { toast } from 'sonner';
-interface ConnectionEvent {
-  type: 'connected' | 'disconnected' | 'ping' | 'pong' | 'message' | 'error' | 'warni
+import { backendService } from '@/lib/backend-service';
+import { Lightning, Check, X, Warning, Info, ChartLineUp } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 interface ConnectionEvent {
   timestamp: Date;
-  type: 'connected' | 'disconnected' | 'ping' | 'pong' | 'message' | 'error';
+  type: 'connected' | 'disconnected' | 'ping' | 'pong' | 'message' | 'error' | 'warning';
   message: string;
 }
 
-  const [pongCount, setPongCount] =
-  const durationInterval = useRef<NodeJS.Timeout | null>
+export function WebSocketTester() {
+  const [isConnected, setIsConnected] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [connectionDuration, setConnectionDuration] = useState(0);
+  const [pingCount, setPingCount] = useState(0);
+  const [pongCount, setPongCount] = useState(0);
+  const [missedPongs, setMissedPongs] = useState(0);
+  const [events, setEvents] = useState<ConnectionEvent[]>([]);
+  
+  const startTime = useRef<number>(Date.now());
+  const durationInterval = useRef<NodeJS.Timeout | null>(null);
+  const eventLogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsConnected(backendService.isConnected());
 
     const handleConnected = () => {
       setIsConnected(true);
+      startTime.current = Date.now();
+      addEvent('connected', 'WebSocket connected');
       
-        if (startTime.current) {
-          setConnectionDuration(duration);
-      }, 1000);
-
-
-      if (durationI
-        durationInterval.current = 
-    };
-    const handleError = (pa
-    };
-    co
-        setPongCount(prev => prev + 1);
-      } else {
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
       }
-
-    backe
-    backendServ
-    if
-
-      durationInterval.current = setIn
-          const duration = Math.floor((Date.now() - start
+      
+      durationInterval.current = setInterval(() => {
+        if (startTime.current) {
+          const duration = Math.floor((Date.now() - startTime.current) / 1000);
+          setConnectionDuration(duration);
         }
+      }, 1000);
+    };
+
+    const handleDisconnected = () => {
+      setIsConnected(false);
+      addEvent('disconnected', 'WebSocket disconnected');
+      
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
+        durationInterval.current = null;
+      }
+    };
+
+    const handlePing = () => {
+      setPingCount(prev => prev + 1);
+      addEvent('ping', 'Ping sent');
+    };
+
+    const handlePong = () => {
+      setPongCount(prev => prev + 1);
+      addEvent('pong', 'Pong received');
+    };
+
+    const handleError = (payload: any) => {
+      addEvent('error', `Error: ${payload.message || 'Unknown error'}`);
+    };
+
+    backendService.on('connected', handleConnected);
+    backendService.on('disconnected', handleDisconnected);
+    backendService.on('ping', handlePing);
+    backendService.on('pong', handlePong);
+    backendService.on('error', handleError);
+
+    if (backendService.isConnected()) {
+      handleConnected();
     }
+
     return () => {
-      backendService.off('disconnected',
-      b
+      backendService.off('connected', handleConnected);
+      backendService.off('disconnected', handleDisconnected);
+      backendService.off('ping', handlePing);
+      backendService.off('pong', handlePong);
+      backendService.off('error', handleError);
       
-
+      if (durationInterval.current) {
+        clearInterval(durationInterval.current);
+      }
+    };
   }, []);
-  const addEvent = (type: ConnectionEvent['type'], message: 
-      
 
+  useEffect(() => {
+    if (eventLogRef.current) {
+      eventLogRef.current.scrollTop = eventLogRef.current.scrollHeight;
+    }
+  }, [events]);
+
+  const addEvent = (type: ConnectionEvent['type'], message: string) => {
+    setEvents(prev => [...prev, { timestamp: new Date(), type, message }]);
+  };
+
+  const startTest = async () => {
+    if (!backendService.isConnected()) {
+      toast.error('Not connected to backend');
+      return;
+    }
 
     setIsTesting(true);
     setPingCount(0);
+    setPongCount(0);
     setMissedPongs(0);
+    setEvents([]);
 
-      addEvent('message', 'Starting WebSocket keepalive t
-      i
+    try {
+      addEvent('message', 'Starting WebSocket keepalive test...');
+      addEvent('message', 'The test will run for 2 minutes');
       
-
-      addEvent('message', 'Running 2-minute keepaliv
+      addEvent('message', 'Running 2-minute keepalive test...');
       
       const startTestTime = Date.now();
-      const checkInterval = setInterval(()
-
-          clearInterval(checkInterval);
-          return;
-
-      
-          setMissedPongs(prev => prev + 1);
-          setIsTesting(false);
-      }, 5000);
-    } catch (error: any) {
-      toa
-    }
-
-
-    const expected
-
-      addEvent('message', `✅ Test passed! Connection stable f
-      toast.success('WebSocket keepalive test p
-      addEvent('warning', `⚠️ Test completed 
-      
-      addEvent('error', `❌ Test faile
-      toast.error('WebSocket keepalive test fail
-  };
-  cons
-    const
-
-  const getEventIcon = (type: ConnectionEvent['type']) => {
-      case 'connected':
-      case 'disconnected':
-      case 'ping':
-       
-    
-
-        return <Info size={14} cl
-  };
-  return (
-      <CardHeader>
-          <div>
-            <CardDescr
-          <Badge className={i
-
-         
-            ) : (
-      
-        </div>
-      <CardContent className="space-y-4">
-          <Info size={20} className="te
-            <strong className="text-primary">How it works:</stro
-       
-
-          <div className="p-3 rounded-lg bg-muted/50 border bord
-            <div className="text-2xl font-bold">{formatDuration(connectionDurat
-      
-            <div className="text-2
-          <div className="p-3 rounded-l
-
-          <div className="p-3 rounded-lg bg-mut
-            <div className="text-2xl font-bold text
+      const checkInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTestTime) / 1000);
         
-        {isTesting && (
-            <div className="flex items-
-              <span cla
+        if (elapsed >= 120) {
+          clearInterval(checkInterval);
+          finishTest();
           return;
         }
 
@@ -180,7 +184,7 @@ interface ConnectionEvent {
         return <X size={14} weight="bold" className="text-destructive" />;
       case 'ping':
       case 'pong':
-        return <Activity size={14} weight="bold" className="text-primary" />;
+        return <ChartLineUp size={14} weight="bold" className="text-primary" />;
       case 'error':
         return <X size={14} weight="bold" className="text-destructive" />;
       case 'warning':
@@ -250,70 +254,43 @@ interface ConnectionEvent {
 
         <Button
           onClick={startTest}
-          disabled={isTesting}
+          disabled={isTesting || !isConnected}
           className="w-full gap-2 bg-primary hover:bg-primary/90"
         >
           <Lightning size={18} weight="bold" />
+          {isTesting ? 'Test Running...' : 'Start 2-Minute Test'}
+        </Button>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <div className="space-y-2">
+          <div className="text-sm font-medium">Connection Events</div>
+          <ScrollArea className="h-64 rounded-lg border border-border bg-muted/30">
+            <div ref={eventLogRef} className="p-3 space-y-2">
+              {events.length === 0 ? (
+                <div className="text-xs text-muted-foreground text-center py-8">
+                  No events yet. Start a test to monitor connection events.
+                </div>
+              ) : (
+                events.map((event, index) => (
+                  <div key={index} className="flex items-start gap-2 text-xs">
+                    <span className="text-muted-foreground mt-0.5">
+                      {event.timestamp.toLocaleTimeString()}
+                    </span>
+                    <span className="mt-0.5">{getEventIcon(event.type)}</span>
+                    <span className={`flex-1 ${
+                      event.type === 'error' ? 'text-destructive' :
+                      event.type === 'warning' ? 'text-yellow-500' :
+                      event.type === 'connected' ? 'text-accent' :
+                      'text-foreground'
+                    }`}>
+                      {event.message}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
