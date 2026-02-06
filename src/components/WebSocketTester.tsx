@@ -1,131 +1,131 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { backendService } from '@/lib/backend-service';
-import { Lightning, Check, X, Warning, Info, Pulse } from '@phosphor-icons/react';
+import { backendService } from '@/lib/backend-
+import { toast } from 'sonner';
+interface ConnectionEvent {
+  type: 'connected' | 'disconnected' | 'ping' | 'pong' | 'message' | 'error' | 'warni
 import { toast } from 'sonner';
 
 interface ConnectionEvent {
   timestamp: Date;
-  type: 'connected' | 'disconnected' | 'ping' | 'pong' | 'message' | 'error' | 'warning';
+  type: 'connected' | 'disconnected' | 'ping' | 'pong' | 'message' | 'error';
   message: string;
 }
 
-export function WebSocketTester() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [events, setEvents] = useState<ConnectionEvent[]>([]);
-  const [connectionDuration, setConnectionDuration] = useState(0);
-  const [pingCount, setPingCount] = useState(0);
-  const [pongCount, setPongCount] = useState(0);
-  const [missedPongs, setMissedPongs] = useState(0);
-  const durationInterval = useRef<NodeJS.Timeout | null>(null);
-  const startTime = useRef<Date | null>(null);
+  const [pongCount, setPongCount] =
+  const durationInterval = useRef<NodeJS.Timeout | null>
 
-  useEffect(() => {
     const handleConnected = () => {
-      addEvent('connected', 'WebSocket connected successfully');
       setIsConnected(true);
-      startTime.current = new Date();
       
-      durationInterval.current = setInterval(() => {
         if (startTime.current) {
-          const duration = Math.floor((Date.now() - startTime.current.getTime()) / 1000);
           setConnectionDuration(duration);
-        }
       }, 1000);
-    };
 
-    const handleDisconnected = () => {
-      addEvent('disconnected', 'WebSocket disconnected');
-      setIsConnected(false);
-      if (durationInterval.current) {
-        clearInterval(durationInterval.current);
-        durationInterval.current = null;
-      }
-    };
 
-    const handleError = (payload: any) => {
-      addEvent('error', payload.message || 'Unknown error');
+      if (durationI
+        durationInterval.current = 
     };
-
-    const handleMessage = (message: any) => {
-      if (message.type === 'pong') {
+    const handleError = (pa
+    };
+    co
         setPongCount(prev => prev + 1);
-        addEvent('pong', 'Received pong from server');
       } else {
-        addEvent('message', `Received: ${message.type}`);
       }
-    };
 
-    backendService.on('connected', handleConnected);
-    backendService.on('disconnected', handleDisconnected);
-    backendService.on('error', handleError);
-    backendService.on('*', handleMessage);
+    backe
+    backendServ
+    if
 
-    if (backendService.isConnected()) {
-      setIsConnected(true);
-      startTime.current = new Date();
-      
-      durationInterval.current = setInterval(() => {
-        if (startTime.current) {
-          const duration = Math.floor((Date.now() - startTime.current.getTime()) / 1000);
-          setConnectionDuration(duration);
+      durationInterval.current = setIn
+          const duration = Math.floor((Date.now() - start
         }
-      }, 1000);
+    }
+    return () => {
+      backendService.off('disconnected',
+      b
+      
+
+  }, []);
+  const addEvent = (type: ConnectionEvent['type'], message: 
+      
+
+
+    setIsTesting(true);
+    setPingCount(0);
+    setMissedPongs(0);
+
+      addEvent('message', 'Starting WebSocket keepalive t
+      i
+      
+
+      addEvent('message', 'Running 2-minute keepaliv
+      
+      const startTestTime = Date.now();
+      const checkInterval = setInterval(()
+
+          clearInterval(checkInterval);
+          return;
+
+      
+          setMissedPongs(prev => prev + 1);
+          setIsTesting(false);
+      }, 5000);
+    } catch (error: any) {
+      toa
     }
 
-    return () => {
-      backendService.off('connected', handleConnected);
-      backendService.off('disconnected', handleDisconnected);
-      backendService.off('error', handleError);
-      backendService.off('*', handleMessage);
-      
-      if (durationInterval.current) {
-        clearInterval(durationInterval.current);
-      }
-    };
-  }, []);
 
-  const addEvent = (type: ConnectionEvent['type'], message: string) => {
-    setEvents(prev => [
-      { timestamp: new Date(), type, message },
-      ...prev.slice(0, 49)
-    ]);
+    const expected
+
+      addEvent('message', `✅ Test passed! Connection stable f
+      toast.success('WebSocket keepalive test p
+      addEvent('warning', `⚠️ Test completed 
+      
+      addEvent('error', `❌ Test faile
+      toast.error('WebSocket keepalive test fail
   };
+  cons
+    const
 
-  const startTest = async () => {
-    setIsTesting(true);
-    setEvents([]);
-    setPingCount(0);
-    setPongCount(0);
-    setMissedPongs(0);
-    setConnectionDuration(0);
+  const getEventIcon = (type: ConnectionEvent['type']) => {
+      case 'connected':
+      case 'disconnected':
+      case 'ping':
+       
+    
 
-    try {
-      addEvent('message', 'Starting WebSocket keepalive test...');
+        return <Info size={14} cl
+  };
+  return (
+      <CardHeader>
+          <div>
+            <CardDescr
+          <Badge className={i
+
+         
+            ) : (
       
-      if (!backendService.isConnected()) {
-        addEvent('message', 'Connecting to backend...');
-        await backendService.connect();
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+        </div>
+      <CardContent className="space-y-4">
+          <Info size={20} className="te
+            <strong className="text-primary">How it works:</stro
+       
 
-      addEvent('message', 'Running 2-minute keepalive test...');
-      addEvent('message', 'Monitoring ping/pong cycles (every 30 seconds)...');
+          <div className="p-3 rounded-lg bg-muted/50 border bord
+            <div className="text-2xl font-bold">{formatDuration(connectionDurat
       
-      const testDuration = 120000;
-      const startTestTime = Date.now();
+            <div className="text-2
+          <div className="p-3 rounded-l
 
-      const checkInterval = setInterval(() => {
-        const elapsed = Date.now() - startTestTime;
+          <div className="p-3 rounded-lg bg-mut
+            <div className="text-2xl font-bold text
         
-        if (elapsed >= testDuration) {
-          clearInterval(checkInterval);
-          finishTest();
+        {isTesting && (
+            <div className="flex items-
+              <span cla
           return;
         }
 
@@ -180,7 +180,7 @@ export function WebSocketTester() {
         return <X size={14} weight="bold" className="text-destructive" />;
       case 'ping':
       case 'pong':
-        return <Pulse size={14} weight="bold" className="text-primary" />;
+        return <Activity size={14} weight="bold" className="text-primary" />;
       case 'error':
         return <X size={14} weight="bold" className="text-destructive" />;
       case 'warning':
@@ -254,66 +254,66 @@ export function WebSocketTester() {
           className="w-full gap-2 bg-primary hover:bg-primary/90"
         >
           <Lightning size={18} weight="bold" />
-          {isTesting ? 'Running Test...' : 'Start 2-Minute Keepalive Test'}
-        </Button>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm">Connection Events</h4>
-            {events.length > 0 && (
-              <Button
-                onClick={() => setEvents([])}
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs"
-              >
-                Clear
-              </Button>
-            )}
-          </div>
-          
-          <div className="rounded-lg border border-border bg-muted/30 h-64 overflow-y-auto">
-            {events.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                Start a test to see connection events
-              </div>
-            ) : (
-              <div className="p-3 space-y-1.5">
-                {events.map((event, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-start gap-2 text-xs font-mono p-2 rounded bg-background/50 hover:bg-background transition-colors"
-                  >
-                    <div className="mt-0.5">{getEventIcon(event.type)}</div>
-                    <div className="flex-1 space-y-0.5">
-                      <div className="text-muted-foreground">
-                        {event.timestamp.toLocaleTimeString()}
-                      </div>
-                      <div className={
-                        event.type === 'error' ? 'text-destructive' :
-                        event.type === 'connected' ? 'text-accent' :
-                        event.type === 'pong' ? 'text-primary' :
-                        event.type === 'warning' ? 'text-yellow-500' :
-                        'text-foreground'
-                      }>
-                        {event.message}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
 
-        <Alert className="bg-accent/10 border-accent/30">
-          <Lightning size={18} className="text-accent" />
-          <AlertDescription className="text-xs">
-            <strong className="text-accent">What to expect:</strong> You should see ~4 pong events during the 2-minute test (one every 30 seconds). 
-            If pongs are missing or the connection drops, there may be network issues or the backend keepalive isn't working properly.
-          </AlertDescription>
-        </Alert>
-      </CardContent>
-    </Card>
-  );
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
