@@ -1,21 +1,29 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useKV } from '@github/spark/hooks';
+import { format } from 'date-fns';
+import { 
+  Download, 
+  Trash, 
+  ClockCounterClockwise, 
+  CheckCircle, 
+  XCircle, 
+  Warning, 
+  ArrowClockwise 
+} from '@phosphor-icons/react';
 
+export interface ConnectionEvent {
   id: string;
   timestamp: Date;
-
+  type: 'connected' | 'disconnected' | 'error' | 'reconnect-attempt';
+  backendUrl: string;
+  message?: string;
+  metadata?: {
+    uptime?: number;
     serverVersion?: string;
-    twitchCon
-    errorDetails?: string;
-  };
-
-  maxEvents?: numbe
-
-  const [connectionHistory,
-
     twitchConnected?: boolean;
     youtubeConnected?: boolean;
     errorDetails?: string;
@@ -35,117 +43,114 @@ export function ConnectionHistoryLog({ maxEvents = 100 }: ConnectionHistoryLogPr
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
+  const getEventIcon = (type: ConnectionEvent['type']) => {
+    switch (type) {
       case 'connected':
-      case 'disconn
+        return <CheckCircle size={20} weight="fill" className="text-accent" />;
+      case 'disconnected':
+        return <XCircle size={20} weight="fill" className="text-muted-foreground" />;
       case 'error':
+        return <Warning size={20} weight="fill" className="text-destructive" />;
       case 'reconnect-attempt':
+        return <ArrowClockwise size={20} weight="bold" className="text-yellow-500" />;
       default:
+        return null;
     }
-
-    setIsClearing(true);
-    setTimeout(() => setIsClear
-
-    const data
-    const url = URL.createObjectURL(blob);
-    l
-    
-
   };
-  const getSessionS
-    const totalConnecti
+
+  const getEventBadge = (type: ConnectionEvent['type']) => {
+    const badges = {
+      connected: <Badge className="bg-accent/20 text-accent border-accent/30">Connected</Badge>,
+      disconnected: <Badge variant="outline">Disconnected</Badge>,
+      error: <Badge className="bg-destructive/20 text-destructive border-destructive/30">Error</Badge>,
+      'reconnect-attempt': <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30">Reconnecting</Badge>,
+    };
+    return badges[type];
+  };
+
+  const handleClearHistory = () => {
+    setIsClearing(true);
+    setTimeout(() => setIsClearing(false), 500);
+    setConnectionHistory(() => []);
+  };
+
+  const handleDownloadHistory = () => {
+    const data = JSON.stringify(sortedHistory, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `connection-history-${format(new Date(), 'yyyy-MM-dd-HH-mm')}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const getSessionStats = (events: ConnectionEvent[]) => {
+    const totalConnections = events.filter(e => e.type === 'connected').length;
+    const totalDisconnections = events.filter(e => e.type === 'disconnected').length;
     const totalErrors = events.filter(e => e.type === 'error').length;
+    const reconnectAttempts = events.filter(e => e.type === 'reconnect-attempt').length;
 
+    let totalUptime = 0;
     let currentConnectTime: number | null = null;
-    const sortedEve
+    const sortedEvents = [...events].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
-    sortedEvents.forEach(event 
+
+    sortedEvents.forEach(event => {
+      if (event.type === 'connected') {
         currentConnectTime = new Date(event.timestamp).getTime();
-        const 
-        currentConne
+      } else if ((event.type === 'disconnected' || event.type === 'error') && currentConnectTime) {
+        const disconnectTime = new Date(event.timestamp).getTime();
+        totalUptime += disconnectTime - currentConnectTime;
+        currentConnectTime = null;
+      }
+    });
+
+    if (currentConnectTime) {
+      totalUptime += Date.now() - currentConnectTime;
     }
-    
 
-    const totalUptimeMinutes = Math.
+    const totalUptimeMinutes = Math.floor(totalUptime / 1000 / 60);
+    
     return {
+      totalConnections,
       totalDisconnections,
+      totalErrors,
       reconnectAttempts,
-    
+      totalUptimeMinutes,
+    };
+  };
 
+  const stats = getSessionStats(sortedHistory);
 
-    <Card className="border-primary/20 bg-gradient-to-br
+  return (
+    <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5">
+      <CardHeader>
         <div className="flex items-center justify-between">
-            <div className="p-3 rounded-fu
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-full bg-primary/10 border border-primary/30">
+              <ClockCounterClockwise size={24} weight="bold" className="text-primary" />
             </div>
-              <CardT
+            <div>
+              <CardTitle className="text-xl">Connection History</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Track all backend connection events and uptime
+              </p>
             </div>
-          <div className="flex gap-2
-              onC
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleDownloadHistory}
+              variant="outline"
               size="sm"
-              disabled={sorte
-    
-
-              onClick={handleClea
-              size="sm"
-              disabled={isClearing || sortedHistory.length === 0}
-              <Trash size={16} weight="bold" />
-            </Button>
-        </div>
-
-          <div className
-            <p className="text-2xl font-bold te
-
-          
-          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30"
-            <p className=
-          <div className="p-3 rounded-lg 
-            <p className="text-2xl font-bold text-yellow-
-          <div className="p-3 rounded-lg bg-primary/10 border border-prim
-            <p className="text-2xl font-bold text-primary">
-        </div>
-        {sortedHistory.length === 0 
-         
-         
-
-        ) : (
-            <div className="flex items-center justify-between">
-     
-
-
-
-            
-                    cla
-                    <div c
-                  
-                        
-                         
-      
-    
-
-                              {eve
-
-          
-                        {event.message && (
-                  
-                        <div className="flex flex-wrap gap-
-                            {event.backendUrl}
-
-                            <Badge variant="outline" className="text-[10px]">
-                  
-
-                            <Badge variant="outline" className="text-[10px]
-                            </Badge>
-
-                
-                            </Badge>
-
-                            <Badge classNam
-                            </B
-
-                            <Ba
-                            </Badge>
-             
-                        {event.metadata?.errorDeta
-                    
+              className="gap-2"
+              disabled={sortedHistory.length === 0}
+            >
+              <Download size={16} weight="bold" />
+              Export
             </Button>
             <Button
               onClick={handleClearHistory}
@@ -271,22 +276,6 @@ export function ConnectionHistoryLog({ maxEvents = 100 }: ConnectionHistoryLogPr
                         {event.metadata?.errorDetails && (
                           <div className="mt-2 p-2 rounded bg-destructive/10 border border-destructive/30">
                             <p className="text-xs font-mono text-destructive leading-relaxed">
-                              {event.metadata.errorDetails}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
                               {event.metadata.errorDetails}
                             </p>
                           </div>
