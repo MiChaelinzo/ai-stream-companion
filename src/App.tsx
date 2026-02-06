@@ -44,6 +44,7 @@ import { QuickActionsPanel } from "@/components/QuickActionsPanel";
 import { StreamGoals } from "@/components/StreamGoals";
 import { ViewerEngagementGames } from "@/components/ViewerEngagementGames";
 import { StreamHighlightsDetector } from "@/components/StreamHighlightsDetector";
+import { TwitchChatTester } from "@/components/TwitchChatTester";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -1444,6 +1445,10 @@ Return as JSON:
             <TabsContent value="backend" className="space-y-6">
               <BackendConnection 
                 onConnectionChange={(connected) => setIsBackendConnected(connected)}
+              />
+              <TwitchChatTester 
+                isConnected={isBackendConnected}
+                twitchChannel={twitchConnection?.channelId || 'michaelinzo'}
               />
             </TabsContent>
 
