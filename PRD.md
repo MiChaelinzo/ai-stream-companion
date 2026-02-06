@@ -14,6 +14,13 @@ This is a comprehensive tool for managing AI streamer personality, connecting to
 
 ## Essential Features
 
+### Backend Server Connection
+- **Functionality**: Connect to a local or remote backend WebSocket server with customizable URL, connection status monitoring, diagnostics, and automatic keepalive
+- **Purpose**: Enable real-time communication between the frontend and backend for live chat integration with Twitch/YouTube
+- **Trigger**: User navigates to Backend Server tab and enters custom URL or selects preset
+- **Progression**: Enter backend URL (ws://localhost:3001 or wss://remote-server.com) → Click Connect → View connection status → Run diagnostics if needed → Monitor live logs → Disconnect when done
+- **Success criteria**: Successfully connect to local or remote WebSocket servers, persist URL preferences, provide quick presets, show connection history, and maintain stable connection with automatic reconnection
+
 ### Platform Connection Management
 - **Functionality**: Connect to Twitch (via IRC/OAuth) and YouTube (via Live Chat API) with credential management and connection status monitoring
 - **Purpose**: Enable real-time integration with actual streaming platforms for live chat reading and AI response posting

@@ -20,7 +20,7 @@ interface BackendConnectionProps {
 }
 
 export function BackendConnection({ onConnectionChange }: BackendConnectionProps) {
-  const [backendUrl, setBackendUrl] = useState('ws://localhost:3001');
+  const [backendUrl, setBackendUrl] = useKV<string>('backend-url', 'ws://localhost:3001');
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -138,7 +138,8 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
 
   const fetchServerStatus = async () => {
     try {
-      const response = await fetch('http://localhost:3001/status');
+      const httpUrl = (backendUrl || 'ws://localhost:3001').replace('ws://', 'http://').replace('wss://', 'https://');
+      const response = await fetch(`${httpUrl}/status`);
       const data = await response.json();
       setServerStatus(data);
       return data;
@@ -163,7 +164,8 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
     setConnectionError(null);
 
     try {
-      backendService.setUrl(backendUrl);
+      const urlToConnect = backendUrl || 'ws://localhost:3001';
+      backendService.setUrl(urlToConnect);
       backendService.resetReconnectAttempts();
       
       await backendService.connect();
@@ -218,9 +220,10 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
 
     let health: any = null;
     let backendReachable = false;
+    const httpUrl = (backendUrl || 'ws://localhost:3001').replace('ws://', 'http://').replace('wss://', 'https://');
 
     try {
-      const healthResponse = await fetch('http://localhost:3001/health', { 
+      const healthResponse = await fetch(`${httpUrl}/health`, { 
         signal: AbortSignal.timeout(10000)
       });
       
@@ -237,7 +240,7 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
     if (backendReachable && health) {
       results.backendServer = {
         status: 'success',
-        message: `Backend server is running on port 3001`,
+        message: `Backend server is running at ${httpUrl}`,
         details: [
           `✓ Server uptime: ${Math.floor(health.uptime || 0)}s`,
           `✓ Connected clients: ${health.connections?.clients || 0}`,
@@ -364,11 +367,11 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
         status: 'error',
         message: 'Backend server is not running',
         details: [
-          '❌ Cannot connect to http://localhost:3001',
+          `❌ Cannot connect to ${httpUrl}`,
           '→ Navigate to backend folder: cd backend',
           '→ Install dependencies: npm install',
           '→ Start server: npm run dev',
-          '→ You should see: "🚀 AI Streamer Backend Server running on port 3001"'
+          `→ You should see: "🚀 AI Streamer Backend Server running..."`
         ]
       };
       
@@ -396,7 +399,7 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
         status: 'success',
         message: 'WebSocket connection is active',
         details: [
-          '✓ Connected to ws://localhost:3001',
+          `✓ Connected to ${backendUrl || 'ws://localhost:3001'}`,
           '✓ Real-time communication ready',
           '✓ Chat messages will flow through this connection'
         ]
@@ -409,7 +412,7 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
           details: [
             '⚠ Backend is running but WebSocket not connected',
             '→ Click "Connect to Backend" button on Connection tab',
-            '→ Make sure URL is correct: ws://localhost:3001'
+            `→ Make sure URL is correct: ${backendUrl || 'ws://localhost:3001'}`
           ]
         };
       } else {
@@ -472,6 +475,7 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
 
   const testBackendConnection = async () => {
     setIsTestingConnection(true);
+    const httpUrl = (backendUrl || 'ws://localhost:3001').replace('ws://', 'http://').replace('wss://', 'https://');
     const results: any = {
       step: 1,
       message: 'Testing connection...',
@@ -480,10 +484,10 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
     setTestResults({ ...results });
 
     try {
-      results.logs.push('→ Attempting to connect to http://localhost:3001...');
+      results.logs.push(`→ Attempting to connect to ${httpUrl}...`);
       setTestResults({ ...results });
       
-      const response = await fetch('http://localhost:3001/health', { 
+      const response = await fetch(`${httpUrl}/health`, { 
         signal: AbortSignal.timeout(5000) 
       });
       
@@ -585,6 +589,15 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
               </Alert>
             )}
 
+            {backendUrl && (backendUrl.startsWith('wss://') || backendUrl.includes('://') && !backendUrl.includes('localhost')) && (
+              <Alert className="bg-accent/10 border-accent/30">
+                <Lightning size={20} className="text-accent" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-accent">Remote Server Detected:</strong> Using a remote backend URL. Make sure your server supports WebSocket connections and has CORS enabled for this frontend domain.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {connectionError && (
               <Alert className="bg-destructive/10 border-destructive/30">
                 <Warning size={20} className="text-destructive" />
@@ -602,14 +615,50 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
                 <Input
                   id="backend-url"
                   type="text"
-                  value={backendUrl}
+                  value={backendUrl || ''}
                   onChange={(e) => setBackendUrl(e.target.value)}
                   placeholder="ws://localhost:3001"
                   disabled={isConnected}
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  WebSocket URL of your backend server (default: ws://localhost:3001)
+                  WebSocket URL of your backend server (ws:// for local, wss:// for remote HTTPS)
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Quick Presets:</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setBackendUrl('ws://localhost:3001')}
+                    disabled={isConnected}
+                    className="text-xs font-mono justify-start"
+                  >
+                    Local (3001)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setBackendUrl('ws://localhost:8080')}
+                    disabled={isConnected}
+                    className="text-xs font-mono justify-start"
+                  >
+                    Local (8080)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setBackendUrl('wss://')}
+                    disabled={isConnected}
+                    className="text-xs font-mono justify-start col-span-2"
+                  >
+                    Remote HTTPS (wss://)
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  💡 For deployed servers on Heroku, Railway, or VPS, use <code className="bg-muted px-1 rounded">wss://your-domain.com</code>
                 </p>
               </div>
 
@@ -699,17 +748,46 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
               </div>
             )}
 
-            <div className="pt-4 border-t border-border">
-              <h4 className="font-semibold text-sm mb-2">Quick Setup Guide</h4>
-              <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
-                <li>Navigate to the <code className="bg-muted px-1 py-0.5 rounded">backend/</code> folder</li>
-                <li>Run <code className="bg-muted px-1 py-0.5 rounded">npm install</code> to install dependencies</li>
-                <li>Copy <code className="bg-muted px-1 py-0.5 rounded">.env.example</code> to <code className="bg-muted px-1 py-0.5 rounded">.env</code></li>
-                <li>Add <strong>GEMINI_API_KEY</strong> (required for AI responses)</li>
-                <li>Add <strong>TWITCH_ACCESS_TOKEN</strong> and <strong>TWITCH_CLIENT_ID</strong></li>
-                <li>Run <code className="bg-muted px-1 py-0.5 rounded">npm run dev</code> to start the server</li>
-                <li>Click "Connect to Backend" above</li>
-              </ol>
+            <div className="pt-4 border-t border-border space-y-4">
+              <div>
+                <h4 className="font-semibold text-sm mb-2">Quick Setup Guide (Local)</h4>
+                <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>Navigate to the <code className="bg-muted px-1 py-0.5 rounded">backend/</code> folder</li>
+                  <li>Run <code className="bg-muted px-1 py-0.5 rounded">npm install</code> to install dependencies</li>
+                  <li>Copy <code className="bg-muted px-1 py-0.5 rounded">.env.example</code> to <code className="bg-muted px-1 py-0.5 rounded">.env</code></li>
+                  <li>Add <strong>GEMINI_API_KEY</strong> (required for AI responses)</li>
+                  <li>Add <strong>TWITCH_ACCESS_TOKEN</strong> and <strong>TWITCH_CLIENT_ID</strong></li>
+                  <li>Run <code className="bg-muted px-1 py-0.5 rounded">npm run dev</code> to start the server</li>
+                  <li>Click "Connect to Backend" above</li>
+                </ol>
+              </div>
+
+              <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                  <Lightning size={16} weight="bold" className="text-accent" />
+                  Remote Server Setup
+                </h4>
+                <div className="text-xs text-muted-foreground space-y-2">
+                  <p>Deploy your backend to a cloud provider for 24/7 availability:</p>
+                  <div className="space-y-1 ml-2">
+                    <p><strong>1. Deploy to Heroku, Railway, or VPS</strong></p>
+                    <p className="ml-3">→ Set all environment variables in deployment settings</p>
+                    <p className="ml-3">→ Ensure WebSocket support is enabled</p>
+                    <p><strong>2. Update Backend URL above</strong></p>
+                    <p className="ml-3">→ Use <code className="bg-background px-1 rounded">wss://your-domain.com</code> (secure WebSocket)</p>
+                    <p className="ml-3">→ Port is usually handled by the platform</p>
+                    <p><strong>3. Enable CORS on backend</strong></p>
+                    <p className="ml-3">→ Add your frontend domain to allowed origins</p>
+                    <p className="ml-3">→ Check <code className="bg-background px-1 rounded">BACKEND_DEPLOYMENT_GUIDE.md</code> for details</p>
+                  </div>
+                  <Alert className="bg-yellow-500/10 border-yellow-500/30 mt-3">
+                    <Warning size={16} className="text-yellow-500" />
+                    <AlertDescription className="text-xs">
+                      <strong>Important:</strong> Remote servers must use <code className="bg-muted px-1 rounded">wss://</code> (secure WebSocket) not <code className="bg-muted px-1 rounded">ws://</code> if your frontend is on HTTPS.
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              </div>
             </div>
           </TabsContent>
 
