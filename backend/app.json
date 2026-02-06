@@ -1,0 +1,73 @@
+{
+  "name": "AI Streamer Companion Backend",
+  "description": "Backend server for AI Streamer Companion with real Twitch/YouTube chat integration",
+  "repository": "https://github.com/yourusername/ai-streamer-backend",
+  "keywords": ["twitch", "youtube", "ai", "chatbot", "streaming", "websocket"],
+  "image": "heroku/nodejs",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "env": {
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production"
+    },
+    "TWITCH_CLIENT_ID": {
+      "description": "Your Twitch application Client ID from https://dev.twitch.tv/console/apps",
+      "required": true
+    },
+    "TWITCH_CLIENT_SECRET": {
+      "description": "Your Twitch application Client Secret",
+      "required": true
+    },
+    "TWITCH_ACCESS_TOKEN": {
+      "description": "Twitch OAuth access token (get from https://twitchtokengenerator.com)",
+      "required": true
+    },
+    "TWITCH_REFRESH_TOKEN": {
+      "description": "Twitch OAuth refresh token",
+      "required": false
+    },
+    "TWITCH_CHANNEL": {
+      "description": "Your Twitch channel name (lowercase)",
+      "required": true
+    },
+    "YOUTUBE_API_KEY": {
+      "description": "YouTube Data API v3 key from Google Cloud Console",
+      "required": false
+    },
+    "YOUTUBE_CLIENT_ID": {
+      "description": "YouTube OAuth Client ID",
+      "required": false
+    },
+    "YOUTUBE_CLIENT_SECRET": {
+      "description": "YouTube OAuth Client Secret",
+      "required": false
+    },
+    "GEMINI_API_KEY": {
+      "description": "Google Gemini API key from https://aistudio.google.com/app/apikey",
+      "required": true
+    },
+    "GEMINI_MODEL": {
+      "description": "Gemini model to use",
+      "value": "gemini-3.0-flash-001"
+    },
+    "FRONTEND_URL": {
+      "description": "URL of your frontend application (for CORS)",
+      "value": "*"
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token generation",
+      "generator": "secret"
+    }
+  },
+  "addons": []
+}

@@ -45,6 +45,7 @@ import { StreamGoals } from "@/components/StreamGoals";
 import { ViewerEngagementGames } from "@/components/ViewerEngagementGames";
 import { StreamHighlightsDetector } from "@/components/StreamHighlightsDetector";
 import { TwitchChatTester } from "@/components/TwitchChatTester";
+import { DeploymentGuide } from "@/components/DeploymentGuide";
 import { 
   AIPersonality, 
   ChatMessage, 
@@ -66,7 +67,7 @@ import {
   StreamHighlight,
 } from "@/lib/types";
 import { useSpeechSynthesis, VoiceSettings } from "@/hooks/use-speech-synthesis";
-import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy, MagnifyingGlass, House, PlugsConnected, Headset, Target, GameController, Sparkle } from "@phosphor-icons/react";
+import { Robot, ChatCircle, Lightning, Question, Link as LinkIcon, GearSix, Broadcast, ChartLine, Terminal, ListChecks, Smiley, Key, Eye, SpeakerHigh, Info, Trophy, MagnifyingGlass, House, PlugsConnected, Headset, Target, GameController, Sparkle, Rocket } from "@phosphor-icons/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
@@ -1161,6 +1162,7 @@ Return as JSON:
               <TabsList className="w-full justify-start h-auto flex-wrap gap-2 bg-card/50 backdrop-blur-sm p-3">
                 {[
                   { value: "home", icon: House, label: "Home" },
+                  { value: "deploy", icon: Rocket, label: "Deploy 24/7", badge: "NEW" },
                   { value: "backend", icon: PlugsConnected, label: "Backend Server", badge: isBackendConnected ? "Connected" : "Disconnected" },
                   { value: "support", icon: Headset, label: "AI Support" },
                   { value: "monitor", icon: Broadcast, label: "Live Monitor" },
@@ -1196,7 +1198,9 @@ Return as JSON:
                     {tab.badge && (
                       <Badge 
                         className={`ml-2 text-[10px] px-1.5 py-0 ${
-                          isBackendConnected 
+                          tab.badge === "NEW"
+                            ? 'bg-accent/30 text-accent border-accent/40'
+                            : isBackendConnected 
                             ? 'bg-accent/30 text-accent border-accent/40' 
                             : 'bg-muted text-muted-foreground border-border'
                         }`}
@@ -1211,17 +1215,17 @@ Return as JSON:
               {tabSearchQuery && (
                 <p className="text-sm text-muted-foreground px-2">
                   Showing {[
-                    "home", "backend", "support", "monitor", "personality", "voice", "vision", "performance",
+                    "home", "deploy", "backend", "support", "monitor", "personality", "voice", "vision", "performance",
                     "quick-actions", "stream-goals", "engagement-games", "highlights",
                     "chat", "sentiment", "analytics", "responses", "templates",
                     "commands", "polls", "platforms", "settings"
                   ].filter(value => 
                     value.toLowerCase().includes(tabSearchQuery.toLowerCase()) ||
-                    ["Home", "Backend Server", "AI Support", "Live Monitor", "Personality", "Voice & SSML", "Vision AI", "Performance",
+                    ["Home", "Deploy 24/7", "Backend Server", "AI Support", "Live Monitor", "Personality", "Voice & SSML", "Vision AI", "Performance",
                      "Quick Actions", "Stream Goals", "Engagement Games", "Highlights",
                      "Chat Test", "Sentiment", "Analytics", "AI Responses", "Templates",
                      "Commands", "Polls", "Platforms", "Stream Settings"]
-                    .find((_, i) => ["home", "backend", "support", "monitor", "personality", "voice", "vision", "performance",
+                    .find((_, i) => ["home", "deploy", "backend", "support", "monitor", "personality", "voice", "vision", "performance",
                                     "quick-actions", "stream-goals", "engagement-games", "highlights",
                                     "chat", "sentiment", "analytics", "responses", "templates",
                                     "commands", "polls", "platforms", "settings"][i] === value)
@@ -1232,7 +1236,38 @@ Return as JSON:
             </div>
 
             <TabsContent value="home" className="space-y-6">
+              <Alert className="bg-gradient-to-r from-accent/20 via-primary/20 to-secondary/20 border-accent/40 animate-pulse-glow">
+                <Rocket size={20} className="text-accent" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-accent">NEW: Deploy Your Backend 24/7!</strong> Get your AI Streamer running continuously in the cloud. Railway offers free tier with no sleep mode. Check the <strong>Deploy 24/7</strong> tab for step-by-step guides!
+                </AlertDescription>
+              </Alert>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div 
+                  onClick={() => setActiveTab("deploy")}
+                  className="group cursor-pointer bg-gradient-to-br from-accent/20 to-primary/10 border-2 border-accent/40 rounded-lg p-6 hover:border-accent/60 transition-all hover:shadow-lg hover:shadow-accent/20 relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-8 -mt-8" />
+                  <div className="flex items-center gap-3 mb-3 relative z-10">
+                    <div className="p-3 rounded-full bg-accent/30 group-hover:bg-accent/40 transition-colors animate-pulse">
+                      <Rocket size={24} weight="bold" className="text-accent" />
+                    </div>
+                    <h3 className="font-bold text-lg">Deploy Backend 24/7</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground relative z-10">
+                    Deploy your backend to Railway or Heroku for continuous 24/7 streaming operation
+                  </p>
+                  <div className="flex gap-2 mt-3 relative z-10">
+                    <Badge className="bg-accent/30 text-accent border-accent/40">
+                      NEW ✨
+                    </Badge>
+                    <Badge className="bg-primary/20 text-primary border-primary/30">
+                      Free Tier
+                    </Badge>
+                  </div>
+                </div>
+
                 <div 
                   onClick={() => setActiveTab("support")}
                   className="group cursor-pointer bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/20 rounded-lg p-6 hover:border-secondary/40 transition-all hover:shadow-lg hover:shadow-secondary/10"
@@ -1440,6 +1475,10 @@ Return as JSON:
               </Alert>
 
               <TwitchIntegrationGuide />
+            </TabsContent>
+
+            <TabsContent value="deploy" className="space-y-6">
+              <DeploymentGuide />
             </TabsContent>
 
             <TabsContent value="backend" className="space-y-6">
