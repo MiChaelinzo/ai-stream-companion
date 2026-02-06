@@ -159,6 +159,7 @@ export class BackendService {
   private attemptReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('Max reconnection attempts reached');
+      this.emit('max-reconnect-attempts-reached', { attempts: this.reconnectAttempts });
       return;
     }
 
@@ -166,6 +167,12 @@ export class BackendService {
     this.reconnectAttempts++;
 
     console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+    
+    this.emit('reconnect-attempt', { 
+      attemptNumber: this.reconnectAttempts, 
+      maxAttempts: this.maxReconnectAttempts,
+      delay 
+    });
 
     this.reconnectTimeout = setTimeout(() => {
       this.connect().catch(() => {

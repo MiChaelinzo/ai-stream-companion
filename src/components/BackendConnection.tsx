@@ -10,6 +10,8 @@ import { backendService } from '@/lib/backend-service';
 import { BackendLogsViewer } from '@/components/BackendLogsViewer';
 import { WebSocketTester } from '@/components/WebSocketTester';
 import { KeepaliveIndicator } from '@/components/KeepaliveIndicator';
+import { ConnectionHistoryLog, ConnectionEvent } from '@/components/ConnectionHistoryLog';
+import { useKV } from '@github/spark/hooks';
 import { PlugsConnected, Lightning, Warning, Info, Check, X, CircleNotch } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
@@ -27,30 +29,86 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);
+  const [connectionHistory, setConnectionHistory] = useKV<ConnectionEvent[]>('connection-history', []);
+
+  const addConnectionEvent = (event: Omit<ConnectionEvent, 'id' | 'timestamp'>) => {
+    const newEvent: ConnectionEvent = {
+      ...event,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date(),
+    };
+    setConnectionHistory((current) => [newEvent, ...(current || [])].slice(0, 100));
+  };
 
   useEffect(() => {
-    const handleConnected = () => {
+    const handleConnected = async () => {
       setIsConnected(true);
       setConnectionError(null);
       toast.success('Connected to backend server');
       onConnectionChange?.(true);
-      fetchServerStatus();
+      
+      try {
+        const status = await fetchServerStatus();
+        addConnectionEvent({
+          type: 'connected',
+          backendUrl,
+          message: 'Successfully connected to backend server',
+          metadata: {
+            serverVersion: status?.version,
+            uptime: status?.uptime,
+            twitchConnected: status?.connections?.twitch,
+            youtubeConnected: status?.connections?.youtube,
+          },
+        });
+      } catch (error) {
+        addConnectionEvent({
+          type: 'connected',
+          backendUrl,
+          message: 'Successfully connected to backend server',
+        });
+      }
     };
 
     const handleError = (payload: any) => {
       setConnectionError(payload.message);
       toast.error(`Backend error: ${payload.message}`);
+      addConnectionEvent({
+        type: 'error',
+        backendUrl,
+        message: payload.message,
+        metadata: {
+          errorDetails: payload.message,
+        },
+      });
     };
 
     const handleDisconnected = () => {
       setIsConnected(false);
       setServerStatus(null);
       onConnectionChange?.(false);
+      addConnectionEvent({
+        type: 'disconnected',
+        backendUrl,
+        message: 'Connection closed',
+      });
+    };
+
+    const handleReconnectAttempt = (payload: any) => {
+      toast.info(`Reconnecting... (attempt ${payload.attemptNumber}/${payload.maxAttempts})`);
+      addConnectionEvent({
+        type: 'reconnect-attempt',
+        backendUrl,
+        message: `Attempting to reconnect (${payload.attemptNumber}/${payload.maxAttempts})`,
+        metadata: {
+          attemptNumber: payload.attemptNumber,
+        },
+      });
     };
 
     backendService.on('connected', handleConnected);
     backendService.on('error', handleError);
     backendService.on('disconnected', handleDisconnected);
+    backendService.on('reconnect-attempt', handleReconnectAttempt);
 
     if (backendService.isConnected()) {
       setIsConnected(true);
@@ -62,16 +120,19 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       backendService.off('connected', handleConnected);
       backendService.off('error', handleError);
       backendService.off('disconnected', handleDisconnected);
+      backendService.off('reconnect-attempt', handleReconnectAttempt);
     };
-  }, [onConnectionChange]);
+  }, [onConnectionChange, backendUrl]);
 
   const fetchServerStatus = async () => {
     try {
       const response = await fetch('http://localhost:3001/status');
       const data = await response.json();
       setServerStatus(data);
+      return data;
     } catch (error) {
       console.error('Failed to fetch server status:', error);
+      return null;
     }
   };
 
@@ -90,6 +151,14 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       setIsConnected(false);
       toast.error(`Connection failed: ${message}`);
       onConnectionChange?.(false);
+      addConnectionEvent({
+        type: 'error',
+        backendUrl,
+        message: `Connection attempt failed: ${message}`,
+        metadata: {
+          errorDetails: message,
+        },
+      });
     } finally {
       setIsConnecting(false);
     }
@@ -101,6 +170,11 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
     setServerStatus(null);
     toast.info('Disconnected from backend server');
     onConnectionChange?.(false);
+    addConnectionEvent({
+      type: 'disconnected',
+      backendUrl,
+      message: 'Manually disconnected from backend',
+    });
   };
 
   const runDiagnostics = async () => {
@@ -466,8 +540,9 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       </CardHeader>
       <CardContent className="space-y-6">
         <Tabs defaultValue="connection" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="connection">Connection</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="keepalive">Keepalive Test</TabsTrigger>
             <TabsTrigger value="logs">Live Logs</TabsTrigger>
             <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
@@ -587,6 +662,10 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
                 <li>Click "Connect to Backend" above</li>
               </ol>
             </div>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6 mt-6">
+            <ConnectionHistoryLog maxEvents={100} />
           </TabsContent>
 
           <TabsContent value="keepalive" className="space-y-6 mt-6">
