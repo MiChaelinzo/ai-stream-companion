@@ -23,6 +23,13 @@ export class BackendService {
     this.url = url;
   }
 
+  private emit(type: string, payload: any): void {
+    const handlers = this.messageHandlers.get(type);
+    if (handlers) {
+      handlers.forEach(handler => handler(payload));
+    }
+  }
+
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
@@ -31,6 +38,7 @@ export class BackendService {
         this.ws.onopen = () => {
           console.log('✅ Connected to backend server');
           this.reconnectAttempts = 0;
+          this.emit('connected', {});
           resolve();
         };
 
@@ -45,11 +53,13 @@ export class BackendService {
 
         this.ws.onerror = (error) => {
           console.error('WebSocket error:', error);
+          this.emit('error', { message: 'WebSocket connection error' });
           reject(error);
         };
 
         this.ws.onclose = () => {
           console.log('❌ Disconnected from backend server');
+          this.emit('disconnected', {});
           this.attemptReconnect();
         };
       } catch (error) {

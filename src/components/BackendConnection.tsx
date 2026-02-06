@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { backendService } from '@/lib/backend-service';
+import { BackendLogsViewer } from '@/components/BackendLogsViewer';
 import { PlugsConnected, Lightning, Warning, Info, Check, X, CircleNotch } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
@@ -414,8 +415,9 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       </CardHeader>
       <CardContent className="space-y-6">
         <Tabs defaultValue="connection" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="connection">Connection</TabsTrigger>
+            <TabsTrigger value="logs">Live Logs</TabsTrigger>
             <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
             <TabsTrigger value="troubleshooting">Troubleshooting</TabsTrigger>
           </TabsList>
@@ -533,6 +535,10 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
                 <li>Click "Connect to Backend" above</li>
               </ol>
             </div>
+          </TabsContent>
+
+          <TabsContent value="logs" className="space-y-6 mt-6">
+            <BackendLogsViewer isConnected={isConnected} />
           </TabsContent>
 
           <TabsContent value="diagnostics" className="space-y-6 mt-6">
