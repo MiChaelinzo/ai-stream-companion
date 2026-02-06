@@ -735,6 +735,14 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
           </TabsContent>
 
           <TabsContent value="troubleshooting" className="space-y-6 mt-6">
+            <Alert className="bg-accent/10 border-accent/30">
+              <Lightning size={20} className="text-accent" />
+              <AlertDescription className="text-sm">
+                <strong className="text-accent">WebSocket Fix Applied!</strong> The backend server now includes keepalive (ping/pong) to prevent immediate disconnects. 
+                <strong> Restart your backend server</strong> with <code className="bg-muted px-1 rounded">npm run dev</code> to apply the fix.
+              </AlertDescription>
+            </Alert>
+
             <Alert className="bg-yellow-500/10 border-yellow-500/30">
               <Warning size={20} className="text-yellow-500" />
               <AlertDescription className="text-sm">
@@ -902,7 +910,9 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
               <Alert className="bg-primary/10 border-primary/30">
                 <Info size={20} className="text-primary" />
                 <AlertDescription className="text-xs">
-                  <strong className="text-primary">Still having issues?</strong> Try the <strong>Diagnostics</strong> tab above to automatically check your setup, or see <strong>BACKEND_TROUBLESHOOTING.md</strong> for the complete troubleshooting guide.
+                  <strong className="text-primary">Still having issues?</strong> See the complete troubleshooting guide: 
+                  <code className="ml-1 bg-muted px-1 rounded">CONNECTION_TROUBLESHOOTING.md</code> in the project root. 
+                  It includes step-by-step solutions for all common connection problems.
                 </AlertDescription>
               </Alert>
             </div>

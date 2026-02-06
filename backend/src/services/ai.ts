@@ -93,4 +93,8 @@ Your response:`;
       configured: this.model !== null
     };
   }
+
+  isConfigured(): boolean {
+    return this.model !== null;
+  }
 }

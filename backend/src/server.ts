@@ -32,6 +32,18 @@ wss.on('connection', (ws: WebSocket) => {
   console.log('Frontend client connected');
   connectedClients.add(ws);
 
+  let pingInterval: NodeJS.Timeout | null = null;
+
+  pingInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.ping();
+    }
+  }, 30000);
+
+  ws.on('pong', () => {
+    console.log('Received pong from client');
+  });
+
   ws.on('message', async (message: string) => {
     try {
       const data = JSON.parse(message);
@@ -71,12 +83,32 @@ wss.on('connection', (ws: WebSocket) => {
   ws.on('close', () => {
     console.log('Frontend client disconnected');
     connectedClients.delete(ws);
+    if (pingInterval) {
+      clearInterval(pingInterval);
+    }
+  });
+
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
   });
 
   ws.send(JSON.stringify({
     type: 'connected',
     payload: { message: 'Backend server connected' }
   }));
+
+  setTimeout(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: 'connection_status',
+        payload: {
+          twitch: twitchService.isConnected(),
+          youtube: youtubeService.isConnected(),
+          gemini: aiService.isConfigured()
+        }
+      }));
+    }
+  }, 500);
 });
 
 async function handleTwitchConnect(payload: any) {
@@ -264,10 +296,19 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date(),
+    version: '1.0.0',
+    uptime: process.uptime(),
     connections: {
       twitch: twitchService.isConnected(),
       youtube: youtubeService.isConnected(),
       clients: connectedClients.size
+    },
+    gemini: {
+      configured: aiService.isConfigured()
+    },
+    twitch: {
+      channel: process.env.TWITCH_CHANNEL || null,
+      username: process.env.TWITCH_CHANNEL || null
     }
   });
 });
@@ -281,15 +322,142 @@ app.get('/status', (req: Request, res: Response) => {
       twitch: twitchService.isConnected(),
       youtube: youtubeService.isConnected(),
       frontendClients: connectedClients.size
+    },
+    gemini: {
+      configured: aiService.isConfigured()
     }
   });
 });
 
-server.listen(PORT, () => {
+async function initializeServices() {
+  console.log('🔧 Initializing services...');
+  
+  if (process.env.TWITCH_ACCESS_TOKEN && process.env.TWITCH_CLIENT_ID && process.env.TWITCH_CHANNEL) {
+    try {
+      console.log(`📺 Auto-connecting to Twitch channel: ${process.env.TWITCH_CHANNEL}`);
+      
+      const token = process.env.TWITCH_ACCESS_TOKEN.replace('oauth:', '');
+      
+      await twitchService.connect(
+        process.env.TWITCH_CHANNEL,
+        token,
+        process.env.TWITCH_CLIENT_ID
+      );
+      
+      twitchService.onMessage(async (chatMessage) => {
+        console.log(`💬 Message from ${chatMessage.username}: ${chatMessage.message}`);
+        
+        const shouldRespond = Math.random() < 0.3;
+        
+        if (shouldRespond) {
+          console.log('🤖 Generating AI response...');
+          const aiResponse = await aiService.generateResponse(chatMessage.message, chatMessage.username);
+          
+          broadcastToClients({
+            type: 'chat_message',
+            payload: {
+              platform: 'twitch',
+              username: chatMessage.username,
+              message: chatMessage.message,
+              timestamp: new Date(),
+              aiResponse: aiResponse
+            }
+          });
+
+          if (aiResponse) {
+            console.log(`✨ AI Response: ${aiResponse}`);
+            
+            await new Promise(resolve => setTimeout(resolve, 5000 + Math.random() * 5000));
+            
+            await twitchService.sendMessage(aiResponse);
+            
+            broadcastToClients({
+              type: 'ai_response',
+              payload: {
+                platform: 'twitch',
+                message: aiResponse,
+                timestamp: new Date()
+              }
+            });
+          } else {
+            console.log('⚠️ No AI response generated (check GEMINI_API_KEY)');
+          }
+        } else {
+          broadcastToClients({
+            type: 'chat_message',
+            payload: {
+              platform: 'twitch',
+              username: chatMessage.username,
+              message: chatMessage.message,
+              timestamp: new Date()
+            }
+          });
+        }
+      });
+      
+      console.log(`✅ Twitch auto-connect successful`);
+    } catch (error) {
+      console.error('❌ Twitch auto-connect failed:', error);
+      console.error('   Check your .env file:');
+      console.error('   - TWITCH_ACCESS_TOKEN (no "oauth:" prefix)');
+      console.error('   - TWITCH_CLIENT_ID');
+      console.error('   - TWITCH_CHANNEL (lowercase, no #)');
+    }
+  } else {
+    console.log('⚠️ Twitch credentials not configured in .env');
+    console.log('   Add TWITCH_ACCESS_TOKEN, TWITCH_CLIENT_ID, and TWITCH_CHANNEL to enable');
+  }
+  
+  if (process.env.YOUTUBE_API_KEY && process.env.YOUTUBE_LIVE_CHAT_ID) {
+    try {
+      console.log(`📺 Auto-connecting to YouTube...`);
+      await youtubeService.connect(process.env.YOUTUBE_LIVE_CHAT_ID, process.env.YOUTUBE_API_KEY);
+      
+      youtubeService.onMessage(async (chatMessage) => {
+        const aiResponse = await aiService.generateResponse(chatMessage.message, chatMessage.username);
+        
+        broadcastToClients({
+          type: 'chat_message',
+          payload: {
+            platform: 'youtube',
+            username: chatMessage.username,
+            message: chatMessage.message,
+            timestamp: new Date(),
+            aiResponse: aiResponse
+          }
+        });
+
+        if (aiResponse) {
+          await youtubeService.sendMessage(aiResponse);
+          
+          broadcastToClients({
+            type: 'ai_response',
+            payload: {
+              platform: 'youtube',
+              message: aiResponse,
+              timestamp: new Date()
+            }
+          });
+        }
+      });
+      
+      console.log(`✅ YouTube auto-connect successful`);
+    } catch (error) {
+      console.error('❌ YouTube auto-connect failed:', error);
+    }
+  }
+}
+
+server.listen(PORT, async () => {
   console.log(`🚀 AI Streamer Backend Server running on port ${PORT}`);
   console.log(`📡 WebSocket server ready`);
   console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
   console.log(`💚 Health check: http://localhost:${PORT}/health`);
+  
+  await initializeServices();
+  
+  console.log('\n✅ Server initialization complete');
+  console.log('👀 Waiting for chat messages...\n');
 });
 
 process.on('SIGTERM', () => {
