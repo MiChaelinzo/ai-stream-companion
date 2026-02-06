@@ -35,27 +35,33 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       fetchServerStatus();
     }
 
-    backendService.on('connected', () => {
+    const handleConnected = () => {
       setIsConnected(true);
       setConnectionError(null);
       toast.success('Connected to backend server');
       onConnectionChange?.(true);
       fetchServerStatus();
-    });
+    };
 
-    backendService.on('error', (payload) => {
+    const handleError = (payload: any) => {
       setConnectionError(payload.message);
       toast.error(`Backend error: ${payload.message}`);
-    });
+    };
 
-    backendService.on('disconnected', () => {
+    const handleDisconnected = () => {
       setIsConnected(false);
       setServerStatus(null);
       onConnectionChange?.(false);
-    });
+    };
+
+    backendService.on('connected', handleConnected);
+    backendService.on('error', handleError);
+    backendService.on('disconnected', handleDisconnected);
 
     return () => {
-      backendService.disconnect();
+      backendService.off('connected', handleConnected);
+      backendService.off('error', handleError);
+      backendService.off('disconnected', handleDisconnected);
     };
   }, [onConnectionChange]);
 
