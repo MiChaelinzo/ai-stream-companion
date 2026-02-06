@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { backendService } from '@/lib/backend-service';
 import { Lightning, Check, X, Warning, Info, ChartLineUp } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -29,6 +29,7 @@ export function WebSocketTester() {
   const eventLogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Initial connection check
     setIsConnected(backendService.isConnected());
 
     const handleConnected = () => {
@@ -72,12 +73,14 @@ export function WebSocketTester() {
       addEvent('error', `Error: ${payload.message || 'Unknown error'}`);
     };
 
+    // Subscribe to backend service events
     backendService.on('connected', handleConnected);
     backendService.on('disconnected', handleDisconnected);
     backendService.on('ping', handlePing);
     backendService.on('pong', handlePong);
     backendService.on('error', handleError);
 
+    // If already connected when mounting, trigger handler
     if (backendService.isConnected()) {
       handleConnected();
     }
@@ -121,8 +124,6 @@ export function WebSocketTester() {
       addEvent('message', 'Starting WebSocket keepalive test...');
       addEvent('message', 'The test will run for 2 minutes');
       
-      addEvent('message', 'Running 2-minute keepalive test...');
-      
       const startTestTime = Date.now();
       const checkInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTestTime) / 1000);
@@ -152,6 +153,7 @@ export function WebSocketTester() {
   const finishTest = () => {
     setIsTesting(false);
     
+    // Assuming 1 ping every 30 seconds -> ~4 pings in 2 mins
     const expectedPings = Math.floor(120 / 30);
     const successRate = pongCount >= expectedPings - 1 ? 100 : Math.floor((pongCount / expectedPings) * 100);
 
@@ -294,3 +296,4 @@ export function WebSocketTester() {
     </Card>
   );
 }
+
