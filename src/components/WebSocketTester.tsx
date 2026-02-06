@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, Car
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { backendService } from '@/lib/backend-service';
 import { Lightning, Check, X, Warning, Info, ChartLineUp } from '@phosphor-icons/react';
 import { toast } from 'sonner';
