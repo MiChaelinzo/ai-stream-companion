@@ -19,11 +19,12 @@ export class BackendService {
   private messageHandlers: Map<string, ((payload: any) => void)[]> = new Map();
   private url: string;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private readonly PING_INTERVAL = 30000;
-  private readonly PONG_TIMEOUT = 5000;
+  private maxReconnectAttempts = 10;
+  private readonly PING_INTERVAL = 15000;
+  private readonly PONG_TIMEOUT = 10000;
   private isConnecting = false;
   private shouldReconnect = true;
+  private manualDisconnect = false;
 
   constructor(url: string = 'ws://localhost:3001') {
     this.url = url;
@@ -57,6 +58,7 @@ export class BackendService {
 
     this.cleanup();
     this.shouldReconnect = true;
+    this.manualDisconnect = false;
 
     return new Promise((resolve, reject) => {
       try {
@@ -66,7 +68,7 @@ export class BackendService {
 
         const connectionTimeout = setTimeout(() => {
           if (this.isConnecting) {
-            console.error('⏱️ Connection timeout after 10 seconds');
+            console.error('⏱️ Connection timeout after 15 seconds');
             this.isConnecting = false;
             if (this.ws) {
               this.ws.close();
@@ -74,7 +76,7 @@ export class BackendService {
             }
             reject(new Error('Connection timeout'));
           }
-        }, 10000);
+        }, 15000);
 
         this.ws.onopen = () => {
           clearTimeout(connectionTimeout);
@@ -113,19 +115,25 @@ export class BackendService {
 
         this.ws.onclose = (event) => {
           clearTimeout(connectionTimeout);
-          console.log('❌ Disconnected from backend server', { code: event.code, reason: event.reason });
           const wasConnecting = this.isConnecting;
           this.isConnecting = false;
           this.stopKeepalive();
           this.ws = null;
-          this.emit('disconnected', { code: event.code, reason: event.reason });
           
-          if (event.code === 1006 && this.reconnectAttempts === 0 && wasConnecting) {
-            reject(new Error('Connection failed - backend may not be running'));
-          }
-          
-          if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.attemptReconnect();
+          if (!this.manualDisconnect) {
+            console.log('❌ Disconnected from backend server', { code: event.code, reason: event.reason });
+            this.emit('disconnected', { code: event.code, reason: event.reason });
+            
+            if (event.code === 1006 && this.reconnectAttempts === 0 && wasConnecting) {
+              reject(new Error('Connection failed - backend may not be running'));
+            }
+            
+            if (this.shouldReconnect && !this.manualDisconnect) {
+              this.attemptReconnect();
+            }
+          } else {
+            console.log('🔌 Disconnected from backend server (manual)');
+            this.emit('disconnected', { code: event.code, reason: 'manual disconnect' });
           }
         };
       } catch (error) {
@@ -160,6 +168,7 @@ export class BackendService {
   disconnect(): void {
     console.log('🔌 Manually disconnecting from backend...');
     this.shouldReconnect = false;
+    this.manualDisconnect = true;
     this.reconnectAttempts = 0;
     this.isConnecting = false;
 
@@ -169,15 +178,25 @@ export class BackendService {
   private startKeepalive(): void {
     this.stopKeepalive();
     
+    console.log('🏓 Starting keepalive (ping every 15s)');
+    
     this.pingInterval = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.ws.send(JSON.stringify({ type: 'ping', payload: {} }));
-        this.emit('ping', {});
-        
-        this.pongTimeout = setTimeout(() => {
-          console.warn('⚠️ Pong timeout - reconnecting...');
-          this.ws?.close();
-        }, this.PONG_TIMEOUT);
+        try {
+          this.ws.send(JSON.stringify({ type: 'ping', payload: {} }));
+          this.emit('ping', {});
+          
+          this.pongTimeout = setTimeout(() => {
+            console.warn('⚠️ Pong timeout - no response from server - closing connection');
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+              this.ws.close(1000, 'Pong timeout');
+            }
+          }, this.PONG_TIMEOUT);
+        } catch (error) {
+          console.error('Failed to send ping:', error);
+        }
+      } else {
+        console.warn('⚠️ Cannot send ping - WebSocket not open');
       }
     }, this.PING_INTERVAL);
   }
@@ -203,7 +222,7 @@ export class BackendService {
   }
 
   private attemptReconnect(): void {
-    if (!this.shouldReconnect) {
+    if (!this.shouldReconnect || this.manualDisconnect) {
       console.log('⚠️ Reconnection disabled, not attempting');
       return;
     }
@@ -232,7 +251,7 @@ export class BackendService {
 
     this.reconnectTimeout = setTimeout(() => {
       this.reconnectTimeout = null;
-      if (this.shouldReconnect) {
+      if (this.shouldReconnect && !this.manualDisconnect) {
         this.connect().catch((error) => {
           console.error('🚫 Reconnection failed:', error.message);
         });

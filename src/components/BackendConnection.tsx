@@ -580,6 +580,19 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
           </TabsList>
 
           <TabsContent value="connection" className="space-y-6 mt-6">
+            <Alert className="bg-accent/10 border-accent/30">
+              <Lightning size={20} className="text-accent" />
+              <AlertDescription className="text-sm">
+                <strong className="text-accent">Connection Stability Improved!</strong> The WebSocket now uses:
+                <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
+                  <li>Ping/pong keepalive every 15 seconds</li>
+                  <li>Automatic reconnection (up to 10 attempts)</li>
+                  <li>Longer timeouts (15s connection, 10s pong)</li>
+                  <li>Better error recovery and logging</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
+
             {!isConnected && (
               <Alert className="bg-primary/10 border-primary/30">
                 <Info size={20} className="text-primary" />
