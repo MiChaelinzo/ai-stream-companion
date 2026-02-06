@@ -35,8 +35,9 @@ YOUTUBE_CLIENT_SECRET=your_client_secret
 YOUTUBE_REFRESH_TOKEN=your_refresh_token
 YOUTUBE_LIVE_CHAT_ID=your_live_chat_id
 
-# OpenAI - Get from https://platform.openai.com
-OPENAI_API_KEY=your_openai_api_key
+# Google Gemini 3 - Get from https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-3.0-flash-001
 
 # Server Config
 PORT=3001
@@ -179,11 +180,17 @@ WebSocket connection for real-time chat integration.
 5. Get your Live Chat ID from a live stream
 6. Copy credentials to your `.env` file
 
-### OpenAI Setup
+### Google Gemini 3 Setup
 
-1. Go to https://platform.openai.com/api-keys
-2. Create a new API key
-3. Copy to your `.env` file
+1. Go to https://aistudio.google.com/app/apikey
+2. Sign in with your Google account
+3. Click "Create API Key" (or "Get API Key")
+4. Copy the API key to your `.env` file
+5. Choose your preferred model:
+   - `gemini-3.0-flash-001` - Fast responses (recommended)
+   - `gemini-3.0-pro-001` - More capable, slightly slower
+
+**Note:** Gemini 3 offers generous free tier limits perfect for development and small streams.
 
 ## 📦 Project Structure
 
@@ -214,10 +221,11 @@ backend/
 - YouTube has daily API quotas - wait 24 hours or request quota increase
 - Reduce polling frequency if needed
 
-### "OpenAI API error"
-- Check your API key is valid
-- Ensure you have credits in your OpenAI account
-- Verify your API key has the correct permissions
+### "Gemini API error"
+- Check your API key is valid at https://aistudio.google.com/app/apikey
+- Ensure you have API access enabled (free tier available)
+- Verify your API key is correctly set in the `.env` file
+- Check rate limits and quotas at https://aistudio.google.com/
 
 ### WebSocket connection fails
 - Check the FRONTEND_URL in .env matches your frontend URL

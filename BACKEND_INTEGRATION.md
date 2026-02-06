@@ -45,7 +45,7 @@ backend/
 - **Twitch IRC:** Full chat read/write using `tmi.js`
 - **YouTube Live Chat:** Polling-based chat integration via Google API
 - **Poll Creation:** Create polls on Twitch programmatically
-- **AI Responses:** Automatic response generation with OpenAI
+- **AI Responses:** Automatic response generation with Google Gemini 3
 
 ### Security & Reliability
 - **Token Security:** All tokens stored server-side in `.env`
@@ -82,10 +82,11 @@ npm run dev
 4. Get Live Chat ID from your stream
 5. Copy to `.env`
 
-#### OpenAI
-1. Go to https://platform.openai.com/api-keys
-2. Create new API key
-3. Copy to `.env`
+#### Google Gemini 3
+1. Go to https://aistudio.google.com/app/apikey
+2. Sign in with your Google account
+3. Click "Create API Key"
+4. Copy to `.env`
 
 ### Step 3: Connect from Frontend
 

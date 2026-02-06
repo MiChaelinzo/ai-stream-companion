@@ -35,8 +35,9 @@ This guide provides complete backend implementation for connecting your AI Strea
    - Create OAuth 2.0 credentials
    - Note your **Client ID** and **Client Secret**
 
-3. **OpenAI API Key** (for AI responses)
-   - Get from: https://platform.openai.com/api-keys
+3. **Google Gemini 3 API Key** (for AI responses)
+   - Get from: https://aistudio.google.com/app/apikey
+   - Free tier available with generous limits
 
 ### Software Requirements
 
@@ -57,8 +58,8 @@ This guide provides complete backend implementation for connecting your AI Strea
                     ┌───────────────┼───────────────┐
                     ▼               ▼               ▼
               ┌──────────┐    ┌──────────┐   ┌──────────┐
-              │  Twitch  │    │ YouTube  │   │  OpenAI  │
-              │    IRC   │    │ Live API │   │   API    │
+              │  Twitch  │    │ YouTube  │   │  Gemini  │
+              │    IRC   │    │ Live API │   │  3 API   │
               └──────────┘    └──────────┘   └──────────┘
 ```
 
@@ -117,8 +118,9 @@ YOUTUBE_CLIENT_SECRET=your_youtube_client_secret_here
 YOUTUBE_REFRESH_TOKEN=your_youtube_refresh_token_here
 YOUTUBE_LIVE_CHAT_ID=your_live_chat_id_here
 
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_key_here
+# Google Gemini 3 Configuration
+GEMINI_API_KEY=your_gemini_key_here
+GEMINI_MODEL=gemini-3.0-flash-001
 
 # Server Configuration
 PORT=3001

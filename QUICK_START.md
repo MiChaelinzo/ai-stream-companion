@@ -44,7 +44,7 @@ npm init -y
 ### B. Install Packages
 
 ```bash
-npm install express ws tmi.js dotenv cors axios openai
+npm install express ws tmi.js dotenv cors axios @google/generative-ai
 ```
 
 ### C. Create `.env` File
@@ -57,7 +57,8 @@ TWITCH_ACCESS_TOKEN=paste_access_token_here
 TWITCH_REFRESH_TOKEN=paste_refresh_token_here
 TWITCH_CHANNEL=michaelinzo
 
-OPENAI_API_KEY=your_openai_key_here
+GEMINI_API_KEY=your_gemini_key_here
+GEMINI_MODEL=gemini-3.0-flash-001
 
 PORT=3001
 ```
