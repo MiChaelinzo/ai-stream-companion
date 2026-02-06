@@ -29,12 +29,6 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
   const [testResults, setTestResults] = useState<any>(null);
 
   useEffect(() => {
-    if (backendService.isConnected()) {
-      setIsConnected(true);
-      onConnectionChange?.(true);
-      fetchServerStatus();
-    }
-
     const handleConnected = () => {
       setIsConnected(true);
       setConnectionError(null);
@@ -57,6 +51,12 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
     backendService.on('connected', handleConnected);
     backendService.on('error', handleError);
     backendService.on('disconnected', handleDisconnected);
+
+    if (backendService.isConnected()) {
+      setIsConnected(true);
+      onConnectionChange?.(true);
+      fetchServerStatus();
+    }
 
     return () => {
       backendService.off('connected', handleConnected);

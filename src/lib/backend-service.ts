@@ -22,6 +22,8 @@ export class BackendService {
   private maxReconnectAttempts = 5;
   private readonly PING_INTERVAL = 30000;
   private readonly PONG_TIMEOUT = 5000;
+  private isConnecting = false;
+  private shouldReconnect = true;
 
   constructor(url: string = 'ws://localhost:3001') {
     this.url = url;
@@ -35,13 +37,27 @@ export class BackendService {
   }
 
   connect(): Promise<void> {
+    if (this.isConnecting) {
+      console.log('⚠️ Connection already in progress, ignoring duplicate request');
+      return Promise.resolve();
+    }
+
+    if (this.isConnected()) {
+      console.log('⚠️ Already connected, ignoring duplicate connection request');
+      return Promise.resolve();
+    }
+
+    this.shouldReconnect = true;
+
     return new Promise((resolve, reject) => {
       try {
+        this.isConnecting = true;
         this.ws = new WebSocket(this.url);
 
         this.ws.onopen = () => {
           console.log('✅ Connected to backend server');
           this.reconnectAttempts = 0;
+          this.isConnecting = false;
           this.startKeepalive();
           this.emit('connected', {});
           resolve();
@@ -64,23 +80,31 @@ export class BackendService {
 
         this.ws.onerror = (error) => {
           console.error('WebSocket error:', error);
+          this.isConnecting = false;
           this.emit('error', { message: 'WebSocket connection error' });
           reject(error);
         };
 
         this.ws.onclose = () => {
           console.log('❌ Disconnected from backend server');
+          this.isConnecting = false;
           this.stopKeepalive();
           this.emit('disconnected', {});
-          this.attemptReconnect();
+          
+          if (this.shouldReconnect) {
+            this.attemptReconnect();
+          }
         };
       } catch (error) {
+        this.isConnecting = false;
         reject(error);
       }
     });
   }
 
   disconnect(): void {
+    this.shouldReconnect = false;
+
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
@@ -92,6 +116,8 @@ export class BackendService {
       this.ws.close();
       this.ws = null;
     }
+
+    this.reconnectAttempts = 0;
   }
 
   private startKeepalive(): void {
