@@ -165,9 +165,9 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
     try {
       backendService.setUrl(backendUrl);
       backendService.resetReconnectAttempts();
+      
       await backendService.connect();
-      setIsConnected(true);
-      onConnectionChange?.(true);
+      
       await fetchServerStatus();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to connect';
