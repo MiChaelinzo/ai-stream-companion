@@ -20,15 +20,13 @@ export interface ConnectionEvent {
   timestamp: Date;
   type: 'connected' | 'disconnected' | 'error' | 'reconnect-attempt';
   message?: string;
-  backendUrl?: string;
   metadata?: {
+    backendUrl?: string;
     serverVersion?: string;
-    twitchConnected?: boolean;
     youtubeConnected?: boolean;
-    errorDetails?: string;
     attemptNumber?: number;
-    closeCode?: number | string;
     closeReason?: string;
+    errorDetails?: string;
     uptime?: number;
   };
 }
