@@ -51,20 +51,21 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
         const status = await fetchServerStatus();
         addConnectionEvent({
           type: 'connected',
-          backendUrl,
           message: 'Successfully connected to backend server',
           metadata: {
+            backendUrl,
             serverVersion: status?.version,
             uptime: status?.uptime,
-            twitchConnected: status?.connections?.twitch,
             youtubeConnected: status?.connections?.youtube,
           },
         });
       } catch (error) {
         addConnectionEvent({
           type: 'connected',
-          backendUrl,
           message: 'Successfully connected to backend server',
+          metadata: {
+            backendUrl,
+          },
         });
       }
     };
@@ -74,9 +75,9 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       toast.error(`Backend error: ${payload.message}`);
       addConnectionEvent({
         type: 'error',
-        backendUrl,
         message: payload.message,
         metadata: {
+          backendUrl,
           errorDetails: payload.message,
         },
       });
@@ -92,10 +93,9 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       
       addConnectionEvent({
         type: 'disconnected',
-        backendUrl,
         message: `Connection closed (code: ${code}, reason: ${reason || 'none'})`,
         metadata: {
-          closeCode: code,
+          backendUrl,
           closeReason: reason,
         },
       });
@@ -109,9 +109,9 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       toast.info(`Reconnecting... (attempt ${payload.attemptNumber}/${payload.maxAttempts})`);
       addConnectionEvent({
         type: 'reconnect-attempt',
-        backendUrl,
         message: `Attempting to reconnect (${payload.attemptNumber}/${payload.maxAttempts})`,
         metadata: {
+          backendUrl,
           attemptNumber: payload.attemptNumber,
         },
       });
@@ -149,11 +149,22 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
   };
 
   const handleConnect = async () => {
+    if (isConnecting) {
+      toast.info('Connection already in progress...');
+      return;
+    }
+
+    if (isConnected) {
+      toast.info('Already connected to backend');
+      return;
+    }
+
     setIsConnecting(true);
     setConnectionError(null);
 
     try {
       backendService.setUrl(backendUrl);
+      backendService.resetReconnectAttempts();
       await backendService.connect();
       setIsConnected(true);
       onConnectionChange?.(true);
@@ -166,9 +177,9 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       onConnectionChange?.(false);
       addConnectionEvent({
         type: 'error',
-        backendUrl,
         message: `Connection attempt failed: ${message}`,
         metadata: {
+          backendUrl,
           errorDetails: message,
         },
       });
@@ -185,8 +196,10 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
     onConnectionChange?.(false);
     addConnectionEvent({
       type: 'disconnected',
-      backendUrl,
       message: 'Manually disconnected from backend',
+      metadata: {
+        backendUrl,
+      },
     });
   };
 
@@ -602,20 +615,43 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
 
               <div className="flex gap-3">
                 {!isConnected ? (
-                  <Button
-                    onClick={handleConnect}
-                    disabled={isConnecting || !backendUrl}
-                    className="gap-2 bg-primary hover:bg-primary/90"
-                  >
-                    <Lightning size={18} weight="bold" />
-                    {isConnecting ? 'Connecting...' : 'Connect to Backend'}
-                  </Button>
+                  <>
+                    <Button
+                      onClick={handleConnect}
+                      disabled={isConnecting || !backendUrl}
+                      className="gap-2 bg-primary hover:bg-primary/90"
+                    >
+                      {isConnecting ? (
+                        <>
+                          <CircleNotch size={18} weight="bold" className="animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <Lightning size={18} weight="bold" />
+                          Connect to Backend
+                        </>
+                      )}
+                    </Button>
+                    {connectionError && (
+                      <Button
+                        onClick={handleConnect}
+                        variant="outline"
+                        disabled={isConnecting}
+                        className="gap-2"
+                      >
+                        <Lightning size={18} weight="bold" />
+                        Retry
+                      </Button>
+                    )}
+                  </>
                 ) : (
                   <Button
                     onClick={handleDisconnect}
                     variant="outline"
                     className="gap-2"
                   >
+                    <X size={18} weight="bold" />
                     Disconnect
                   </Button>
                 )}

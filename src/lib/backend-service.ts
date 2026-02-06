@@ -55,6 +55,7 @@ export class BackendService {
       return Promise.resolve();
     }
 
+    this.cleanup();
     this.shouldReconnect = true;
 
     return new Promise((resolve, reject) => {
@@ -69,6 +70,7 @@ export class BackendService {
             this.isConnecting = false;
             if (this.ws) {
               this.ws.close();
+              this.ws = null;
             }
             reject(new Error('Connection timeout'));
           }
@@ -112,11 +114,13 @@ export class BackendService {
         this.ws.onclose = (event) => {
           clearTimeout(connectionTimeout);
           console.log('❌ Disconnected from backend server', { code: event.code, reason: event.reason });
+          const wasConnecting = this.isConnecting;
           this.isConnecting = false;
           this.stopKeepalive();
+          this.ws = null;
           this.emit('disconnected', { code: event.code, reason: event.reason });
           
-          if (event.code === 1006 && this.reconnectAttempts === 0) {
+          if (event.code === 1006 && this.reconnectAttempts === 0 && wasConnecting) {
             reject(new Error('Connection failed - backend may not be running'));
           }
           
@@ -126,15 +130,13 @@ export class BackendService {
         };
       } catch (error) {
         this.isConnecting = false;
+        this.ws = null;
         reject(error);
       }
     });
   }
 
-  disconnect(): void {
-    console.log('🔌 Manually disconnecting from backend...');
-    this.shouldReconnect = false;
-
+  private cleanup(): void {
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
@@ -143,12 +145,25 @@ export class BackendService {
     this.stopKeepalive();
 
     if (this.ws) {
-      this.ws.close(1000, 'Manual disconnect');
+      this.ws.onopen = null;
+      this.ws.onmessage = null;
+      this.ws.onerror = null;
+      this.ws.onclose = null;
+      
+      if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
+        this.ws.close();
+      }
       this.ws = null;
     }
+  }
 
+  disconnect(): void {
+    console.log('🔌 Manually disconnecting from backend...');
+    this.shouldReconnect = false;
     this.reconnectAttempts = 0;
     this.isConnecting = false;
+
+    this.cleanup();
   }
 
   private startKeepalive(): void {
@@ -188,16 +203,26 @@ export class BackendService {
   }
 
   private attemptReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max reconnection attempts reached');
-      this.emit('max-reconnect-attempts-reached', { attempts: this.reconnectAttempts });
+    if (!this.shouldReconnect) {
+      console.log('⚠️ Reconnection disabled, not attempting');
       return;
+    }
+
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('❌ Max reconnection attempts reached');
+      this.emit('max-reconnect-attempts-reached', { attempts: this.reconnectAttempts });
+      this.shouldReconnect = false;
+      return;
+    }
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
     }
 
     const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
     this.reconnectAttempts++;
 
-    console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+    console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
     
     this.emit('reconnect-attempt', { 
       attemptNumber: this.reconnectAttempts, 
@@ -206,9 +231,12 @@ export class BackendService {
     });
 
     this.reconnectTimeout = setTimeout(() => {
-      this.connect().catch(() => {
-        console.error('Reconnection failed');
-      });
+      this.reconnectTimeout = null;
+      if (this.shouldReconnect) {
+        this.connect().catch((error) => {
+          console.error('🚫 Reconnection failed:', error.message);
+        });
+      }
     }, delay);
   }
 
@@ -276,6 +304,24 @@ export class BackendService {
 
   isConnected(): boolean {
     return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+  }
+
+  getConnectionState(): { 
+    isConnected: boolean; 
+    isConnecting: boolean; 
+    reconnectAttempts: number;
+    shouldReconnect: boolean;
+  } {
+    return {
+      isConnected: this.isConnected(),
+      isConnecting: this.isConnecting,
+      reconnectAttempts: this.reconnectAttempts,
+      shouldReconnect: this.shouldReconnect,
+    };
+  }
+
+  resetReconnectAttempts(): void {
+    this.reconnectAttempts = 0;
   }
 }
 
