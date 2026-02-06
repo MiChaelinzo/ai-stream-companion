@@ -27,6 +27,12 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
   const [testResults, setTestResults] = useState<any>(null);
 
   useEffect(() => {
+    if (backendService.isConnected()) {
+      setIsConnected(true);
+      onConnectionChange?.(true);
+      fetchServerStatus();
+    }
+
     backendService.on('connected', () => {
       setIsConnected(true);
       setConnectionError(null);
@@ -40,10 +46,16 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       toast.error(`Backend error: ${payload.message}`);
     });
 
+    backendService.on('disconnected', () => {
+      setIsConnected(false);
+      setServerStatus(null);
+      onConnectionChange?.(false);
+    });
+
     return () => {
       backendService.disconnect();
     };
-  }, []);
+  }, [onConnectionChange]);
 
   const fetchServerStatus = async () => {
     try {
@@ -96,133 +108,161 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
 
     setDiagnosticResults({ ...results });
 
+    let health: any = null;
+    let backendReachable = false;
+
     try {
       const healthResponse = await fetch('http://localhost:3001/health', { 
-        signal: AbortSignal.timeout(5000) 
+        signal: AbortSignal.timeout(10000)
       });
       
       if (healthResponse.ok) {
-        const health = await healthResponse.json();
-        results.backendServer = {
-          status: 'success',
-          message: `Backend server is running on port 3001`,
-          details: [
-            `✓ Server uptime: ${Math.floor(health.uptime || 0)}s`,
-            `✓ Connected clients: ${health.connections?.clients || 0}`,
-            `✓ Version: ${health.version || 'unknown'}`
-          ],
-          data: health
-        };
-
-        if (health.connections?.twitch) {
-          const twitchDetails: string[] = [];
-          twitchDetails.push(`✓ Connected to Twitch IRC`);
-          if (health.twitch?.channel) {
-            twitchDetails.push(`✓ Channel: ${health.twitch.channel}`);
-          }
-          if (health.twitch?.username) {
-            twitchDetails.push(`✓ Bot username: ${health.twitch.username}`);
-          }
-          
-          results.twitchConnection = {
-            status: 'success',
-            message: 'Twitch integration is working',
-            details: twitchDetails
-          };
-        } else {
-          results.twitchConnection = {
-            status: 'warning',
-            message: 'Twitch is not connected',
-            details: [
-              '⚠ Check your .env file has:',
-              '  • TWITCH_ACCESS_TOKEN (from twitchtokengenerator.com)',
-              '  • TWITCH_CLIENT_ID',
-              '  • TWITCH_CHANNEL (your channel name, lowercase)',
-              '⚠ Restart backend after updating .env'
-            ]
-          };
-        }
-
-        if (health.connections?.youtube) {
-          results.youtubeConnection = {
-            status: 'success',
-            message: 'YouTube integration is working',
-            details: [
-              '✓ Connected to YouTube Live Chat API',
-              health.youtube?.channelId ? `✓ Channel: ${health.youtube.channelId}` : ''
-            ].filter(Boolean)
-          };
-        } else {
-          results.youtubeConnection = {
-            status: 'warning',
-            message: 'YouTube is not connected',
-            details: [
-              '⚠ Add to .env if needed:',
-              '  • YOUTUBE_API_KEY',
-              '  • YOUTUBE_CHANNEL_ID',
-              '⚠ YouTube requires additional setup (see docs)'
-            ]
-          };
-        }
-
-        if (health.gemini?.configured) {
-          results.geminiAPI = {
-            status: 'success',
-            message: 'Gemini API is configured and ready',
-            details: [
-              '✓ GEMINI_API_KEY is set',
-              `✓ Model: ${health.gemini?.model || 'gemini-1.5-flash'}`,
-              '✓ AI responses will work'
-            ]
-          };
-        } else {
-          results.geminiAPI = {
-            status: 'error',
-            message: 'Gemini API is NOT configured',
-            details: [
-              '❌ GEMINI_API_KEY is missing or invalid',
-              '→ Get key from: https://aistudio.google.com/app/apikey',
-              '→ Add to .env file: GEMINI_API_KEY=your_key_here',
-              '→ Restart backend server',
-              '⚠ AI will not respond without this!'
-            ]
-          };
-        }
+        health = await healthResponse.json();
+        backendReachable = true;
       } else {
-        results.backendServer = {
-          status: 'error',
-          message: `Backend server returned HTTP ${healthResponse.status}`,
-          details: [
-            '❌ Server is running but not responding correctly',
-            '→ Check backend terminal for errors',
-            '→ Try restarting: npm run dev'
-          ]
-        };
+        backendReachable = false;
       }
     } catch (error: any) {
-      if (error.name === 'TimeoutError') {
-        results.backendServer = {
-          status: 'error',
-          message: 'Backend server connection timed out',
-          details: [
-            '❌ Server took too long to respond',
-            '→ Check if backend is hung or crashed',
-            '→ Restart: cd backend && npm run dev'
-          ]
+      backendReachable = false;
+    }
+
+    if (backendReachable && health) {
+      results.backendServer = {
+        status: 'success',
+        message: `Backend server is running on port 3001`,
+        details: [
+          `✓ Server uptime: ${Math.floor(health.uptime || 0)}s`,
+          `✓ Connected clients: ${health.connections?.clients || 0}`,
+          `✓ Version: ${health.version || 'unknown'}`
+        ],
+        data: health
+      };
+
+      if (health.connections?.twitch) {
+        const twitchDetails: string[] = [];
+        twitchDetails.push(`✓ Connected to Twitch IRC`);
+        if (health.twitch?.channel) {
+          twitchDetails.push(`✓ Channel: ${health.twitch.channel}`);
+        }
+        if (health.twitch?.username) {
+          twitchDetails.push(`✓ Bot username: ${health.twitch.username}`);
+        }
+        
+        results.twitchConnection = {
+          status: 'success',
+          message: 'Twitch integration is working',
+          details: twitchDetails
         };
       } else {
-        results.backendServer = {
-          status: 'error',
-          message: 'Backend server is not running',
+        results.twitchConnection = {
+          status: 'warning',
+          message: 'Twitch is not connected',
           details: [
-            '❌ Cannot connect to http://localhost:3001',
-            '→ Navigate to backend folder: cd backend',
-            '→ Install dependencies: npm install',
-            '→ Start server: npm run dev',
-            '→ You should see: "🚀 AI Streamer Backend Server running on port 3001"'
+            '⚠ Check your .env file has:',
+            '  • TWITCH_ACCESS_TOKEN (from twitchtokengenerator.com)',
+            '  • TWITCH_CLIENT_ID',
+            '  • TWITCH_CHANNEL (your channel name, lowercase)',
+            '⚠ Restart backend after updating .env'
           ]
         };
       }
+
+      if (health.connections?.youtube) {
+        results.youtubeConnection = {
+          status: 'success',
+          message: 'YouTube integration is working',
+          details: [
+            '✓ Connected to YouTube Live Chat API',
+            health.youtube?.channelId ? `✓ Channel: ${health.youtube.channelId}` : ''
+          ].filter(Boolean)
+        };
+      } else {
+        results.youtubeConnection = {
+          status: 'warning',
+          message: 'YouTube is not connected',
+          details: [
+            '⚠ Add to .env if needed:',
+            '  • YOUTUBE_API_KEY',
+            '  • YOUTUBE_CHANNEL_ID',
+            '⚠ YouTube requires additional setup (see docs)'
+          ]
+        };
+      }
+
+      if (health.gemini?.configured) {
+        results.geminiAPI = {
+          status: 'success',
+          message: 'Gemini API is configured and ready',
+          details: [
+            '✓ GEMINI_API_KEY is set',
+            `✓ Model: ${health.gemini?.model || 'gemini-3.0-flash'}`,
+            '✓ AI responses will work'
+          ]
+        };
+      } else {
+        results.geminiAPI = {
+          status: 'error',
+          message: 'Gemini API is NOT configured',
+          details: [
+            '❌ GEMINI_API_KEY is missing or invalid',
+            '→ Get key from: https://aistudio.google.com/app/apikey',
+            '→ Add to .env file: GEMINI_API_KEY=your_key_here',
+            '→ Restart backend server',
+            '⚠ AI will not respond without this!'
+          ]
+        };
+      }
+    } else if (backendService.isConnected()) {
+      results.backendServer = {
+        status: 'success',
+        message: 'Backend server is running (verified via WebSocket)',
+        details: [
+          '✓ WebSocket connection is active',
+          '✓ Backend is responding',
+          '⚠ HTTP health endpoint unavailable (this is OK if WebSocket works)',
+          '→ Check backend terminal for any HTTP server issues'
+        ]
+      };
+
+      results.twitchConnection = {
+        status: 'warning',
+        message: 'Cannot verify - use backend logs to check',
+        details: [
+          '⚠ Check backend terminal for Twitch connection status',
+          '→ Should see: "✅ Connected to Twitch channel"',
+          '→ Check .env file if not connected'
+        ]
+      };
+
+      results.youtubeConnection = {
+        status: 'warning',
+        message: 'Cannot verify - use backend logs to check',
+        details: [
+          '⚠ Check backend terminal for YouTube connection status'
+        ]
+      };
+
+      results.geminiAPI = {
+        status: 'warning',
+        message: 'Cannot verify - use backend logs to check',
+        details: [
+          '⚠ Check backend terminal for Gemini initialization',
+          '→ Should see: "✅ Google Gemini initialized"',
+          '→ Add GEMINI_API_KEY to .env if missing'
+        ]
+      };
+    } else {
+      results.backendServer = {
+        status: 'error',
+        message: 'Backend server is not running',
+        details: [
+          '❌ Cannot connect to http://localhost:3001',
+          '→ Navigate to backend folder: cd backend',
+          '→ Install dependencies: npm install',
+          '→ Start server: npm run dev',
+          '→ You should see: "🚀 AI Streamer Backend Server running on port 3001"'
+        ]
+      };
       
       results.twitchConnection = {
         status: 'unknown',
@@ -243,7 +283,7 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       };
     }
 
-    if (backendService.isConnected()) {
+    if (backendService.isConnected() || isConnected) {
       results.websocket = {
         status: 'success',
         message: 'WebSocket connection is active',
@@ -254,13 +294,13 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
         ]
       };
     } else {
-      if (results.backendServer.status === 'success') {
+      if (backendReachable || results.backendServer.status === 'success') {
         results.websocket = {
           status: 'warning',
           message: 'WebSocket not connected (but server is running)',
           details: [
             '⚠ Backend is running but WebSocket not connected',
-            '→ Click "Connect to Backend" button above',
+            '→ Click "Connect to Backend" button on Connection tab',
             '→ Make sure URL is correct: ws://localhost:3001'
           ]
         };
