@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { backendService } from '@/lib/backend-service';
 import { BackendLogsViewer } from '@/components/BackendLogsViewer';
+import { WebSocketTester } from '@/components/WebSocketTester';
+import { KeepaliveIndicator } from '@/components/KeepaliveIndicator';
 import { PlugsConnected, Lightning, Warning, Info, Check, X, CircleNotch } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
@@ -436,27 +438,31 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
               <CardDescription>Connect to the backend server for real Twitch/YouTube chat</CardDescription>
             </div>
           </div>
-          <Badge 
-            className={isConnected ? 'bg-accent/20 text-accent border-accent/30' : 'bg-muted text-muted-foreground border-border'}
-          >
-            {isConnected ? (
-              <>
-                <span className="w-2 h-2 rounded-full bg-accent mr-2 animate-pulse" />
-                Connected
-              </>
-            ) : (
-              <>
-                <span className="w-2 h-2 rounded-full bg-muted-foreground mr-2" />
-                Disconnected
-              </>
-            )}
-          </Badge>
+          <div className="flex flex-col gap-2">
+            <Badge 
+              className={isConnected ? 'bg-accent/20 text-accent border-accent/30' : 'bg-muted text-muted-foreground border-border'}
+            >
+              {isConnected ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-accent mr-2 animate-pulse" />
+                  Connected
+                </>
+              ) : (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-muted-foreground mr-2" />
+                  Disconnected
+                </>
+              )}
+            </Badge>
+            <KeepaliveIndicator />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <Tabs defaultValue="connection" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="connection">Connection</TabsTrigger>
+            <TabsTrigger value="keepalive">Keepalive Test</TabsTrigger>
             <TabsTrigger value="logs">Live Logs</TabsTrigger>
             <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
             <TabsTrigger value="troubleshooting">Troubleshooting</TabsTrigger>
@@ -574,6 +580,45 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
                 <li>Run <code className="bg-muted px-1 py-0.5 rounded">npm run dev</code> to start the server</li>
                 <li>Click "Connect to Backend" above</li>
               </ol>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="keepalive" className="space-y-6 mt-6">
+            <Alert className="bg-accent/10 border-accent/30">
+              <Lightning size={20} className="text-accent" />
+              <AlertDescription className="text-sm">
+                <strong className="text-accent">WebSocket Keepalive:</strong> The frontend now sends ping messages every 30 seconds to keep the connection alive. 
+                Use this tester to verify your connection stays stable for extended periods.
+              </AlertDescription>
+            </Alert>
+            
+            <WebSocketTester />
+            
+            <div className="p-4 rounded-lg bg-muted/50 border border-border space-y-3">
+              <h4 className="font-semibold text-sm">Understanding Keepalive</h4>
+              <div className="text-xs text-muted-foreground space-y-2">
+                <p>
+                  <strong>Why keepalive is important:</strong> WebSocket connections can be closed by firewalls, proxies, or cloud providers 
+                  if they're inactive for too long. Keepalive (ping/pong) prevents this by regularly sending small messages to prove the connection is still alive.
+                </p>
+                <div className="pt-2 space-y-1">
+                  <p className="font-semibold text-foreground">How it works:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Frontend sends <code className="bg-background px-1 rounded">ping</code> every 30 seconds</li>
+                    <li>Backend responds with <code className="bg-background px-1 rounded">pong</code> immediately</li>
+                    <li>If no pong received within 5 seconds, connection is considered dead</li>
+                    <li>Automatic reconnection kicks in with exponential backoff</li>
+                  </ul>
+                </div>
+                <div className="pt-2">
+                  <p className="font-semibold text-accent">✅ What success looks like:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Connection stays active for 2+ minutes without drops</li>
+                    <li>All pings get pong responses within 1 second</li>
+                    <li>No reconnection attempts during normal operation</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </TabsContent>
 
@@ -738,8 +783,8 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
             <Alert className="bg-accent/10 border-accent/30">
               <Lightning size={20} className="text-accent" />
               <AlertDescription className="text-sm">
-                <strong className="text-accent">WebSocket Fix Applied!</strong> The backend server now includes keepalive (ping/pong) to prevent immediate disconnects. 
-                <strong> Restart your backend server</strong> with <code className="bg-muted px-1 rounded">npm run dev</code> to apply the fix.
+                <strong className="text-accent">WebSocket Keepalive Implemented!</strong> The connection now uses ping/pong every 30 seconds to prevent disconnects. 
+                Go to the <strong>Keepalive Test</strong> tab to verify your connection stability.
               </AlertDescription>
             </Alert>
 

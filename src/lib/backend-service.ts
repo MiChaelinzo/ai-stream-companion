@@ -14,10 +14,14 @@ export interface ChatMessagePayload {
 export class BackendService {
   private ws: WebSocket | null = null;
   private reconnectTimeout: NodeJS.Timeout | null = null;
+  private pingInterval: NodeJS.Timeout | null = null;
+  private pongTimeout: NodeJS.Timeout | null = null;
   private messageHandlers: Map<string, ((payload: any) => void)[]> = new Map();
   private url: string;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+  private readonly PING_INTERVAL = 30000;
+  private readonly PONG_TIMEOUT = 5000;
 
   constructor(url: string = 'ws://localhost:3001') {
     this.url = url;
@@ -38,12 +42,18 @@ export class BackendService {
         this.ws.onopen = () => {
           console.log('✅ Connected to backend server');
           this.reconnectAttempts = 0;
+          this.startKeepalive();
           this.emit('connected', {});
           resolve();
         };
 
         this.ws.onmessage = (event) => {
           try {
+            if (event.data === 'pong') {
+              this.handlePong();
+              return;
+            }
+            
             const message: BackendMessage = JSON.parse(event.data);
             this.handleMessage(message);
           } catch (error) {
@@ -59,6 +69,7 @@ export class BackendService {
 
         this.ws.onclose = () => {
           console.log('❌ Disconnected from backend server');
+          this.stopKeepalive();
           this.emit('disconnected', {});
           this.attemptReconnect();
         };
@@ -74,9 +85,45 @@ export class BackendService {
       this.reconnectTimeout = null;
     }
 
+    this.stopKeepalive();
+
     if (this.ws) {
       this.ws.close();
       this.ws = null;
+    }
+  }
+
+  private startKeepalive(): void {
+    this.stopKeepalive();
+    
+    this.pingInterval = setInterval(() => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send('ping');
+        
+        this.pongTimeout = setTimeout(() => {
+          console.warn('⚠️ Pong timeout - reconnecting...');
+          this.ws?.close();
+        }, this.PONG_TIMEOUT);
+      }
+    }, this.PING_INTERVAL);
+  }
+
+  private stopKeepalive(): void {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+    
+    if (this.pongTimeout) {
+      clearTimeout(this.pongTimeout);
+      this.pongTimeout = null;
+    }
+  }
+
+  private handlePong(): void {
+    if (this.pongTimeout) {
+      clearTimeout(this.pongTimeout);
+      this.pongTimeout = null;
     }
   }
 
