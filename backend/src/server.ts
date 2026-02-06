@@ -32,21 +32,16 @@ wss.on('connection', (ws: WebSocket) => {
   console.log('Frontend client connected');
   connectedClients.add(ws);
 
-  let pingInterval: NodeJS.Timeout | null = null;
-
-  pingInterval = setInterval(() => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.ping();
-    }
-  }, 30000);
-
-  ws.on('pong', () => {
-    console.log('Received pong from client');
-  });
-
-  ws.on('message', async (message: string) => {
+  ws.on('message', async (rawMessage: Buffer | string) => {
     try {
-      const data = JSON.parse(message);
+      const messageStr = rawMessage.toString();
+      const data = JSON.parse(messageStr);
+
+      if (data.type === 'ping') {
+        ws.send(JSON.stringify({ type: 'pong', payload: {} }));
+        return;
+      }
+
       console.log('Received message from frontend:', data);
 
       switch (data.type) {
@@ -83,9 +78,6 @@ wss.on('connection', (ws: WebSocket) => {
   ws.on('close', () => {
     console.log('Frontend client disconnected');
     connectedClients.delete(ws);
-    if (pingInterval) {
-      clearInterval(pingInterval);
-    }
   });
 
   ws.on('error', (error) => {

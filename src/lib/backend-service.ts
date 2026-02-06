@@ -49,12 +49,13 @@ export class BackendService {
 
         this.ws.onmessage = (event) => {
           try {
-            if (event.data === 'pong') {
+            const message: BackendMessage = JSON.parse(event.data);
+            
+            if (message.type === 'pong') {
               this.handlePong();
               return;
             }
             
-            const message: BackendMessage = JSON.parse(event.data);
             this.handleMessage(message);
           } catch (error) {
             console.error('Failed to parse backend message:', error);
@@ -98,7 +99,7 @@ export class BackendService {
     
     this.pingInterval = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.ws.send('ping');
+        this.ws.send(JSON.stringify({ type: 'ping', payload: {} }));
         
         this.pongTimeout = setTimeout(() => {
           console.warn('⚠️ Pong timeout - reconnecting...');

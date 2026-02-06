@@ -59,6 +59,7 @@ Then connect via the **Backend Server** tab in the UI!
 - ✅ Real-time Twitch IRC integration
 - ✅ YouTube Live Chat API integration  
 - ✅ WebSocket communication with frontend
+- ✅ **FIXED:** Stable WebSocket keepalive (no more instant disconnects!)
 - ✅ OAuth token management
 - ✅ AI response generation
 - ✅ Poll creation support
@@ -68,6 +69,7 @@ Then connect via the **Backend Server** tab in the UI!
 - 📖 **[BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md)** - Integration overview
 - 📖 **[BACKEND_DEPLOYMENT_GUIDE.md](./BACKEND_DEPLOYMENT_GUIDE.md)** - Production deployment
 - 🔧 **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and fixes
+- 🎉 **[WEBSOCKET_FIX.md](./WEBSOCKET_FIX.md)** - WebSocket connection fix details
 
 **Why is this needed?** Browsers cannot directly connect to Twitch IRC or YouTube Live Chat due to CORS restrictions, token security requirements, and WebSocket limitations. The backend server handles these connections securely.
 
