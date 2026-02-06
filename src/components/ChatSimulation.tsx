@@ -11,11 +11,12 @@ interface ChatSimulationProps {
   onSimulateMessage: (message: string, sentiment: 'positive' | 'neutral' | 'negative') => void;
   isRunning: boolean;
   onToggle: () => void;
+  messageRate: 'slow' | 'medium' | 'fast';
+  onRateChange: (rate: 'slow' | 'medium' | 'fast') => void;
 }
 
-export function ChatSimulation({ onSimulateMessage, isRunning, onToggle }: ChatSimulationProps) {
+export function ChatSimulation({ onSimulateMessage, isRunning, onToggle, messageRate, onRateChange }: ChatSimulationProps) {
   const [autoMode, setAutoMode] = useState(false);
-  const [messageRate, setMessageRate] = useState<'slow' | 'medium' | 'fast'>('medium');
 
   const sampleMessages = {
     positive: [
@@ -84,7 +85,7 @@ export function ChatSimulation({ onSimulateMessage, isRunning, onToggle }: ChatS
           <Users size={20} weight="fill" className="text-primary" />
           Chat Simulation
         </CardTitle>
-        <CardDescription>Simulate live chat messages for testing sentiment analysis</CardDescription>
+        <CardDescription>Simulate live chat messages for testing sentiment analysis (reduced rate to save API quota)</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between p-4 rounded-lg bg-background/50">
@@ -108,16 +109,20 @@ export function ChatSimulation({ onSimulateMessage, isRunning, onToggle }: ChatS
 
         <div className="space-y-2">
           <Label htmlFor="message-rate" className="text-sm font-medium">
-            Message Rate
+            Message Rate {isRunning && <span className="text-xs text-muted-foreground">(stop to change)</span>}
           </Label>
-          <Select value={messageRate} onValueChange={(value) => setMessageRate(value as any)}>
+          <Select 
+            value={messageRate} 
+            onValueChange={(value) => onRateChange(value as 'slow' | 'medium' | 'fast')}
+            disabled={isRunning}
+          >
             <SelectTrigger id="message-rate">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="slow">Slow (1 msg/5s)</SelectItem>
-              <SelectItem value="medium">Medium (1 msg/3s)</SelectItem>
-              <SelectItem value="fast">Fast (1 msg/2s)</SelectItem>
+              <SelectItem value="slow">Slow (1 msg/10 min)</SelectItem>
+              <SelectItem value="medium">Medium (1 msg/6 min)</SelectItem>
+              <SelectItem value="fast">Fast (1 msg/3 min)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -154,7 +159,7 @@ export function ChatSimulation({ onSimulateMessage, isRunning, onToggle }: ChatS
 
         <div className="text-xs text-center text-muted-foreground bg-muted/20 rounded-lg p-3">
           {isRunning 
-            ? 'Automatically generating messages to simulate chat activity...' 
+            ? `Automatically generating messages every ${messageRate === 'slow' ? '10 minutes' : messageRate === 'medium' ? '6 minutes' : '3 minutes'}...` 
             : 'Click a button above or enable auto-mode to simulate messages'}
         </div>
       </CardContent>

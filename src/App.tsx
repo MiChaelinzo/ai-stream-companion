@@ -137,6 +137,7 @@ function App() {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
+  const [chatSimulationRate, setChatSimulationRate] = useState<'slow' | 'medium' | 'fast'>('medium');
   const [avatarEmotion, setAvatarEmotion] = useState<"neutral" | "happy" | "excited" | "thinking" | "confused" | "surprised" | "sad">("neutral");
   const [avatarSpeaking, setAvatarSpeaking] = useState(false);
   const [currentSpeechText, setCurrentSpeechText] = useState("");
@@ -589,6 +590,14 @@ Return as JSON:
       setIsSimulating(true);
       toast.success('Chat simulation started');
       
+      const intervalTimes = {
+        slow: 600000,
+        medium: 360000,
+        fast: 180000,
+      };
+      
+      const intervalTime = intervalTimes[chatSimulationRate];
+      
       const interval = setInterval(() => {
         const sentiments: Array<'positive' | 'neutral' | 'negative'> = ['positive', 'neutral', 'negative'];
         const weights = [0.5, 0.3, 0.2];
@@ -631,9 +640,23 @@ Return as JSON:
         const messages = sampleMessages[sentiment];
         const message = messages[Math.floor(Math.random() * messages.length)];
         handleSimulateMessage(message, sentiment);
-      }, 3000);
+      }, intervalTime);
       
       setSimulationInterval(interval);
+    }
+  };
+
+  const handleChatRateChange = (rate: 'slow' | 'medium' | 'fast') => {
+    setChatSimulationRate(rate);
+    
+    if (isSimulating) {
+      if (simulationInterval) {
+        clearInterval(simulationInterval);
+        setSimulationInterval(null);
+      }
+      setIsSimulating(false);
+      
+      toast.info(`Rate changed to ${rate}. Restart simulation to apply.`);
     }
   };
 
@@ -1597,6 +1620,8 @@ Return as JSON:
                     onSimulateMessage={handleSimulateMessage}
                     isRunning={isSimulating}
                     onToggle={handleToggleSimulation}
+                    messageRate={chatSimulationRate}
+                    onRateChange={handleChatRateChange}
                   />
                 </div>
                 <div className="space-y-6">
