@@ -100,6 +100,7 @@ export class BackendService {
     this.pingInterval = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.ws.send(JSON.stringify({ type: 'ping', payload: {} }));
+        this.emit('ping', {});
         
         this.pongTimeout = setTimeout(() => {
           console.warn('⚠️ Pong timeout - reconnecting...');
@@ -126,6 +127,7 @@ export class BackendService {
       clearTimeout(this.pongTimeout);
       this.pongTimeout = null;
     }
+    this.emit('pong', {});
   }
 
   private attemptReconnect(): void {
