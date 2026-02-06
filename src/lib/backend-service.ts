@@ -29,6 +29,14 @@ export class BackendService {
     this.url = url;
   }
 
+  setUrl(url: string): void {
+    if (this.isConnected()) {
+      console.warn('⚠️ Cannot change URL while connected. Disconnect first.');
+      return;
+    }
+    this.url = url;
+  }
+
   private emit(type: string, payload: any): void {
     const handlers = this.messageHandlers.get(type);
     if (handlers) {
@@ -52,9 +60,22 @@ export class BackendService {
     return new Promise((resolve, reject) => {
       try {
         this.isConnecting = true;
+        console.log(`🔌 Attempting to connect to ${this.url}...`);
         this.ws = new WebSocket(this.url);
 
+        const connectionTimeout = setTimeout(() => {
+          if (this.isConnecting) {
+            console.error('⏱️ Connection timeout after 10 seconds');
+            this.isConnecting = false;
+            if (this.ws) {
+              this.ws.close();
+            }
+            reject(new Error('Connection timeout'));
+          }
+        }, 10000);
+
         this.ws.onopen = () => {
+          clearTimeout(connectionTimeout);
           console.log('✅ Connected to backend server');
           this.reconnectAttempts = 0;
           this.isConnecting = false;
@@ -79,19 +100,27 @@ export class BackendService {
         };
 
         this.ws.onerror = (error) => {
+          clearTimeout(connectionTimeout);
           console.error('WebSocket error:', error);
           this.isConnecting = false;
           this.emit('error', { message: 'WebSocket connection error' });
-          reject(error);
+          if (this.ws?.readyState === WebSocket.CONNECTING) {
+            reject(new Error('WebSocket connection failed'));
+          }
         };
 
-        this.ws.onclose = () => {
-          console.log('❌ Disconnected from backend server');
+        this.ws.onclose = (event) => {
+          clearTimeout(connectionTimeout);
+          console.log('❌ Disconnected from backend server', { code: event.code, reason: event.reason });
           this.isConnecting = false;
           this.stopKeepalive();
-          this.emit('disconnected', {});
+          this.emit('disconnected', { code: event.code, reason: event.reason });
           
-          if (this.shouldReconnect) {
+          if (event.code === 1006 && this.reconnectAttempts === 0) {
+            reject(new Error('Connection failed - backend may not be running'));
+          }
+          
+          if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
             this.attemptReconnect();
           }
         };
@@ -103,6 +132,7 @@ export class BackendService {
   }
 
   disconnect(): void {
+    console.log('🔌 Manually disconnecting from backend...');
     this.shouldReconnect = false;
 
     if (this.reconnectTimeout) {
@@ -113,11 +143,12 @@ export class BackendService {
     this.stopKeepalive();
 
     if (this.ws) {
-      this.ws.close();
+      this.ws.close(1000, 'Manual disconnect');
       this.ws = null;
     }
 
     this.reconnectAttempts = 0;
+    this.isConnecting = false;
   }
 
   private startKeepalive(): void {

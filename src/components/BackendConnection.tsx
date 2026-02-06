@@ -82,15 +82,27 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
       });
     };
 
-    const handleDisconnected = () => {
+    const handleDisconnected = (payload: any) => {
       setIsConnected(false);
       setServerStatus(null);
       onConnectionChange?.(false);
+      
+      const reason = payload?.reason || 'Connection closed';
+      const code = payload?.code || 'Unknown';
+      
       addConnectionEvent({
         type: 'disconnected',
         backendUrl,
-        message: 'Connection closed',
+        message: `Connection closed (code: ${code}, reason: ${reason || 'none'})`,
+        metadata: {
+          closeCode: code,
+          closeReason: reason,
+        },
       });
+      
+      if (code === 1006) {
+        toast.error('Connection closed unexpectedly. Check if backend is running.');
+      }
     };
 
     const handleReconnectAttempt = (payload: any) => {
@@ -141,6 +153,7 @@ export function BackendConnection({ onConnectionChange }: BackendConnectionProps
     setConnectionError(null);
 
     try {
+      backendService.setUrl(backendUrl);
       await backendService.connect();
       setIsConnected(true);
       onConnectionChange?.(true);

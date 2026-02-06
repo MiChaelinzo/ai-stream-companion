@@ -28,6 +28,8 @@ export interface ConnectionEvent {
     youtubeConnected?: boolean;
     errorDetails?: string;
     attemptNumber?: number;
+    closeCode?: number | string;
+    closeReason?: string;
   };
 }
 
